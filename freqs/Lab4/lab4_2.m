@@ -1,0 +1,108 @@
+% проварьировать a, T
+
+a = 4;
+b = 0.5;
+d = 5;
+c = 0.3;
+
+dt = 0.01;
+t1 = 3;
+t2 = 7;
+t = t1 - 5 : dt : t2 + 125;
+
+g = zeros(size(t));
+g(t >= t1 & t <= t2) = a;
+xi = 2*rand(size(t))- 1;
+u = g + b*xi + c*sin(d*t);
+
+f = figure;
+
+%plot(t, u, 'r', 'LineWidth', 3); hold on;
+%plot(t, g, 'k--', 'LineWidth', 3);
+%xlabel('Время t', 'FontSize', 50); ylabel('Значения', "FontSize", 50);
+%title('Исходный и зашумленный сигналы', 'FontSize', 100);
+%legend('Зашумленный сигнал u(t)', 'Исходный g(t)', "FontSize", 22);
+%grid on;
+
+b1 = 10;
+T = 0.1;
+w1 = tf([1, 0, 16], [1, b1, 16]);
+w2 = tf(1, [T, 1]);
+prod = w2*w1;
+%w = 0:0.01:80;
+[mag1, ~] = bode(w1, w);
+%[mag2, ~] = bode(w2, w);
+%[mag3, ~] = bode(w3, w);
+
+%plot(w, squeeze(mag3), 'k', 'LineWidth', 3); hold on;
+%plot(w, squeeze(mag2), 'b', 'LineWidth', 3);
+%plot(w, squeeze(mag1), 'r', 'LineWidth', 3);
+%xlabel('Частота', 'FontSize', 50); ylabel('Амплитуда', "FontSize", 50);
+%title('Сравнение АЧХ фильтров', 'FontSize', 75);
+%xticks([0 4 10 20 30 40 50 60 70 80]);
+%ylim([0 1]);
+%legend('АЧХ фильтра при b_1 = 2', 'АЧХ фильтра при b_1 = 10', ...
+%    'АЧХ фильтра при b_1 = 18', "FontSize", 22, 'Location', 'southeast');
+%grid on;
+
+u_filtered = lsim(prod, u, t);
+
+plot(t, g, 'k--', 'LineWidth', 4); hold on;
+plot(t, u, 'r', 'LineWidth', 2);
+plot(t, u_filtered, 'b', 'LineWidth', 2);
+legend('Исходный сигнал g(t)', 'Зашумленный сигнал u(t)', 'Фильтрованный сигнал', "FontSize", 21);
+xlabel('Время t', 'FontSize', 50); ylabel('Значения', 'FontSize', 50);
+title('Сравнение сигналов', 'FontSize', 100);
+xlim([0 10]);
+grid on;
+
+U = fftshift(fft(u));
+G = fftshift(fft(g));
+U_filt = fftshift(fft(u_filtered));
+
+N = length(t);
+omega = 2*pi*(-N/2:N/2-1) / (N * dt);
+
+%plot(omega, abs(G), 'k', 'LineWidth', 3); hold on;
+%plot(omega, abs(U), 'r-.', 'LineWidth', 5);
+%plot(omega, abs(U_filt), 'b', 'LineWidth', 2);
+%legend('|G(ω)|', '|U(ω)|', '|Uf(ω)|', 'FontSize', 21);
+%xlabel('Частота', "FontSize", 50); ylabel('Амплитуда', 'FontSize', 50);
+%title('Модули Фурье-образов', 'FontSize', 100);
+%xlim([0 20]); % Ограничиваем частоты для наглядности
+%xticks([0 2 4 5 6 8 10 12 14 16 18 20]);
+%grid on;
+
+% Вычисление и сравнение модуля фильтр сигнала и модуля W1(iω) * Û(ω)
+[mag, phase, ~] = bode(w1, omega);
+wu_abs = squeeze(mag) .* abs(U)';
+
+%plot(omega, abs(U_filt), 'b', 'LineWidth', 3); hold on;
+%plot(omega, wu_abs, 'g--', 'LineWidth', 3);
+%legend('|U_f(ω)|', '|W_2(iω)U(ω)|', 'FontSize', 21);
+%xlabel('Частота', 'FontSize', 50);
+%ylabel('Амплитуда', 'FontSize', 50);
+%title('Сравнение Фурье фильтрованного сигнала и произведения W(iω)U(ω)', 'FontSize', 100);
+%xlim([0 20]);
+%grid on;
+
+% Обратное преобразование Фурье W1(iω) ⋅ Û(ω)
+wu = zeros(size(omega));
+for i = 1:length(omega)
+    wu(i) = evalfr(w1, 1i * omega(i)) * U(i);  % evalfr вычисляет значение на jω
+end
+wu_time = ifft(ifftshift(wu));
+
+% Сравнительные графики
+%plot(t, u_filtered, 'b', 'LineWidth', 3); hold on;
+%plot(t, wu_time, 'g--', 'LineWidth', 3);
+%legend('Фильтрованный сигнал', 'Обратное Фурье W_2(iω)U(ω)', 'FontSize', 18);
+%xlabel('Время t', 'FontSize', 50); ylabel('Значения', 'FontSize', 50);
+%title('Сравнение фильтрованного сигнала и обратного преобразования Фурье', 'FontSize', 100);
+%xlim([0 10]);
+%grid on;
+
+set(gcf, 'PaperPositionMode', 'auto');
+set(gcf, 'Position', [100, 100, 1800, 1000]);
+set(gca, 'FontSize', 20, 'GridLineWidth', 3, 'LineWidth', 2);
+exportgraphics(f, "images\26.jpg")

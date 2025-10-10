@@ -1,0 +1,754 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[framed,autolinebreaks,useliterate,numbered]{mcode}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{Лабораторная работа №1}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{Ряды Фурье}}
+\fancyfoot[L]{}
+\fancyfoot[C]{Страница \thepage\space из \pageref{LastPage}}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+				Научно исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №1 \\
+			Ряды Фурье
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{minipage}{.48\linewidth}
+			Выполнил студент группы R3380
+			
+			Преподаватели
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.5\linewidth}
+			\begin{flushright}
+				Мовчан И.E.
+				\\
+				Пашенко А.В., Перегудин А.А.
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2025
+		\end{center}
+		
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\section{Вещественные функции}
+	Зададимся положительными числами $a=1$, $b=2$, $t_0=1$, $t_1=2$, $t_2=3$ и рассмотрим вещественные функции $f: \mathbb{R} \rightarrow \mathbb{R}$.
+	\subsection{Квадратная волна}
+	Начнём с базового, зададим $T=t_2-t_0=2$ периодическую фунцию следующего вида:
+	\begin{equation*}
+	f(t) = \begin{cases}
+		a, \ t \in [t_0, t_1), \\
+		b, \ \hspace{0.5mm} t \in [t_1, t_2);
+	\end{cases}
+	\Rightarrow
+	f(t) = \begin{cases}
+		1, \ t \in [1, 2), \\
+		2, \ t \in [2, 3).
+	\end{cases}
+	\end{equation*}
+
+	Все периодические функции с подобными квадратными пиками, мы и назовём \textit{квадратной волной} (график на рисунке \ref{1}).
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/1.jpg}
+		\caption{Функция квадратной волны}
+		\label{1}
+	\end{figure}
+
+	Наша задача - разложить её в ряд Фурье, задающийся частичными суммами $F_N$ и $G_N$, имеющими в сумме вещественные и комплекснозначные функции соответственно:
+	$$
+		F_N = \frac{a_0}{2} + \sum \limits_{n=1}^{N} (a_n \cos(\omega_n t) + b_n \sin(\omega_n t)), \ 
+		G_N = \sum \limits_{n=-N}^{N} c_n e^{i \omega_n t},
+	$$
+	где $\omega_n = \frac{2\pi n}{T}$.
+	
+	Так как косинусы и синусы, участвующие в разложении, ортогональны друг другу на $[t_0, t_2]$ (при стандартно введённом скалярном произведении функций на этом отрезке), то мы можем вычислить коэффициенты $a_n$ и $b_n$ из скалярного произведения и соответствующей ему нормы:
+	$$
+	a_n = \frac{(f, cos(\omega_n t))}{||cos(\omega_n t)||^2},\hspace{0.55mm} b_n = \frac{(f, sin(\omega_n t))}{||sin(\omega_n t)||^2}
+	$$
+	
+	Откуда
+	$$
+	a_n = \frac{2}{T} \int_{h}^{h+T}f(t)\cos\left(\frac{2\pi n}{T} t\right) dt,
+	$$
+	$$ 
+	b_n = \frac{2}{T} \int_{h}^{h+T}f(t)\sin\left(\frac{2\pi n}{T} t\right) dt, \hspace{1mm} n \geq 0
+	$$
+	
+	или
+
+	$$
+	a_n = \int_{1}^{3}f(t)\cos\left(\pi n  t\right) dt, \ 
+	b_n = \int_{1}^{3}f(t)\sin\left(\pi n t\right) dt, \hspace{1mm} n \geq 0
+	$$
+	
+	В комплексном случае ортогональны экспоненты (всё на том же отрезке $[t_0, t_2]$), и коэффициенты вычисляются похожим образом:
+	$$
+	c_n = \frac{(f, e^{i\omega_n t})}{||e^{-i\omega_n t}||^2} = \frac{1}{T} \int_{1}^{3} f(t) e^{-i \omega_n t} dt = \frac{1}{2} \int_{1}^{3} f(t) e^{-i \omega_n t} dt, \hspace{1mm} n \in \mathbb{Z}
+	$$
+	
+	Что ж, попробуем найти их аналитические представления:
+	$$
+	a_0 = \int^{2}_{1} dt + 2 \int^{3}_{2} dt = 3,\ b_0 = 0
+	$$
+	$$
+	a_n = \int_{1}^{2} \cos\left(\pi n t\right) dt + \int_{2}^{3} 2 \cos\left(\pi n t\right) dt =
+	$$
+	$$
+	= \frac{\sin (2 \pi n) - \sin (\pi n)}{\pi n} + \frac{2\sin (3 \pi n) - 2\sin(2 \pi n)}{\pi n} =
+	$$
+	$$
+	= \frac{2\sin (3 \pi n) - \sin(2 \pi n) - \sin (\pi n)}{\pi n}, \hspace{1mm} n \ge 1;
+	$$
+	$$
+	b_n = \int_{1}^{2} \sin\left(\pi n t\right) dt + \int_{2}^{3} 2 \sin \left(\pi n t\right) dt =
+	$$
+	$$
+	= \frac{\cos\left(\pi n \right) - \cos\left(2 \pi n \right)}{\pi n} + \frac{2\cos (2\pi n) - 2\cos\left(3 \pi n \right)}{\pi n} =
+	$$
+	$$
+	= \frac{\cos\left(\pi n \right) +  \cos (2\pi n) - 2\cos\left(3 \pi n \right)}{\pi n} = \frac{1 - (-1)^n}{\pi n}, \hspace{1mm} n \ge 1.
+	$$
+	
+	Тогда $a_1 = a_2 = a_n = 0$, что также следует из чётности функции относительно $y = 1.5$ (коэффициент $a_0$ в данном случае как бы <<выравнивает>> функцию относительно этой прямой), а $b_1 = 2/ \pi, b_2 = 0$. Продолжим начатое, и совершим все те же операции с комплексным рядом Фурье:
+	$$
+	c_0 = \frac{1}{2} \int_{1}^{2} dt + \int_{2}^{3} dt = \frac{3}{2},\hspace{1mm} c_n = \frac{1}{2} \int_{1}^{2} e^{-i\omega_n t} dt + \int_{2}^{3} e^{-i\omega_n t} dt =
+	$$
+	$$
+	= \frac{i(e^{-2i\omega_n} - e^{-i\omega_n})}{2\omega_n} + \frac{i(e^{-3i\omega_n} - e^{-2i\omega_n})}{\omega_n} = \frac{i(2e^{-3i\omega_n} - e^{-2i\omega_n} - e^{-i\omega_n})}{2\omega_n} =
+	$$
+	$$
+	= \frac{i(2e^{-3i \pi n} - e^{-2i \pi n} - e^{-i\pi n})}{2 \pi n} = \frac{i(2\cos(3 \pi n) - \cos(2 \pi n) - \cos(\pi n))}{2 \pi n} =
+	$$
+	$$
+	= \frac{i((-1)^n-1)}{2\pi n}.
+	$$
+
+	Откуда $c_1 = \overline{c_{-1}} = -i/\pi$ и $c_2 = \overline{c_{-2}} = 0$.
+	
+	Пришло время взглянуть на результаты нашей работы, однако каждый раз вычислять коэффициенты вручную очень утомительно и напряжно, поэтому далее давайте производить расчёты численно. Для наглядности сравним результаты вычислений коэффициентов с помощью численного интегрирования и руками:
+	$$
+	a_0 = 3, \hspace{1mm} a_n: [0.0, \hspace{1mm}0.0], \hspace{1mm} b_n: [0.63662, \hspace{1mm}0.0]
+	$$
+	$$
+	c_n: [0.0, \hspace{1mm}0.3183i, \hspace{1mm}1.5, \hspace{1mm}-0.3183i, \hspace{1mm}0.0]
+	$$
+	
+	Получили абсолютно то же! Теперь можем поручить трудные расчёты машинам, а сами заняться интересными вещами, например, построением графиков. Отметим также, что полученные $a_i$, $b_i$ и $c_i$ убывают с ростом $n$ обратно пропорционально, так что чем более большие $N$ мы будем задавать, тем более мелкие значения коэффициентов будут на выходе (можно сказать, что будут вноситься некоторые высокочастотные калибровки).
+	
+	Итак, зададимся шестью значениями разными значениями параметров $N = 2$, $N = 3$, $N = 5$, $N = 10$, $N = 50$ и $N = 100$, исследуем получаемые при них приближения. Соответствующе графики изображены на рисунках \ref{2}, \ref{3}, \ref{4}, \ref{5}, \ref{6} и \ref{7}. Как можно видеть, увеличение количества гармоник напрямую влияет на качество - чем больше, тем лучше. В точках разрыва функции при возрастании $N$ также можно также видеть весомые осцилляции (это известный факт, увы гармонические функции не способны точно передать резкий переход из-за своей непрерывной природы). Однако в каждой точке при своём большом $N$ может быть достигнуто сколь угодно малое отклонение ряда от исходной функции, то есть существует поточечная сходимость (как и по норме). В точках разрыва же ряд даёт половину амплитуды <<пика>>, что полностью согласуется с введенной на лекциях теорией. Также комплексный и вещественный Фурье по итогу дают одни и те же результаты при равном <<количестве>> функций.
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/2.jpg}
+		\caption{Приближение рядами Фурье функции при $N = 2$}
+		\label{2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/3.jpg}
+		\caption{Приближение рядами Фурье функции при $N = 3$}
+		\label{3}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/4.jpg}
+		\caption{Приближение рядами Фурье функции при $N = 5$}
+		\label{4}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/5.jpg}
+		\caption{Приближение рядами Фурье функции при $N = 10$}
+		\label{5}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/6.jpg}
+		\caption{Приближение рядами Фурье функции при $N = 50$}
+		\label{6}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/7.jpg}
+		\caption{Приближение рядами Фурье функции при $N = 100$}
+		\label{7}
+	\end{figure}
+
+	Теперь проверим выполнение равенства Парсеваля, то есть
+	\[
+	E_{func} = \frac{2}{T} \int_0^T f^2(t)\,dt = \frac{a_0^2}{2} + \sum_{n=1}^{\infty} \left( a_n^2 + b_n^2 \right) = E_{real}.
+	\]
+
+	Или для комплексного ряда $G_N$:
+	\[
+	E_{func} = \frac{1}{T} \int_0^T |f(t)|^2\,dt = \sum_{n=-\infty}^{\infty} |c_n|^2 = E_{complex}.
+	\]
+
+	Так как бесконечности взять мы не может, можем лишь задать очень большое количество гармоник (в нашем случае $N=100$), а интеграл вычислить численно с помощью, например, функции \textbf{trapz} в matlab. Результаты обработки ниже:
+	$$
+	E_{func} = 2.5000; \hspace{3mm} E_{real} = 2.4990; \hspace{3mm} E_{complex} = 2.4990.
+	$$
+
+	Значения получились очень близкими (мелкие отклонения можно свесить на аппаратную часть, так как вычислялись не сами значения, а лишь их приближения). Получается, всё работает, и мы можем вычислить норму функции с помощью коэффициентов ряда Фурье, что может быть очень удобно. А вообще, равенство Парсеваля даёт нам понять, что ряды Фурье как бы сохраняют заложенную в функцию <<энергию>> (то есть её норму с точностью до коэффициента).
+
+	\subsection{Чётная функция}
+	Зададимся теперь функцией с периодом $T = 2$ (график на рисунке \ref{8}): 
+	$$
+	f(t) = 1 + t^2 \text{ при } t\in[-1, 1].
+	$$
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/8.jpg}
+		\caption{График выбранной чётной функции}
+		\label{8}
+	\end{figure}
+
+	Так как она чётная, то $b_n = 0$, а $a_n \neq 0$. Также вычислениями соответствующих, уже заданных и приведенных выше интегралов для коэффициентов можно получить:
+	\[
+	a_0 = \frac{2}{T} \int_{-T/2}^{T/2} f(t) \, dt = 2 \int_{0}^{1} (1 + t^2) \, dt
+	= 2\left( t + \frac{t^3}{3} \right)\bigg|_0^1 =  \frac{8}{3},
+	\]
+	\[
+	a_n = \frac{2}{T} \int_{-T/2}^{T/2} f(t) \cos\left( \frac{2\pi n}{T} t \right) dt
+	=  \int_{-1}^{1} (1 + t^2) \cos(n\pi t) \, dt = 
+	\]
+	$$
+	= \int_{-1}^{1} \cos(n\pi t) \, dt + \int_{-1}^{1} t^2 \cos(n\pi t) \, dt = 
+	$$
+
+	\[
+	= \int_{-1}^{1} t^2 \cos(n\pi t) \, dt = 4\frac{(-1)^n}{(n\pi)^2}.
+	\]
+
+	Аналогичные формулы можно получить и для $c_n$. Приближенные вычисления коэффициентов при $N = 2$ приведены ниже:
+	$$
+	a_0 = 2.667, \hspace{1mm} a_n: [-0.405, \hspace{1mm}0.1013], \hspace{1mm} b_n: [0.0, \hspace{1mm}0.0]
+	$$
+	$$
+	c_n: [0.0507, \hspace{1mm}-0.203, \hspace{1mm}1.333,\hspace{1mm} -0.203,\hspace{1mm} 0.0507]
+	$$
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/9.jpg}
+		\caption{Приближение рядами Фурье функции при $N = 2$}
+		\label{9}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/10.jpg}
+		\caption{Приближение рядами Фурье функции при $N = 3$}
+		\label{10}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/11.jpg}
+		\caption{Приближение рядами Фурье функции при $N = 5$}
+		\label{11}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/12.jpg}
+		\caption{Приближение рядами Фурье функции при $N = 10$}
+		\label{12}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/13.jpg}
+		\caption{Приближение рядами Фурье функции при $N = 50$}
+		\label{13}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/14.jpg}
+		\caption{Приближение рядами Фурье функции при $N = 100$}
+		\label{14}
+	\end{figure}
+	Как и прежде, зададимся параметрами $N = 2$, $N = 3$, $N = 5$, $N = 10$, $N = 50$ и $N = 100$ и посмотрим на получаемые при них приближения. Соответствующе графики изображены на рисунках \ref{9}, \ref{10}, \ref{11}, \ref{12}, \ref{13} и \ref{14}. Можем видеть, что из-за непрерывности $f(t)$ приближения при возрастании количества гармоник сходятся поточечно к $f(t)$ всюду на периоде, причем при $N = 50$ уже достигается визуальное равенство ряда и заданной функции.
+
+	Проверим равенство Парсеваля при наибольшем $N = 100$:
+	$$
+	E_{func} = 1.8667; \hspace{3mm} E_{real} = 1.8667; \hspace{3mm} E_{complex} = 1.8667.
+	$$
+
+	Нормы сохраняются, успех!
+
+	\subsection{Нечётная функция}
+	Пусть теперь задана нечётная функция с периодом $T = 2$:
+	$$
+	f(t) = t \text{ при } t\in[-1, 1].
+	$$
+
+	Её график изображен ниже на рисунке \ref{21}:
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/21.jpg}
+		\caption{График выбранной нечётной функции}
+		\label{21}
+	\end{figure}
+
+	Перейдем к вычислению значений коэффициентов вещественного ряда фурье $F_N$ и комплексно заданного $G_N$. Так как $f(t)$ - нечётная функция на симметричном интервале, то
+	$$
+	a_0 = a_n = c_0 = 0, \hspace{3mm} b_n = -2\frac{(-1)^n}{n \pi}, \hspace{3mm} c_n = \frac{i(-1)^{n+1}}{\pi n}.
+	$$
+
+	Численно найденные параметры при $N = 2$ приведены ниже:
+	$$
+	a_0 = 0, \hspace{1mm} a_n: [0, \hspace{1mm}0], \hspace{1mm} b_n: [0.637, \hspace{1mm}-0.3183]
+	$$
+	$$
+	c_n: [-0.1592i, \hspace{1mm}0.3183i, \hspace{1mm}0,\hspace{1mm} -0.3183i,\hspace{1mm} 0.1592]
+	$$
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/15.jpg}
+		\caption{Частичные суммы ряда Фурье функции при $N = 2$}
+		\label{15}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/16.jpg}
+		\caption{Частичные суммы ряда Фурье функции при $N = 3$}
+		\label{16}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/17.jpg}
+		\caption{Частичные суммы ряда Фурье функции при $N = 5$}
+		\label{17}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/18.jpg}
+		\caption{Частичные суммы ряда Фурье функции при $N = 10$}
+		\label{18}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/19.jpg}
+		\caption{Частичные суммы ряда Фурье функции при $N = 50$}
+		\label{19}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/20.jpg}
+		\caption{Частичные суммы ряда Фурье функции при $N = 100$}
+		\label{20}
+	\end{figure}
+	Зададимся параметрами $N = 2$, $N = 3$, $N = 5$, $N = 10$, $N = 50$ и $N = 100$, оценим результаты вычисления частичных сумм. Соответствующе графики представлены на рисунках \ref{15}, \ref{16}, \ref{17}, \ref{18}, \ref{19} и \ref{20}. Как видим, исходная функция терпит разрывы на концах периода, поэтому мы попадаем в условия теоремы Дирихле, говоряющей о том, что в точках разрыва частичные суммы будут равны половине <<скачка>>, а в других - сходится к исходной функции поточечно. Именно это мы и наблюдаем.
+	
+	Проверим также равенство Парсеваля при $N = 100$:
+	$$
+	E_{func} = 0.3333; \hspace{3mm} E_{real} = 0.3312; \hspace{3mm} E_{complex} = 0.3312.
+	$$
+
+	Всё выполняется при небольших погрешностях в используемых приближенных вычислениях.
+
+	\subsection{Ни нечётная, ни чётная}
+	Наконец пусть задана функция с периодом $T = 2$
+	$$
+	f(t) = t + \sin^2(\pi t) \text{ при } t \in [-1, 1].
+	$$
+
+	Как можно заметить, функция состоит не только из прямых линий, а $f(-t) = -t + \sin^2(-\pi t) \neq \pm f(t)$, то есть не является ни чётной, ни нечётной. Её график приведён на рисунке \ref{22}.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/22.jpg}
+		\caption{График выбранной произвольной функции}
+		\label{22}
+	\end{figure}
+
+	Вычисленные коэффициенты при $N = 2$ приведены ниже:
+	$$
+	a_0 = 1, \hspace{1mm} a_n: [0, \hspace{1mm}-0.5], \hspace{1mm} b_n: [0.637, \hspace{1mm}-0.3183]
+	$$
+	$$
+	c_n: [-0.25, \hspace{1mm}0.3183i, \hspace{1mm}0.5,\hspace{1mm} -0.3183i,\hspace{1mm} -0.25]
+	$$
+
+	В данном случае никакого обнуления не происходит, а коэффициенты $b_n$ как бы перетягиваются из предыдущего пункта (так как $\sin^2(\pi t)$ - функция чётная), равно как и мнимые части при $c_n$. Формулы для расчёта коэффициентов можно вычислить, они частично сведутся к предыдущему пункту с возникающим выделенным случаем (квадрат синуса выражается через $cos(2x) = 1- 2\sin^2(x)$):
+	$$
+	a_0 = 2c_0 = 1, \hspace{3mm}a_2 = 2c_{\pm2} = -0.5,
+	$$
+	$$
+	a_n = 0,\hspace{3mm} n\notin \{0, 2\},\hspace{3mm} b_n = \frac{2(-1)^{n+1}}{\pi n},
+	$$
+	$$
+	c_n = \frac{i(-1)^{n+1}}{\pi n}, \hspace{3mm} n\notin \{0, 2\}.
+	$$
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/23.jpg}
+		\caption{Частичные суммы ряда Фурье функции при $N = 2$}
+		\label{23}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/24.jpg}
+		\caption{Частичные суммы ряда Фурье функции при $N = 3$}
+		\label{24}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/25.jpg}
+		\caption{Частичные суммы ряда Фурье функции при $N = 5$}
+		\label{25}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/26.jpg}
+		\caption{Частичные суммы ряда Фурье функции при $N = 10$}
+		\label{26}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/27.jpg}
+		\caption{Частичные суммы ряда Фурье функции при $N = 50$}
+		\label{27}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/28.jpg}
+		\caption{Частичные суммы ряда Фурье функции при $N = 100$}
+		\label{28}
+	\end{figure}
+	Проварьируем параметр $N$: графики частичных сумм и исходной функции при $N = 2$, $N = 3$, $N = 5$, $N = 10$, $N = 50$ и $N = 100$ изображены, соотвественно, на рисунках \ref{23}, \ref{24}, \ref{25}, \ref{26}, \ref{27} и \ref{28}. Можно заметить, что вещественные и комплексные частичные суммы $F_N$ и $G_N$ дают одинаковый результат. Также на концах периода возникает разрыв, приближения там равны половине разности значений <<на концах>> (в нашем случае это равно 0), что согласуется с введенной нами теорией.
+
+	Равенство Парсеваля выполняется с точностью до погрешностей при вычислениях:
+	$$
+	E_{func} = 0.7083; \hspace{3mm} E_{real} = 0.7062; \hspace{3mm} E_{complex} = 0.7062.
+	$$
+
+	Таким образом было введено четыре вида периодических функций, включая квадратную волну, чётную, нечётную и произвольную ни чётную, ни нечётную, разработан алгоритм для численного вычисления коэффициентов и построения частичных сумм рядов Фурье \( F_N(t) \) и \( G_N(t) \) для разных значений \( N \) и проверено равенство Парсеваля. Было получено, что увеличение числа гармоник $N$ влечёт за собой лучшие приближения, а чётность и нечётность функции прямо влияют на те параметры, которые будут участвовать в построении частичных сумм.
+
+	\section{Комплексная функция}
+	Зададимся положительными числами $R=2$, $T=1 > 0$ и рассмотрим комплекснозначную функцию $f: \mathbb{R} \rightarrow \mathbb{C}$ c периодом $T$ такую, что её вещественные и мнимые части задаются
+	\[
+	\operatorname{Re}(f(t)) = 
+	\begin{cases}
+	R, & t \in \left[-\frac{T}{8}, \frac{T}{8}\right), \\
+	2R - \frac{8Rt}{T}, & t \in \left[\frac{T}{8}, \frac{3T}{8}\right), \\
+	-R, & t \in \left[\frac{3T}{8}, \frac{5T}{8}\right), \\
+	-6R + \frac{8Rt}{T}, & t \in \left[\frac{5T}{8}, \frac{7T}{8}\right);
+	\end{cases}
+	\]
+
+	\[
+	\operatorname{Im}(f(t)) = 
+	\begin{cases}
+	\frac{8Rt}{T}, & t \in \left[-\frac{T}{8}, \frac{T}{8}\right), \\
+	R, & t \in \left[\frac{T}{8}, \frac{3T}{8}\right), \\
+	4R - \frac{8Rt}{T}, & t \in \left[\frac{3T}{8}, \frac{5T}{8}\right), \\
+	-R, & t \in \left[\frac{5T}{8}, \frac{7T}{8}\right).
+	\end{cases}
+	\]
+
+	Рассмотрим для функции $f(t)$ частичные суммы комплексного ряда Фурье (вещественный мы использовать не можем, так как сама функция стреляет в множество комплексных чисел)
+	$$
+	G_N(t) = \sum_{n=-N}^{N} c_n e^{i \omega_n t},
+	$$
+	где $\omega_n = 2 \pi n/T$. 
+
+	Выведем явный вид коэффициентов
+	\[
+	c_n = \frac{1}{T} \int_{0}^{T} f(t) e^{-i \omega_n t} \, dt.
+	\]
+	
+	Функция \( f(t) \) кусочно определена, поэтому интеграл представляется как сумма на конкретных промежутках (подставим конкретные значения $R = 2$, $T = 1$):
+	\[
+	c_n = \frac{1}{T} \left( I_1 + I_2 + I_3 + I_4 \right),
+	\]
+
+	где:
+	\[
+	\begin{aligned}
+	I_1 &= \int_{-T/8}^{T/8} \left( R + i \cdot \frac{8Rt}{T} \right) e^{-i \omega_n t} \, dt, \\
+	I_2 &= \int_{T/8}^{3T/8} \left( 2R - \frac{8Rt}{T} + iR \right) e^{-i \omega_n t} \, dt, \\
+	I_3 &= \int_{3T/8}^{5T/8} \left( -R + i \left(4R - \frac{8Rt}{T} \right) \right) e^{-i \omega_n t} \, dt, \\
+	I_4 &= \int_{5T/8}^{7T/8} \left( -6R + \frac{8Rt}{T} - iR \right) e^{-i \omega_n t} \, dt;
+	\end{aligned}
+	\]
+
+	Или же
+	\[
+		\begin{aligned}
+		I_1 &= \int_{-\frac{1}{8}}^{\frac{1}{8}} \left(2 + 16i t \right) e^{-i \omega_n t} dt, \\
+		I_2 & = \int_{\frac{1}{8}}^{\frac{3}{8}} \left(4 - 16t + 2i\right) e^{-i \omega_n t} dt dt, \\
+		I_3 &= \int_{\frac{3}{8}}^{\frac{5}{8}} \left( -2 + i(8 - 16t) \right) e^{-i \omega_n t} dt, \\
+		I_4 &= \int_{\frac{5}{8}}^{\frac{7}{8}} \left( -12 + 16t - 2i \right) e^{-i \omega_n t} dt.
+		\end{aligned}
+	\]
+
+	Программные вычисления $c_n$ при $N=2$ дали следующее:
+	$$
+	c_{-2} = c_{-1} = c_{0} = c_{2} = 0,\hspace{1mm} c_{1} = 2.2926.
+	$$
+
+	Построим параметрические графики частичных сумм ряда $G_N(t)$ при $N = 1$, $2$, $3$, $10$. Результаты приведены на одном рисунке \ref{29} для лучшего визуального сравнения. Заметно, что при росте $N$ частичные суммы становятся всё ближе к $f(t)$, то есть ряд приближает функцию на комплексной оси.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/29.jpg}
+		\caption{Графики $f(t)$ и $G_N(t)$ при различных $N$}
+		\label{29}
+	\end{figure}
+
+	Отдельно выведем графики вещественной и мнимых частей для каждый из $N$ в зависимости от $t$ (рисунки \ref{30}-\ref{37} при всё той же вариации $N$). Как можно заметить, сходимость работает по каждой из частей - чем больше <<вращений>> мы берём, тем больше приближаются к вещественной и мнимой частям $f(t)$, соответственно, вещественные и мнимые части частичной суммы $G_N$. 
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/30.jpg}
+		\caption{Графики вещественный частей $f(t)$ и $G_N(t)$ при $N=1$}
+		\label{30}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/31.jpg}
+		\caption{Графики вещественный частей $f(t)$ и $G_N(t)$ при $N=1$}
+		\label{31}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/32.jpg}
+		\caption{Графики вещественный частей $f(t)$ и $G_N(t)$ при $N=2$}
+		\label{32}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/33.jpg}
+		\caption{Графики вещественный частей $f(t)$ и $G_N(t)$ при $N=2$}
+		\label{33}
+	\end{figure}
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/34.jpg}
+		\caption{Графики вещественный частей $f(t)$ и $G_N(t)$ при $N=3$}
+		\label{34}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/35.jpg}
+		\caption{Графики вещественный частей $f(t)$ и $G_N(t)$ при $N=3$}
+		\label{35}
+	\end{figure}
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/36.jpg}
+		\caption{Графики вещественный частей $f(t)$ и $G_N(t)$ при $N=10$}
+		\label{36}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{./images/37.jpg}
+		\caption{Графики вещественный частей $f(t)$ и $G_N(t)$ при $N=10$}
+		\label{37}
+	\end{figure}
+	
+	Результат проверка равенства Парсеваля для $N = 10$ положительный, полученные значения очень близки:
+	$$
+	E_{func} = 5.3313330002; \hspace{3mm} E_{complex} = 5.3286450407.
+	$$
+
+	\section{Общие выводы}
+	В ходе лабораторной работы были рассмотрены различные типы периодических функций — чётные, нечётные, ни чётные, ни нечётные, а также комплекснозначная функция с кусочно-заданными вещественной и мнимой частями. Для каждой функции были найдены выражения коэффициентов Фурье (вещественных $a_n$ и $b_n$, а также мнимых $c_n$), а также написан код для численного расчёта коэффициентов и построения частичных сумм $F_N(t)$ и $G_N(t)$. Проведено сравнение графиков исходных функций с их приближениями с помощью рядов Фурье при различных значениях $N$, что позволило наглядно проследить улучшение аппроксимации с ростом числа членов ряда.
+
+	\newpage
+	\section{Приложение}
+	\begin{lstlisting}[caption={Код для первого пункта}]
+T = 2;
+omega0 = 2*pi/T;
+N = 100;
+Nt = 1000;
+%tb = linspace(1, 3, Nt);
+tb = linspace(-1, 1, Nt);
+dt = tb(2) - tb(1);
+
+%f_base = ones(size(tb));
+%f_base(tb >= 2) = 2;
+
+%f_base = 1 + tb.^2;
+
+%f_base = tb;
+
+f_base = tb + sin(pi*tb).^2;
+
+a0 = (2/T) * trapz(tb, f_base);
+
+a = zeros(1, N);
+b = zeros(1, N);
+for n = 1:N
+    a(n) = (2/T) * trapz(tb, f_base .* cos(n * omega0 * tb));
+    b(n) = (2/T) * trapz(tb, f_base .* sin(n * omega0 * tb));
+end
+
+n_range = -N:N;
+c = zeros(size(n_range));
+for k = 1:length(n_range)
+    n = n_range(k);
+    c(k) = (1/T) * trapz(tb, f_base .* exp(-1i * n * omega0 * tb));
+end
+
+t_start = -4;
+t_end = t_start+4*T;
+t = linspace(t_start, t_end, 2000);
+f_approx = a0/2 * ones(size(t));
+
+for n = 1:N
+    f_approx = f_approx + a(n)*cos(n * omega0 * t) + b(n)*sin(n * omega0 * t);
+end
+
+f_complex = zeros(size(t));
+for k = 1:length(n_range)
+    n = n_range(k);
+    f_complex = f_complex + c(k) * exp(1i * n * omega0 * t);
+end
+f_complex = real(f_complex);
+
+t_mod = mod(t - 1, T);
+%f_true = ones(size(t));
+%f_true(t_mod >= 1) = 2;
+
+%f_true = 1 + (mod(t + 1, T) - 1).^2;
+
+%f_true = (mod(t + 1, T) - 1);
+
+f_true = (mod(t + 1, T) - 1) + (sin(pi*(mod(t + 1, T) - 1))).^2;
+
+E_func = (1/T) * trapz(tb, f_base.^2)
+E_real = (a0^2)/4 + 0.5*sum(a.^2 + b.^2)
+E_complex = sum(abs(c).^2)
+	\end{lstlisting}
+
+	\newpage
+		\begin{lstlisting}[caption={Код для построения параметрических графиков}]
+R = 2;
+T = 1;
+omega = @(n) 2*pi*n;
+
+Nt = 100000;
+t_int = linspace(-1/8, 7/8, Nt);
+dt = t_int(2) - t_int(1);
+
+func = @(t) ...
+    ((t >= -1/8 & t < 1/8) .* (2 + 16i * t) + ...
+     (t >= 1/8  & t < 3/8) .* (4 - 16*t + 2i) + ...
+     (t >= 3/8  & t < 5/8) .* (-2 + 1i*(8 - 16*t)) + ...
+     (t >= 5/8  & t < 7/8) .* (-12 + 16*t - 2i)) ...
+    .* (t >= -1/8 & t <= 7/8);
+ft = func(t_int);
+
+t = linspace(-1/8, 7/8, 2000);
+t = [t, t(1)];
+ft_plot = func(t);
+valid = (ft_plot ~= 0);
+
+Ns = [1, 2, 3, 10];
+colors = ['r', 'g', 'b', 'm'];
+widths = [12, 6, 7, 8];
+
+for i = 1:length(Ns)
+    N = Ns(i);
+    n_vals = -N:N;
+    c = zeros(size(n_vals));
+    
+    for k = 1:length(n_vals)
+        n = n_vals(k);
+        c(k) = trapz(t_int, ft .* exp(-1i * omega(n) * t_int));
+    end
+
+    GN = zeros(size(t));
+    for k = 1:length(n_vals)
+        GN = GN + c(k) * exp(1i * omega(n_vals(k)) * t);
+    end
+	...
+end
+	\end{lstlisting}
+
+	\newpage
+	\begin{lstlisting}[caption={Код для графиков с вещественной и мниной частями}]
+R = 2;
+T = 1;
+omega = @(n) 2*pi*n;
+
+N = 10;
+n_vals = -N:N;
+
+t = linspace(-1/8, 7/8, 2000);
+
+f = @(t) ...
+    ((t >= -1/8 & t < 1/8) .* (2 + 16i * t) + ...
+     (t >= 1/8  & t < 3/8) .* (4 - 16*t + 2i) + ...
+     (t >= 3/8  & t < 5/8) .* (-2 + 1i*(8 - 16*t)) + ...
+     (t >= 5/8  & t < 7/8) .* (-12 + 16*t - 2i)) ...
+    .* (t >= -1/8 & t <= 7/8);
+
+ft = f(t);
+
+t_int = linspace(-1/8, 7/8, 2000);
+ft_int = f(t_int);
+
+c = zeros(size(n_vals));
+for k = 1:length(n_vals)
+    n = n_vals(k);
+    c(k) = trapz(t_int, ft_int .* exp(-1i * omega(n) * t_int));
+end
+
+GN = zeros(size(t));
+for k = 1:length(n_vals)
+    GN = GN + c(k) * exp(1i * omega(n_vals(k)) * t);
+end
+	\end{lstlisting}
+	
+	
+	
+\end{document}

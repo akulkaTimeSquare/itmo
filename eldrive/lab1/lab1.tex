@@ -1,0 +1,496 @@
+ \documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{Лабораторная работа №1}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{Механика электропривода}}
+\fancyfoot[L]{}
+\fancyfoot[C]{Страница \thepage\space из \pageref{LastPage}}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+				Научно исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №1 \\
+			Механика электропривода
+		\end{center}
+		
+		\vspace{45mm}
+		
+		\begin{minipage}{.37\linewidth}
+			Выполнили студенты \\
+			\\
+			\\
+			\\
+			Преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.60\linewidth}
+			\begin{flushright}
+				Мовчан Игорь Евгеньевич \\
+				Демкин Алексей Игоревич \\
+				Ле Ван Хынг \\
+				Будков Ярослав Антонович \\
+				Маматов Александр Геннадьевич
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2025
+		\end{center}
+		
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\section{Исходные данные}
+	
+	Согласно \textbf{варианту 7}, имеем следующие исходные данные:
+	\begin{itemize}
+		\item Диаметры шкивов ременной передачи: $d_1 = 150 \, \text{мм}$ и $d_2 = 200 \, \text{мм}$;
+		\item Число заходов и шаг гайки винтовой передачи: $z = 1$ и $s = 0.01 \, \text{м}$;
+		\item КПД ременной передачи: $\eta_b = 0.95$;
+		\item КПД зубчатой пары: $\eta_g = 0.9$;
+		\item КПД винтовой пары: $\eta_s = 0.6$;
+		\item КПД цепной передачи: $\eta_{ch} = 0.97$;
+		\item Передаточное число цепной передачи: $j_c = 1$;
+		\item Жесткость соединительных муфт: $k_c = 15 \cdot 10^6 \, \text{Н} \cdot \text{м}/\text{рад}$;
+		\item Жесткость ременной передачи: $k_b = 3 \cdot 10^6 \, \text{Н} \cdot \text{м}/\text{рад}$;
+		\item Жесткость цепной передачи: $k_{ch} = 12 \cdot 10^6 \, \text{Н} \cdot \text{м}/\text{рад}$;
+		\item Коэффициент демпфирования: $b = 0.1 \, \text{Н} \cdot \text{м} \cdot \text{с}$;
+		\item Момент сухого трения: $M_f = 1.1 \, \text{Н} \cdot \text{м}$;
+		\item Масса: $m = 4700 \, \text{кг}$;
+    
+		\item Линейная скорость: $v = 0.013 \, \text{м/с}$;
+			
+ 		\item $z_1 = 12$, $z_2 = 21$, $z_3 = 16$, $z_4 = 42$, $z_5 = 16$, $z_6 = 50$;
+			
+		\item $J_2 = 0.1700 \, \text{кг} \cdot \text{м}^2$;
+			
+		\item $J_3 = 0.3929 \, \text{кг} \cdot \text{м}^2$;
+			
+		\item $J_4 = 0.0982 \, \text{кг} \cdot \text{м}^2$;
+			
+		\item $J_5 = 0.3008 \, \text{кг} \cdot \text{м}^2$;
+			
+		\item $J_6 = 0.1310 \, \text{кг} \cdot \text{м}^2$;
+			
+		\item $J_7 = 0.6016 \, \text{кг} \cdot \text{м}^2$;
+			
+		\item $J_8 = 0.1473 \, \text{кг} \cdot \text{м}^2$;
+			
+		\item $J_9 = 0.5054 \, \text{кг} \cdot \text{м}^2$.
+	\end{itemize}
+
+	\section{Выполнение силового расчета}
+	Рассмотрим винтовой домкрат:
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.95\textwidth]{images/scheme.png}
+		\caption{Кинематическая схема винтового домкрата с электропривода}
+		\label{fig:scheme}
+	\end{figure}
+
+	Найдем скорости вращения $\omega_m$, момента $M_m$ на валу и мощности
+	двигателя $P_m$, необходимого для привода домкрата, предназначенного для подъема груза
+	массой $m$ со скоростью $v$.
+
+	Для начала вычислим угловую скорость нагрузки:
+	\[
+	\omega_5 = 2 \pi \cdot \frac{v}{s} = 2 \pi \cdot \frac{0.013}{0.01} \approx 8.168 \, \text{рад/с}.
+	\]
+
+	После найдем передаточное число от нагрузки к двигателю:
+	\[
+	j = j_{b} \cdot j_{c} \cdot j_{2} \cdot j_{4} \cdot j_{6},
+	\]
+	\[
+	j_{b} = \frac{d_2}{d_1} = \frac{200}{150} \approx 1.33,
+	\]
+	\[
+	j_{2} = \frac{z_2}{z_1} = \frac{21}{12} = 1.75,
+	\]
+	\[
+	j_{4} = \frac{z_4}{z_3} = \frac{42}{16} = 2.625,
+	\]
+	\[
+	j_{6} = \frac{z_6}{z_5} = \frac{50}{16} = 3.125.
+	\]
+	
+	Откуда
+	\[
+	j = 1.33 \cdot 1.75 \cdot 2.625 \cdot 3.125 \approx 19.14.
+	\]
+
+	Угловая скорость вращения на валу двигателя тогда равна:
+	\[
+	\omega_m = \omega_5 \cdot j = 8.168 \cdot 17.08 \approx 156.34 \, \text{рад/с}.
+	\]
+	\[
+	n_m = \omega_m \cdot \frac{60}{2 \pi} \approx 1492.97 \, \text{об/мин}.
+	\]
+
+	Теперь найдем момент на валу двигателя:
+	\[
+	F = \frac{m}{2} \cdot g = \frac{4700}{2} \cdot 9.81 \approx 23053.5 \, \text{Н},
+	\]
+	\[
+	r = \frac{s}{2 \pi} = \frac{0.01}{2 \pi} \approx 0.00159 \, \text{м},
+	\]
+	\[
+	M_m = \frac{F \cdot r}{j \cdot \eta_{total 1}} + \frac{F \cdot r}{j \cdot \eta_{total 2}},
+	\]
+	\[
+	\eta_{total 2} = \eta_{total_1} \cdot \eta_{ch} = \eta_s \cdot \eta_g^3 \cdot \eta_b \cdot \eta_{ch}.
+	\]
+
+	Откуда
+	\[
+	M_m \approx 9.3 \, \text{Н} \cdot \text{м}.
+	\]
+
+	Мощность двигателя:
+	\[
+	P_m = M_m \cdot \omega_m \approx 1464.75 \, \text{Вт}.
+	\]
+
+	Выберем ближайшую по мощности модель \textbf{5A80MB4} c номинальной мощностью $P_{n} = 1.5 \, \text{кВт}$, $n_{n} = 1440 \, \text{об/мин}$, $M_{n} = 10 \, \text{Нм}$, $J_{1} = 0.0036 \, \text{кг} \cdot \text{м}^2$, $K_{n} = 2.2$.
+
+	Номинальная скорость вращения двигателя не соответсвует рассчитанной ранее, поэтому скорректируем ременную передачу изменением диаметра $d_1$:
+	\[
+	\omega_0 = \frac{2 \pi \cdot 1500}{60} \approx 157.08 \, \text{рад/с},
+	\]
+	\[
+	j = \frac{\omega_0}{2 \omega_2} \left(1 \pm \sqrt{1-\frac{4 M_2 \omega_2}{\eta h \omega_0^2}}\right),
+	\]
+
+	где $h = \frac{M_{n}}{\omega_0 - \omega_{n}}$, $M_2$ - момент второго шкива, $\omega_2$ - угловая скорость второго шкива, $\eta$ - КПД передачи, $\omega_0$ - угловая скорость холостого хода двигателя.
+
+	Получаем исправленное значение диаметра $d_1$:
+	\[
+	\tilde{d_1} = \frac{d_2}{j} \approx 155.6 \, \text{мм}.
+	\]
+
+	\section{Аналитическое моделирование}
+	Для каждого вала $i$ найдем приведенный момент инерции и коэффициент жесткости:
+	\[
+	J'_i = \frac{J_i}{j_{1i}^2}, \quad k'_i = \frac{k_i}{j_{1i}^2},
+	\]
+	\[
+	j_{12} = 1,
+	\]
+	\[
+	j_{13} = j_{14} = j_b \approx 1.282,
+	\]
+	\[
+	j_{15} = j_{16} = j_b \cdot j_2 \approx 2.2436,
+	\]
+	\[
+	j_{17} = j_{18} = j_b \cdot j_2 \cdot j_4 \approx 5.8894,
+	\]
+	\[
+	j_{19} = j_b \cdot j_2 \cdot j_4 \cdot j_6 \approx 18.4.
+	\]
+
+	Далее произведем аналитическое моделирование системы, для чего используем модели масса-пружина-демпфер (отдельно рассмотрим трехмассовую систему и двухмассовую системы).
+
+	\subsection{Трехмассовая система}
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.65\textwidth]{images/three.png}
+		\caption{Трехмассовая система}
+		\label{fig:three}
+	\end{figure}
+	Найдем приведенный момент инерции каждой из масс:
+	\[
+	\widetilde{J}_1 = \sum J'_{1-7} \approx 0.5733 \, \text{кг} \cdot \text{м}^2,
+	\]
+	\[
+	\widetilde{J}_2 = \sum J'_{8-10_1} \approx 5.721 \cdot 10^{-3} \, \text{кг} \cdot \text{м}^2,
+	\]
+	\[
+	\widetilde{J}_3 = \sum J'_{10_2} = J'_{10_2} = J'_{10} = \frac{m}{2} \cdot \left(\frac{v}{\omega_m}\right)^2 \approx 1.746 \cdot 10^{-5} \, \text{кг} \cdot \text{м}^2.
+	\]
+
+
+	Приведем также жесткости:
+	\[
+		k_3' = \frac{k_c}{j^2_{17}} \approx 4.2982 \cdot 10^5 \, \text{Н} \cdot \text{м}/\text{рад},
+	\]
+	\[
+		k'_4 = \frac{k_{ch}}{j^2_{19}} \approx 3.521 \cdot 10^4 \, \text{Н} \cdot \text{м}/\text{рад},
+	\]
+
+	Вычислим резонсные частоты для трехмассовой системы:
+	\begin{align*}
+	\left\{
+	\begin{aligned}
+	\widetilde{J}_1 \frac{dw_1}{dt} &= M_m - M_{s12} - M_{d12} - M_{L1}, \\
+	\frac{dM_{s12}}{dt} &= k'_3(w_1 - w_2), \\
+	\widetilde{J}_2 \frac{dw_2}{dt} &= M_{s12} + M_{d12} - M_{s23} + M_{d23} - M_{L2}, \\
+	\frac{dM_{s23}}{dt} &= k'_4(w_2 - w_3), \\
+	\widetilde{J}_3 \frac{dw_3}{dt} &= M_{s23} + M_{d23} - M_{L3}.
+	\end{aligned}
+	\right.
+	\end{align*}
+
+	В матричной форме система примет вид:
+	\begin{align*}
+	\left\{
+	\begin{aligned}
+	\dot{x} &= Ax + Bu \\
+	y &= Cx
+	\end{aligned}
+	\right.,
+	\end{align*}
+
+	где $x = [\omega_1, \, M_{s12}, \, \omega_2, \, M_{s23}, \, \omega_3]^T$ - вектор состояния,
+	\[ 
+		A = 
+		\begin{bmatrix}
+		0 & -\frac{1}{\widetilde{J}_1} & 0 & 0 & 0 \\[6pt]
+		k'_3 & 0 & -k'_3 & 0 & 0 \\[6pt]
+		0 & \frac{1}{\widetilde{J}_2} & 0 & -\frac{1}{\widetilde{J}_2} & 0 \\[6pt]
+		0 & 0 & k'_4 & 0 & -k'_4 \\[6pt]
+		0 & 0 & 0 & \frac{1}{\widetilde{J}_3} & 0 
+		\end{bmatrix}.
+	\]
+
+	Находя собственные числа матрицы $A$, получаем:
+	\begin{align*}
+		\begin{aligned}
+		\lambda_1 &= 0 \\
+		\lambda_{2,3} &= \pm 8697.27j \\
+		\lambda_{4,5} &= \pm 44977.79j
+		\end{aligned}
+	\end{align*}
+
+	Откуда значения резонансных частот:
+	\begin{align*}
+		\begin{aligned}
+			v_1 &= 0 \\
+			v_2 &= 8697.27 \\
+			v_3 &= 44977.79
+		\end{aligned}
+	\end{align*}
+
+	\subsection{Двухмассовая система}
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.45\textwidth]{images/two.png}
+		\caption{Двухмассовая система}
+		\label{fig:two}
+	\end{figure}	
+	Найдем приведенный момент инерции каждой из масс:
+	\[
+	\widetilde{J}_1 = \sum J'_{1-7} \approx 0.5733 \, \text{кг} \cdot \text{m}^2,
+	\]
+	\[
+	\widetilde{J}_2 = \sum J'_{8-10_2} \approx 5.739 \cdot 10^{-3} \, \text{кг} \cdot \text{m}^2.
+	\]
+
+	Жесткость:
+	\[
+		k'_{34} = (k'_3 + k'_4)^{-1} \approx 32539.68 \, \text{Н} \cdot \text{м}/\text{рад}.
+	\]
+
+	Система описывается уравнениями:
+	\begin{align*}
+		\left\{
+		\begin{aligned}
+		\widetilde{J}_1 \frac{dw_1}{dt} &= M_m - M_{s12} - M_{d12} - M_{L1}, \\
+		\frac{dM_{s12}}{dt} &= k'_{34}(w_1 - w_2), \\
+		\widetilde{J}_2 \frac{dw_2}{dt} &= M_{s12} + M_{d12} - M_{L2}.
+		\end{aligned}
+		\right.
+	\end{align*}
+	
+	В матричной форме система всё так же имеет вид:
+	\begin{align*}
+		\left\{
+		\begin{aligned}
+		\dot{x} &= Ax + Bu \\
+		y &= Cx
+		\end{aligned}
+		\right.
+	\end{align*}
+
+	где $x = [\omega_1, \, M_{s12}, \, \omega_2]^T$ - вектор состояния,
+	\[ 
+		A = 
+		\begin{bmatrix}
+		0 & -\frac{1}{\widetilde{J}_1} & 0 \\[6pt]
+		k'_{34} & 0 & -k'_{34} \\[6pt]
+		0 & \frac{1}{\widetilde{J}_2} & 0
+		\end{bmatrix}.
+	\]
+
+	Находя собственные числа матрицы $A$, получаем:
+	\begin{align*}
+		\begin{aligned}
+		\lambda_1 &= 0 \\
+		\lambda_{2,3} &= \pm 2393.0483j
+		\end{aligned}
+	\end{align*}
+
+	Откуда значения резонансных частот:
+	\begin{align*}
+		\begin{aligned}
+			v_1 &= 0 \\
+			v_2 &= 2393.0483
+		\end{aligned}
+	\end{align*}
+
+	\section{Имитационное моделирование}
+	Для генерации крутящего момента АД используем линеаризованную модель, которая позволяет анализировать электромеханические процессы при скольжении меньше критического $s < s_k$.
+
+	Для этого опишем передаточную функцию \( W(s) \) АД от угловой частоты питающей сети \( \omega_{1n} \) к крутящему моменту \( M \) на рабочем участке с помощью апериодического звена первого порядка:
+	\[
+		W(s) = \frac{M}{\omega_{1n}} = \frac{2M_k T_2'}{1 + T_2' s} = \frac{h_u}{1 + T_2 s},
+	\]
+	где \( T_2' = 1/(s_k \omega_{1n}) \) - постоянная переходного времени ротора, \( M_k = K_n \cdot M_n = 22 \) - момент опрокидывания АД. Для определения \( s_k \) можно воспользоваться упрощенной формулой Клосса:
+	\[
+		s_k = s_n (K_m + \sqrt{K_m^2 - 1}),
+	\]
+	где \( s_n = \frac{\omega_0 - \omega_n}{\omega_0} = 0.04 \) - номинальное скольжение, \( K_m = K_n = 2.2 \) - кратность отношения максимального момента к номинальному, $\omega_{1n} = 2\pi \cdot 50 = 314.159 \, \text{рад/с}$.
+	
+	Откуда
+	\[
+		s_k = 0.04 \cdot 2.2 + \sqrt{2.2^2 - 1} \approx 0.1664,
+	\]
+	\[
+		T_2' = \frac{1}{s_k \omega_{1n}} = \frac{1}{0.1664 \cdot 314.159} \approx 0.01913 \, \text{с},
+	\]
+	\[
+		W(s) \approx \frac{2 \cdot 22 \cdot 0.01913}{1 + 0.01913 s} \approx \frac{0.842}{1 + 0.01913 s}.
+	\]
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{images/two_scheme.png}
+		\caption{Двухмассовая система}
+		\label{fig:twomass}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{images/two_scheme_zero.png}
+		\caption{Графики системы при $M_{d12} = 0$}
+		\label{fig:twomass_speed_zero}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=\textwidth]{images/two_scheme_unzero.png}
+		\caption{Графики системы при $M_{d12} = 10$}
+		\label{fig:twomass_speed_unzero}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=\textwidth]{images/two_scheme_unzero_f.png}
+		\caption{Графики системы при $M_{d12} = 10$ с сухим трением $M_f$}
+		\label{fig:twomass_speed_unzero_f}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{images/three_scheme.png}
+		\caption{Трехмассовая система}
+		\label{fig:threemass}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{images/three_zero_w.png}
+		\caption{Графики скоростей системы при $M_{d12} = M_{d23} = 0$}
+		\label{fig:threemass_speed_zero_w}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{images/three_zero_m.png}
+		\caption{Графики моментов системы при $M_{d12} = M_{d23} = 0$}
+		\label{fig:threemass_speed_zero_m}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{images/three_unzero_w.png}
+		\caption{Графики скоростей системы при $M_{d12} = M_{d23} = 10$}
+		\label{fig:threemass_speed_unzero_w}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{images/three_unzero_m.png}
+		\caption{Графики моментов системы при $M_{d12} = M_{d23} = 10$}
+		\label{fig:threemass_speed_unzero_m}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{images/three_unzero_w_f.png}
+		\caption{Графики скоростей системы при $M_{d12} = M_{d23} = 10$ с трением $M_f$}
+		\label{fig:threemass_speed_unzero_w_f}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.95\textwidth]{images/three_unzero_m_f.png}
+		\caption{Графики моментов системы при $M_{d12} = M_{d23} = 10$ с трением $M_f$}
+		\label{fig:threemass_speed_unzero_m_f}
+	\end{figure}
+	
+	\newpage
+	\section{Выводы}
+	В работе выполнены силовой расчёт привода, построена методика аналитической оценки параметров многомассовых моделей и приведено моделирование в среде Simscape.
+
+
+	
+
+
+
+	
+
+
+	
+\end{document}

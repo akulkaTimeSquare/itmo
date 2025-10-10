@@ -1,0 +1,246 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+
+\usepackage{minted, xcolor}
+\usemintedstyle{monokai}
+\definecolor{bg}{HTML}{282828}
+\setminted{bgcolor=bg}
+\setminted{fontsize=\scriptsize}
+\setminted{}
+
+\fancyhead[R]{\textit{Бифуракции в системе}}
+\fancyhead[L]{Практическая работа №3} 
+\fancyfoot[C]{Страница \thepage\space из \pageref{LastPage}}
+\fancyfoot[R]{}
+\fancyfoot[L]{}
+\pagestyle{fancy}
+\setlength{\headheight}{17.0pt}
+
+\newcommand{\anonsection}[1]{\section*{#1}\addcontentsline{toc}{section}{#1}}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+				Научно исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{center}
+			Отчет\\
+            по дисциплине\\
+            <<Моделирование динамических систем>>\\
+            \vspace{2mm}
+            Практическая работа №3 \\
+            \vspace{2mm}
+            Вариант №3
+		\end{center}
+		
+		\vspace{28mm}
+		
+		\begin{minipage}{.29\linewidth}
+			Выполнили
+			
+			Преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.70\linewidth}
+			\begin{flushright}
+				Воротников А.А., Гридусов Д.Д., Мовчан И.Е.
+				\\
+				Семенов Д.М.
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2024
+		\end{center}
+	
+	\end{titlepage}
+
+    \tableofcontents
+	\newpage
+	\section{Задание}
+    Пусть дана нелинейная система:
+    \begin{equation*}
+        \begin{cases*}
+            \dot{x}_1 = -x_1, \\
+            \dot{x}_2 = rx_2 - x_2^3 + x_2^5.
+        \end{cases*}
+    \end{equation*}
+
+	Необходимо
+    \begin{itemize}
+        \item Найти возможные бифуракции в системе, положения равновесия, определить их тип в зависимости от параметра $r$.
+        \item Построить фазовые портреты при различных значениях этого параметра.
+    \end{itemize}
+
+	\newpage
+	\section{Решение}
+
+	Найдём положения равновесия, решив систему на равенство нулю производных:
+
+	\begin{equation*}
+		\begin{cases*}
+			-x_1 = 0, \\
+			rx_2 - x_2^3 + x_2^5 = 0
+		\end{cases*}
+		\Rightarrow
+		\begin{cases*}
+			x_1 = 0, \\
+			x_2(r - x_2^2 + x_2^4) = 0,
+		\end{cases*}
+	\end{equation*}
+	откуда положения равновесия:
+
+	\begin{equation}
+		\label{1}
+		\begin{cases}
+			x_1^* = 0,\\
+			x_2^* = 0;
+		\end{cases}
+	\end{equation}
+	\begin{equation}
+		\label{2}
+		\begin{cases}
+			x_1^* = 0,\\
+			x_2^* = \pm\sqrt{\frac{1+\sqrt{1-4r}}{2}};
+		\end{cases}
+	\end{equation}
+	\begin{equation}
+		\label{3}
+		\begin{cases}
+			x_1^* = 0,\\
+			x_2^* = \pm\sqrt{\frac{1-\sqrt{1-4r}}{2}}.
+		\end{cases}
+	\end{equation}
+
+	Первое (\ref{1}) положение существует при любых параметрах $r \in \mathbb{R}$, второе и третье (\ref{2}) - при $r \le \frac{1}{4}$, четвертое и пятое (\ref{3}) - при $0 \le r \le \frac{1}{4}$.
+	
+	Исследуем на устойчивость (линеаризовав в окрестности положения равновесия), используя:
+	$$
+	\dot{x} = Ax, \text{ где  } A = \begin{bmatrix}
+		-1 & 0 \\
+		0 & r-3x_2^2+5x_2^4
+	\end{bmatrix} \Bigg|_{x=x^*}.
+	$$
+
+	Видим, что устойчивость пар точек \ref{2} одинакова (для \ref{3} то же самое), поэтому дальше будем исследовать поведение только одного элемента пары.
+
+	Подставим в матрицу $A$ точки, найдём собственные числа. Начнём с \ref{1}:
+	$$
+	A = \begin{bmatrix}
+		-1 & 0 \\
+		0 & r-3x_2^2+5x_2^4
+	\end{bmatrix} \Bigg|_{x=x^*}
+	=
+	\begin{bmatrix}
+		-1 & 0 \\
+		0 & r
+	\end{bmatrix}
+	\Rightarrow
+	\left[
+		\begin{array}{l}
+			\lambda = -1, \\
+			\lambda = r. \\
+		\end{array}
+	\right.
+	$$
+	
+	При $r > 0$ положение равновесия является седлом, при $r < 0$ - устойчивым узлом.
+
+	Рассмотрим теперь точку из пары \ref{2}:
+	$$
+	A
+	=
+	\begin{bmatrix}
+		-1 & 0 \\
+		0 & 5r-5x_2^2+5x_2^4 - 4r + 2x_2^2
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+		-1 & 0 \\
+		0 & - 4r + 2x_2^2
+	\end{bmatrix},
+	$$
+	так как точки были найдены из решения уравнения $r - x_2^2 + x_2^4 = 0$.
+	
+	Получаем:
+	$$
+	\left[
+		\begin{array}{l}
+			\lambda = -1, \\
+			\lambda = - 4r + 1 + \sqrt{1 - 4r} = \sqrt{1 - 4r}(\sqrt{1-4r} + 1) > 0.
+		\end{array}
+	\right.
+	$$
+
+	Отсюда положения равновесия из пары \ref{2} являются седлом.
+
+	Аналогичные рассуждения над матрицей $A$ дают собственные числа матрицы $A$ для положения равновесия \ref{3}:
+	$$
+	\left[
+		\begin{array}{l}
+			\lambda = -1, \\
+			\lambda = -4r + 1 - \sqrt{1-4r} = \sqrt{1-4r}(\sqrt{1-4r} - 1) < 0.
+		\end{array}
+	\right.
+	$$
+
+	Итак, положение равновесия является устойчивым узлом. Отметим также, что здесь и в прошлом случае мы делали выводы о $\lambda$ из условий на существование положений равновесия.
+
+	Проведём дополнительное исследование, построив фазовый портрет системы для различных значений параметра $r$. Результаты на рис. \ref{4}, \ref{5} и \ref{6}. Как можно видеть, численные результаты дают те же типы положений, что и были найдены.
+	\begin{figure}[h]
+		\begin{center}
+			\includegraphics[scale=0.65]{images/1.png}
+			\caption{Фазовый портрет системы при $r \in (-\infty, 0)$}
+			\label{4}
+		\end{center}
+	\end{figure}
+	\begin{figure}[h]
+		\begin{center}
+			\includegraphics[scale=0.65]{images/2.png}
+			\caption{Фазовый портрет системы при $r \in (0, \frac{1}{4})$}
+			\label{5}
+		\end{center}
+	\end{figure}
+	\begin{figure}[h]
+		\begin{center}
+			\includegraphics[scale=0.65]{images/3.png}
+			\caption{Фазовый портрет системы при $r \in (\frac{1}{4}, +\infty)$}
+			\label{6}
+		\end{center}
+	\end{figure}
+	\section{Выводы}
+	В результате выполнения лабораторной работы было исследовано влияние бифуракционных параметров на свойства системы (её положения равновесия, а также их типы), а также построены фазовые портреты для различных значений этих параметров для численных проверок результатов.
+
+\end{document}

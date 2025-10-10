@@ -1,0 +1,60 @@
+% Загрузка и преобразование изображения в ЧБ
+img = imread('1.png');  % Замените на имя вашего файла
+gray_img = im2gray(img);
+gray_img = im2double(gray_img);
+
+%[X, Y] = meshgrid(1:N, 1:N);
+%G = exp(-((X - center).^2 + (Y - center).^2) / (2 * sigma^2));
+%G = G / sum(G(:));  % Нормировка
+
+%N = 12;
+%G = ones(N, N);           % Ядро из единиц
+%G = G / sum(kernel(:));  % Нормализация
+
+%G = [0 -1 0; -1 5 -1; 0 -1 0];
+
+%G = [-1 -1 -1; -1 8 -1; -1 -1 -1];
+
+G = [-1 -1 -1; -1 0 -1; -1 -1 -1];
+
+conv_img = conv2(gray_img, G, 'same');
+
+% Фурье-образы
+[h, w] = size(gray_img);
+[hk, wk] = size(G);
+H = fft2(gray_img, h + hk - 1, w + wk - 1);
+Gf = fft2(G, h + hk - 1, w + wk - 1);
+
+% Поэлементное перемножение и обратное преобразование
+filtered = H .* Gf;
+result_fft = real(ifft2(filtered));
+start_row = floor((hk - 1) / 2) + 1;
+start_col = floor((wk - 1) / 2) + 1;
+result_fft = result_fft(start_row:start_row+h-1, start_col:start_col+w-1);
+
+
+
+f = figure();
+%imshow(gray_img, []);
+
+%imshow(conv_img, []);
+
+
+fourier = fftshift(filtered);
+ab = abs(fourier); % абсолютные значения
+an = angle(fourier); % фазы
+l = log(ab+1);
+m = max(l(:));
+ul = l/m; % нормировка логарифма
+%imshow(ul, []);
+
+imshow(result_fft, []);
+
+set(gcf, 'PaperPositionMode', 'auto');
+set(gcf, 'Position', [100, 100, 1800, 1000]);
+set(gca, 'FontSize', 22, 'GridLineWidth', 3, 'LineWidth', 2);
+exportgraphics(f, "37.png")
+
+% (Дополнительно) сравнение с блочным размытием:
+% avg_kernel = ones(N) / (N^2);
+% block_blur = conv2(gray_img, avg_kernel, 'same');

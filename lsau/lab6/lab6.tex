@@ -1,0 +1,306 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\usepackage[framed,autolinebreaks,numbered,useliterate]{mcode}
+
+
+\usepackage{minted, xcolor} 
+\usemintedstyle{monokai}
+\definecolor{bg}{HTML}{282828}
+\setminted{bgcolor=bg}
+\setminted{fontsize=\scriptsize}
+\setminted{}
+
+\fancyhead[R]{\textit{Влияние нулей и полюсов}}
+\fancyhead[L]{Лабораторная работа №6}
+\fancyfoot[C]{Страница \thepage\space из \pageref{LastPage}}
+\fancyfoot[R]{}
+\fancyfoot[L]{}
+\pagestyle{fancy}
+\setlength{\headheight}{17.0pt}
+
+\newcommand{\anonsection}[1]{\section*{#1}\addcontentsline{toc}{section}{#1}}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+				Научно исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №6 \\
+			Анализ влияния нулей и полюсов передаточной функции на динамические свойства
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{minipage}{.48\linewidth}
+			Выполнил студент группы R3380
+			
+			Преподаватели
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.5\linewidth}
+			\begin{flushright}
+				Мовчан И.Е.
+				\\
+				Лопарев А.В., Золотаревич В.П.
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2024
+		\end{center}
+		
+	\end{titlepage}
+	
+	\section{Цель работы}
+	Изучить связь характера переходной характеристики, ди
+намических свойств системы с размещением на комплексной плоскости нулей и
+полюсов.
+	\section{От постоянных к системе (Баттерворт)}
+	Пусть заданы значения постоянных $n = 6$, $t_\text{П} = 8$, $k = 5$ (исходя из варианта 11). Хотим построить систему с этими характеристиками с нулями передаточной функции, распределенными по системе Баттерворта.
+	
+	Напишем некоторую автоматизацию для вычисления корней и полинома:
+	\begin{lstlisting}
+n = 6;
+k = 5;
+tp = 8;
+alphas = [1, ];
+for j = 1:n
+	p = [1, -exp(1i*(pi/2 + (2*j-1)/(2*n)*pi))];
+	alphas = conv(alphas, p);
+end
+alphas = real(alphas)
+	\end{lstlisting}
+
+	Получаем коэфиициенты полинома:
+	$$
+	alphas = [1.0000,\hspace{1mm} 3.8637,\hspace{1mm} 7.4641,\hspace{1mm} 9.1416, \hspace{1mm} 7.4641, \hspace{1mm}3.8637, \hspace{1mm}1.0000]
+	$$
+
+	Вычислим время нормированного переходного процесс (рисунок \ref{1}).
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.55]{./images/1.png}
+		\caption{Переходный процесс при полиноме Баттерворта}
+		\label{1}
+	\end{figure}
+
+	Далее найдём всё необходимое, используя:
+	\begin{lstlisting}
+a = zeros(n);
+tpn = 14.1;
+omega = tpn/tp;
+for j = 1:n
+	a(j) = alphas(j)*omega^(n-j+1);
+end
+a = cat(1, [1, ], wrev(a(:, 1)))
+b = a(end)*k
+r = roots(a);
+rp = real(r)
+ip = imag(r)
+nu = abs(rp(1));
+t = 1/nu*log(1/0.05)
+	\end{lstlisting}
+
+	Откуда получаем:
+$$
+a = [1.0000,\hspace{1mm} 6.8098\hspace{1mm} , 23.1865\hspace{1mm} , 50.0507\hspace{1mm} , 72.0268\hspace{1mm} , 65.7127\hspace{1mm}, 29.9761]
+$$
+$$
+b = 149.8804
+$$
+$$
+rp = [-0.4562,\hspace{1mm} -0.4562\hspace{1mm} , -1.2463\hspace{1mm} , -1.2463\hspace{1mm} , -1.7024\hspace{1mm} , -1.7024]
+$$
+$$
+ip = [1.7024,\hspace{1mm} -1.7024\hspace{1mm} , 1.2463\hspace{1mm} , -1.2463\hspace{1mm} , 0.4562\hspace{1mm} , -0.4562]
+$$
+$$
+t = 6.5672
+$$
+	
+	$a$ - коэффициенты при $y$, $b$ - при входном воздействии, $rp$, $ip$ - действительные и мнимые части корней соответственно, $t$ - время переходного процесса, вычисленного по данной формуле.
+
+	Схема моделирования и переходные процессы:
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.55]{./images/2.png}
+		\caption{Cхема моделирования при полиноме Баттерворта}
+		\label{2}
+	\end{figure}
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.55]{./images/3.png}
+		\caption{Переходный процесс при полиноме Баттерворта}
+		\label{3}
+	\end{figure}
+
+	\section{От постоянных к системе (бином)}
+	Аналогично можем вычислить соответствующие величины при биномиальном распределении корней:
+	\begin{lstlisting}
+n = 6;
+k = 5;
+tp = 8;
+alphas = [1, ];
+for j = 1:n
+	p = [1, 1];
+	alphas = conv(alphas, p);
+end
+alphas
+a = zeros(n);
+tpn = 12;
+omega = tpn/tp;
+for j = 1:n
+	a(j) = alphas(j)*omega^(n-j+1);
+end
+a = cat(1, [1, ], wrev(a(:, 1)))
+b = a(end)*k
+r = roots(a);
+rp = real(r);
+ip = imag(r);
+nu = abs(rp(3));
+t = 1/nu*log(1/0.05);
+	\end{lstlisting}
+	
+	Откуда:
+$$
+	alphas = [1,\hspace{1mm}     6,\hspace{1mm}    15,\hspace{1mm}    20,\hspace{1mm}    15,\hspace{1mm}     6,\hspace{1mm}     1]
+$$
+$$
+a = [1.0000,\hspace{1mm} 9.0000,\hspace{1mm} 33.7500,\hspace{1mm} 67.5000,\hspace{1mm} 75.9375,\hspace{1mm} 45.5625,\hspace{1mm} 11.3906]   
+$$
+$$
+b = 56.9531
+$$
+$$
+r =\begin{bmatrix}
+  -1.5052 + 0.0030i \\
+  -1.5052 - 0.0030i \\
+  -1.5000 + 0.0060i\\
+  -1.5000 - 0.0060i \\
+  -1.4948 + 0.0030i \\
+  -1.4948 - 0.0030i \\	
+\end{bmatrix}
+$$
+$$
+t = 1.9972
+$$
+
+	Схемы моделирования и переходные процессы представлены на рис. \ref{4}, \ref{5}, \ref{6}, \ref{7}
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.75]{./images/4.png}
+		\caption{Cхема моделирования (нормированное) при биномиальном распределении}
+		\label{4}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.45]{./images/5.png}
+		\caption{Переходный процесс (нормированное) при биномиальном распределении}
+		\label{5}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.55]{./images/6.png}
+		\caption{Cхема моделирования при биномиальном распределении}
+		\label{6}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.45]{./images/7.png}
+		\caption{Переходный процесс при биномиальном распределении}
+		\label{7}
+	\end{figure}
+
+	\section{Переходные процессы различных систем}
+	Добавим теперь к входному сигналу линейное воздействие (согласно варианту 11):
+	$$
+	W(s) = \frac{2.75s+56.9531}{s^6+9s^5+33.75s^4+67.5s^3+75.9375s^2+45.5625s+11.3906}
+	$$
+	
+	Откуда
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.55]{./images/8.png}
+		\caption{Переходный процесс при линейной входном воздействии}
+		\label{8}
+	\end{figure}
+
+	Используем также следующую передаточную функцию:
+	$$
+	W(s) = \frac{2.5s^6+0.3s^5+0.2s^4+0.3s^3+0.1s^2+0.3s+56.9531}{s^6+9s^5+33.75s^4+67.5s^3+75.9375s^2+45.5625s+11.3906}
+	$$
+
+	Переходный процесс данной системы:
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.55]{./images/9.png}
+		\caption{Переходный процесс при полиномиальном входном воздействии}
+		\label{9}
+	\end{figure}
+
+	\section{Заданное входное воздействие}
+	Пусть заданое входное воздействие $g(t)=4\cos (4t)$, а передаточная функция системы имеет вид
+	$$
+	W(s)=\frac{0.5s^2 + 8}{s^6+9s^5+33.75s^4+67.5s^3+75.9375s^2+45.5625s+11.3904}.
+	$$
+
+	Смоделируем систему:
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.45]{./images/10.png}
+		\caption{Схема моделирования системы при заданном входном воздействии}
+		\label{10}
+	\end{figure}
+	\newpage
+
+	Графики:
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.32]{./images/11.png}
+		\caption{График y(t) системы при заданном входном воздействии}
+		\label{11}
+	\end{figure}
+
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.32]{./images/12.png}
+		\caption{График входного воздействия}
+		\label{12}
+	\end{figure}
+	\section{Выводы}
+	В результате выполнения лабораторной работы была изучена связь характера переходной характеристики, динамических свойств системы с размещением на комплексной плоскости нулей и
+	полюсов (при распределении по Баттерворту и биному).
+\end{document}

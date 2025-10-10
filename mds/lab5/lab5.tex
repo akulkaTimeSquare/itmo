@@ -1,0 +1,245 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+
+\usepackage{minted, xcolor}
+\usemintedstyle{monokai}
+\definecolor{bg}{HTML}{282828}
+\setminted{bgcolor=bg}
+\setminted{fontsize=\scriptsize}
+\setminted{}
+
+\fancyhead[R]{\textit{Системы с задержками}}
+\fancyhead[L]{Практическая работа №5}
+\fancyfoot[C]{Страница \thepage\space из \pageref{LastPage}} 
+\fancyfoot[R]{}
+\fancyfoot[L]{}
+\pagestyle{fancy}
+\setlength{\headheight}{17.0pt}
+
+\newcommand{\anonsection}[1]{\section*{#1}\addcontentsline{toc}{section}{#1}}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+				Научно исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{center}
+			Отчет\\
+            по дисциплине\\
+            <<Моделирование динамических систем>>\\
+            \vspace{2mm}
+            Практическая работа №5 \\
+            \vspace{2mm}
+            Вариант №3
+		\end{center}
+		
+		\vspace{28mm}
+		
+		\begin{minipage}{.29\linewidth}
+			Выполнили
+			
+			Преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.70\linewidth}
+			\begin{flushright}
+				Воротников А.А., Гридусов Д.Д., Мовчан И.Е.
+				\\
+				Семенов Д.М.
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2024
+		\end{center}
+	
+	\end{titlepage}
+
+    \tableofcontents
+	\newpage
+	\section{Задание 1}
+    
+    \subsection{Условие}
+    Пусть задана система с задержкой:
+    $$
+    \dot{x}(t) = -\text{sign} (x (t-h)), \hspace{3mm} t \ge 0,\ h = 2 > 0,
+    $$
+    $h$ - постоянная задержка, $x(t) = \varphi (t)$ на $[-h, 0]$,
+    $$
+    \varphi(t) =
+    \begin{cases*}
+        0.5, \hspace{15mm} t\in[-2, -1),\\
+        -t-0.5, \hspace{3mm} t\in[-1, 0].   
+    \end{cases*}
+    $$
+
+    Необходимо построить решение системы методом шагов.
+    \subsection{Решение}
+
+    Так как производная $\dot{x}$ как бы запаздывает в своих значениях, мы можем определить значения исходной функции $x$ по ней, используя предыдущие. Итак, пусть $t \in [0, 2]$, из начальных условий знаем $x(0) = \varphi(0) = -0.5$, тогда
+    \begin{equation*}
+        \begin{cases*}
+            \dot{x}(t) = -1,\ \varphi (t - 2) > 0, \\
+            \dot{x}(t) = 1,\hspace{5mm} \varphi (t - 2) < 0
+        \end{cases*}
+        \Rightarrow
+        \begin{cases*}
+            \dot{x}(t) = -1,\ t\in [0, 1.5), \\
+            \dot{x}(t) = 1,\hspace{5mm}t\in [1.5, 2].
+        \end{cases*}
+    \end{equation*}
+    
+    Теперь если $\dot{x}(t) = -1$ на $[0, 1.5)$, то $x(t) = -t + C$, где $-0.5 = 0 + C \Rightarrow C = -0.5$, и $x(1.5) = -1.5 - 0.5 = -2$.
+
+    А для $[1.5, 2)\text{: }\dot{x}(t) = -1$, откуда $x(t) = t + C$, где $-2 = 1.5 + C \Rightarrow C = -3.5$, и $x(2) = 2 - 3.5 = -1.5$.
+	
+    Аналогично можем распространить решение и на отрезок $[2, 4]$. В данном случае $\dot{x} = 1$ на всём $[2, 4]$, так как на предыдущем шаге получили отрицательную функцию на промежутке $(0, 2]$, но тогда $x(t) = t + C, \text{ где } 2+C = -1.5 \Rightarrow C = -3.5.$
+    
+    А также на отрезок $[4, 6]\text{: } x(t) = t - 3.5$ на $[4, 5.5)$, $x(t) = -t + 7.5$ на $[5.5, 6]$.
+    
+    График системы выходит следующим:
+    \begin{figure}[h]
+		\begin{center}
+			\includegraphics[scale=0.75]{images/1.png}
+            \caption{График системы при $h = 2$}
+            \label{1}
+		\end{center}
+	\end{figure}
+    
+    \section{Задание 2}
+    \subsection{Условие}
+    Пусть дана система с произвольной задержкой $\tau (t):$
+
+    $$
+    \dot{x} = -2x(t) - 0.1x(t-\tau(t))
+    $$
+    
+    Необходимо построить функцию Ляпунова и с помощью метода Разумихина доказать устойчивость данной системы.
+
+    \subsection{Решение}
+    
+    Функция Ляпунова задаётся выражением
+    $$
+    V(x) = x^2.
+    $$
+
+    Её производная тогда
+    $$
+    V'(x) = 2x\dot{x} = 2x(-2x+0.1x(t - \tau (t))) = -4x^2 + 0.2x(t)x(t - \tau (t)).
+    $$
+
+    Для устойчивости системы необходимо, чтобы $\dot{V}(x(t)) \le 0$ для всех $x(t+\theta)\text{ }(\theta \in [-h, 0])$, удовлетворяющих $V(x(t+\theta)) <= V(x(t))$. По методу же Разумихина данное выполнено, если
+    $$
+    \Psi = \begin{bmatrix}
+        A^T P + PA + qP & P A_1 \\
+        A_1^T P & -q P
+    \end{bmatrix} < 0, \text{  } q > 0,\text{ }P > 0
+    $$
+
+    В нашем случае $A = -2, A_1 = -0.1$, а это значит, что
+    $$
+    \Psi = \begin{bmatrix}
+        -4P + qP & -0.1 P \\
+        -0.1 P & -q P
+    \end{bmatrix} < 0, \text{  } q > 0,\text{ }P > 0
+    $$
+
+    Решим с помощью критерия Сильвестра:
+    \begin{equation*}
+        \begin{cases*}
+            -4P + qP = -P(4-q) < 0, \\
+            -P^2((-4+q)q + 0.01) > 0, \\
+            q > 0, \\
+            P > 0.
+        \end{cases*}
+    \end{equation*}
+
+    Откуда получаем, что система разрешима при $q \in (0.0025, 3.9975)$, а значит, она асимптотически устойчива.
+
+    \section{Задание 3}
+    \subsection{Условие}
+    Пусть дана система с постоянной задержкой $h=3$:
+    $$
+    \dot{x} = Ax(t)+A_1x(t-h), \hspace{1mm} A = \begin{bmatrix}
+        -4 & 1 \\
+        -2 & -4
+    \end{bmatrix}, \hspace{1mm} A_1 = \begin{bmatrix}
+        1 & 2 \\
+        1 & -1
+    \end{bmatrix}
+    $$
+
+    Необходимо построить графики системы (смоделировать её) и доказать её устойчивость.
+    \subsection{Решение}
+    По методу функционалов Ляпунова-Красовского, система устойчива, если разрешимо
+    $$
+    \Psi =
+    \begin{bmatrix}
+        A^T P + PA + Q & P A_1 \\
+        A_1^T P & -(1-\dot{\tau}(t))Q
+    \end{bmatrix} =
+    \begin{bmatrix}
+        A^T P + PA + Q & P A_1 \\
+        A_1^T P & -Q
+    \end{bmatrix} < 0
+    $$
+    для $P > 0, \hspace{1mm} Q > 0$.
+
+    Решение в MATLAB даёт
+    $$
+    P = \begin{bmatrix}
+        0.3183 &   -0.0205 \\
+        -0.0205 &   0.3154        
+    \end{bmatrix}, \hspace{1mm}
+    Q = \begin{bmatrix}
+        1.0558 &   0.1102 \\
+        0.1102 &   1.2894.
+    \end{bmatrix}
+    $$
+
+    Неравенство разрешилось, а значит, система устойчива. Посмотрим на графиках:
+    \begin{figure}[h]
+		\begin{center}
+			\includegraphics[scale=0.5]{images/2.png}
+			\caption{Моделирование системы}
+			\label{2}
+		\end{center}
+	\end{figure}
+
+    \section{Выводы}
+	По результатам выполнения лабораторной работы был изучен способ построения графика решения системы с постоянной задержкой $h$ (метод шагов), исследованы способы доказать устойчивость системы с задержкой (методы Лянуова-Красовского и Разумихина, использующие матричные неравенства для достижения результатов).
+
+
+\end{document}

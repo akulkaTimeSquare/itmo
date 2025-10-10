@@ -1,0 +1,420 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{Лабораторная работа №2}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{Расчет трансформатора}}
+\fancyfoot[L]{}
+\fancyfoot[C]{Страница \thepage\space из \pageref{LastPage}}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+				Научно исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №2 \\
+			Расчет трансформатора
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{minipage}{.37\linewidth}
+			Выполнили студенты \\
+			\\
+			\\
+			\\
+			Преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.60\linewidth}
+			\begin{flushright}
+				Мовчан Игорь Евгеньевич \\
+				Демкин Алексей Игоревич \\
+				Ле Ван Хынг \\
+				Будков Ярослав Антонович \\
+				Маматов Александр Геннадьевич
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2025
+		\end{center}
+		
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\section{Исходные данные}
+	
+	Имеем следующие исходные данные:
+	\begin{itemize}
+		\item Частота сети: $f = 50~\text{Гц}$
+		\item Напряжение первичной обмотки: $U_1 = 230~\text{В}$
+		\item Максимальная индукция в стержне: $B_{\text{max}} = 1.5~\text{Тл}$
+		\item Плотность тока: $J = 2.5~\text{А/мм}^2$
+		\item Коэффициент заполнения стали: $k_{\text{ст}} = 0.9$
+		\item Коэффициент заполнения окна: $k_{\text{окн}} = 0.25$
+		\item Материал сердечника: Э320
+		\item Зазор в сердечнике: $\delta = 0.05~\text{мм}$
+		\item Напряжение вторичной обмотки: $U_2 = 15~\text{В}$
+		\item Размеры сердечника: $H = 78~\text{мм}$, $L = 67~\text{мм}$, $a = 22~\text{мм}$, $b = 14~\text{мм}$, $c = 44~\text{мм}$, $h = 39~\text{мм}$
+	\end{itemize}
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.5\textwidth]{images/trans.png}
+		\caption{Схема трансформатора}
+	\end{figure}
+
+	\section{Расчет тока намагничивания}
+
+	Для меньших вычислений перейдем к эквивалентной схеме трансформатора:
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/eq.png}
+		\caption{Эквивалентная схема трансформатора}
+	\end{figure}
+
+	Вычислим дополнительные размеры сердечника:
+	\[
+		d = \frac{L - 2b - a}{2} = 8.5~\text{мм}
+	\]
+	\[
+		e = \frac{H - h}{2} = 19.5~\text{мм}
+	\]
+
+	А также площади сечений:
+	\[
+		S_{2d} = 2 d \cdot c = 748~\text{мм}^2
+	\]
+	\[
+		S_{2e} = 2e \cdot c = 1716~\text{мм}^2
+	\]
+	\[
+		S_a = a \cdot c = 968~\text{мм}^2
+	\]
+	
+	Теперь пусть
+	\[
+		B_0 = B_{max} = 1.5 ~\text{Тл}
+	\]
+
+	Будем рассчитывать индукцию относительно сечения $S_{2d}$:
+	\[
+		B_{2d} = B_0 = 1.5~\text{Тл}
+	\]
+	\[
+		B_{a} = B_0 \cdot \frac{S_{2d}}{S_{a}} \approx 1.159~\text{Тл}
+	\]
+	\[
+		B_{2e} = B_0 \cdot \frac{S_{2d}}{S_{2e}} \approx 0.654~\text{Тл}
+	\]
+	
+	Найдем напряженности, используя таблицу для стали Э320 (для недостающих значений используем линейное интерполирование):
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/table.png}
+		\caption{Таблица для магнитной индукции}
+	\end{figure}
+	\[
+		H_{2d} = 480~\text{А/м}, \quad
+		H_{a} \approx 123.6 ~\text{А/м}, \quad
+		H_{2e} \approx 39.24 ~\text{А/м}
+	\]
+
+	Также вычислим напряженности в зазорах:
+	\[
+		H_{2d\delta} = \frac{B_{2d}}{\sqrt{2}\mu_0} = \frac{1.5}{\sqrt{2}\cdot 4\pi 10^{-7}} \approx 844046.5464 ~\text{А/м}
+	\]
+	\[
+		H_{a\delta} = \frac{B_{a}}{\sqrt{2}\mu_0} = \frac{1.159}{\sqrt{2}\cdot 4\pi 10^{-7}} \approx 652217.787 ~\text{А/м}
+	\]
+
+	Расчитаем магнитное напряжение, используя формулу:
+	\[
+		U = H \cdot l
+	\]
+
+	Тогда:
+	\[
+		U_{2d} = H_{2d} h = 480 \cdot 0.039 = 18.72 ~\text{А}
+	\]
+	\[
+		U_{a} = H_{a} h =  = 4.8204 ~\text{А}
+	\]
+	\[
+		U_{2e} = 2 H_{2e} \cdot (2d + b + a) = 4.15944 ~\text{А}
+	\]
+	\[
+		U_\delta = (H_{2d\delta} + H_{a\delta}) \delta = 74.81321667 ~\text{А}
+	\]
+	
+	Наконец, суммарный ток намагничивания трансформатора:
+	\[
+		I_\mu = U_{2d} + U_{a} + U_{2e} + U_\delta \approx 102.513 ~\text{А}
+	\]
+
+	Найдем также номинальный ток для оценки $I_\mu$:
+	\[
+		I_p = \frac{b \cdot h \cdot k_{\text{окн}}}{2}J = 170.625 ~\text{А}.
+	\]
+
+	Получаем, что:
+	\[
+		\frac{I_\mu}{I_p} > 0.4
+	\]
+
+	Следовательно, индукцию $B_0 = B$ надо уменьшить. 
+	
+	Пусть теперь $B_0 = 1~\text{Тл}$. Тогда:
+	\[
+		B'_{2d} = B_0 = 1~\text{Тл}
+	\]
+	\[
+		B'_{a} = B_0 \cdot \frac{S_{2d}}{S_{a}} \approx 0.773~\text{Тл}
+	\]
+	\[
+		B'_{2e} = B_0 \cdot \frac{S_{2d}}{S_{2e}} \approx 0.4359~\text{Тл}
+	\]
+
+	Найдем напряженности с использованием таблицы:
+	\[
+		H'_{2d} = 60~\text{А/м}, \quad
+		H'_{a} \approx 34.1 ~\text{А/m}, \quad
+		H'_{2e} \approx 28 ~\text{А/м}
+	\]
+
+	Также вычислим напряженность в зазоре:
+	\[
+		H'_{2d\delta} = \frac{B'_{2d}}{\sqrt{2}\mu_0} = \frac{1}{\sqrt{2}\cdot 4\pi 10^{-7}} \approx 562697.7 ~\text{А/м}
+	\]
+	\[
+		H'_{a\delta} = \frac{B'_{a}}{\sqrt{2}\mu_0} = \frac{0.773}{\sqrt{2}\cdot 4\pi 10^{-7}} \approx 434965.32 ~\text{А/м}
+	\]
+
+	Тогда:
+	\[
+		U'_{2d} = H'_{2d} h = 60 \cdot 0.039 = 2.34 ~\text{А}
+	\]
+	\[
+		U'_{a} = H'_{a} h = 0.341 \cdot 0.039 = 1.33 ~\text{А}
+	\]
+	\[
+		U'_{2e} = 2 H'_{2e} \cdot (2d + b + a) = 2 \cdot 28 \cdot (2 \cdot 8.5 + 14 + 22) = 2.968 ~\text{А}
+	\]
+	\[
+		U'_\delta = (H'_{2d\delta} + H'_{a\delta}) \delta = 49.883 ~\text{А}
+	\]
+
+	Наконец, суммарный ток намагничивания трансформатора:
+	\[
+		I'_\mu = U'_{2d} + U'_{a} + U'_{2e} + U'_\delta \approx 56.521 ~\text{А}
+	\]
+
+	Получаем, что:
+	\[
+		\frac{I'_\mu}{I_p} \approx 0.33 \leq 0.4
+	\]
+
+	В итоге ток намагничивания трансформатора не превышает $40\%$ от номинального тока обмотки.
+
+	\section{Расчет обмоток}
+	Определим мощность трансформатора:
+	\[
+		S = 2.22 f B_{max} S_a k_{\text{ст}} b h k_{\text{окн}} J \approx 49.5 ~\text{Вт}
+	\]
+
+	Число витков первичной обмотки:
+	\[
+		W_1 = \text{round}\left(\frac{U_1}{4.44 f S_a B_{max} k_{\text{ст}}}\right) \approx 792
+	\]
+
+	Число витков вторичной обмотки:
+	\[
+		W_2 = \text{round}\left(W_1\frac{U_2}{U_1}\right) \approx 51
+	\]
+
+	Отметим, что
+	\[
+		\frac{k' - k }{k} < 0.03, \quad k' = \frac{W_1}{W_2}
+	\]
+
+	Номинальные токи обмоток:
+	\[
+		I_{1N} = \frac{I_p}{W_1} \approx 0.215 ~\text{А}, \quad
+		I_{2N} = \frac{I_p}{W_2} \approx 3.3456 ~\text{А}
+	\]
+
+	Вычислим сопротивления первичной и вторичной обмоток. Минимальные сечения проводов:
+	\[
+		s'_1 = \frac{I_{1N}}{J} \approx 0.086 ~\text{мм}^2, \quad
+		s'_2 = \frac{I_{2N}}{J} \approx 1.338 ~\text{мм}^2
+	\]
+
+	Откуда сечения проводов:
+	\[
+		s_1 = 0.01131 ~\text{мм}^2, \quad
+		s_2 = 1.4314 ~\text{мм}^2
+	\]
+
+	Получаем:
+	\[
+		p_1 = 1.55 ~\text{Ом/м}, \quad
+		p_2 = 0.0122 ~\text{Ом/м}
+	\]
+
+	Также имеем:
+	\[
+		L_{W1} = 2(a + c + 3b) = 216 ~\text{мм}, \quad
+		L_{W2} = 2(a + c + b) = 80 ~\text{мм}
+	\]
+
+	Откуда сопротивления обмоток:
+	\[
+		R_1 = W_1 L_{w1} p_1 = 265.1616 ~\text{Ом}, \quad
+		R_2 = W_2 L_{w2} p_2 = 0.049776 ~\text{Ом}
+	\]
+
+	\section{Расчет потерь и КПД}
+	Медные потери:
+	\[
+		\Delta P_{Cu} = R_1 I_{1N}^2 + R_2 I_{2N}^2 \approx 12.814 ~\text{Вт}
+	\]
+
+	Плотность сердечника:
+	\[
+		\gamma = 7.8 ~\text{кг/дм}^3 = 7800 ~\text{кг/м}^3
+	\]
+	
+	Потери в стали можно вычислить по формуле:
+	\[
+		\Delta P_{Fe} = G_a p(B'_a) + 2 G_{d} p(B'_{2d}) + 2 G_{e} p(B'_{2e})
+	\]
+
+	Найдем соответствующие значения масс как плотность на объем:
+	\[
+		G_a = \gamma\cdot a \cdot c \cdot h \approx 0.2945 ~\text{кг}
+	\]
+	\[
+		G_{d} = \gamma\cdot d \cdot h \cdot c \approx 0.1 ~\text{кг}
+	\]
+	\[
+		G_{e} = \gamma\cdot e \cdot b \cdot L = 0.14267 ~\text{кг}
+	\]
+
+	Также найдем удельные мощности потерь в стали:
+	\[
+		p(B'_a) = 0.3184 ~\text{Вт/кг}, \quad
+		p(B'_{2d}) = 0.5 ~\text{Вт/кг}, \quad
+		p(B'_{2e}) = 0.08 ~\text{Вт/кг}
+	\]
+
+	И удельные реактивные мощности (намагничивания):
+	\[
+		q(B'_a) \approx 1.12342 ~\text{Вар/кг}, \quad
+		q(B'_{2d}) = 1.7  ~\text{Вар/кг}
+	\]
+	\[
+		q(B'_{2e}) = 0.4 ~\text{Вар/кг}
+	\]
+
+	Тогда потери в стали и системе из формулы выше:
+	\[
+		\Delta P_{Fe} \approx 0.2166 ~\text{Вт}
+	\]
+	\[
+		Q_{Fe} = G_a q(B'_a) + 2 G_{d} q(B'_{2d}) + 2 G_{e} q(B'_{2e}) \approx 0.785 ~\text{Вар}
+	\]
+	\[
+		P_0 = \Delta P_{Cu 0} + \Delta P_{Fe} = R_1 \left(\frac{I'_\mu}{W_1}\right)^2 + \Delta P_{Fe} \approx 1.35 ~\text{Вт}
+	\]
+
+	Коэффициент мощности:
+	\[
+		\cos \varphi_0 \approx \frac{1}{\sqrt{1 + (Q_{Fe} / P_0)^2}} \approx 0.7473
+	\]
+
+	Оптимальный коэффициент нагрузки:
+	\[
+		\beta_{max} = \sqrt{\frac{\Delta P_{Fe}}{\Delta P_{Cu}}} \approx 0.13
+	\]
+
+	В итоге, номинальный КПД трансформатора:
+	\[
+		\eta_{N} = \frac{U_1 I_{1N}}{U_1 I_{1N} + \Delta P_{Cu} + \Delta P_{Fe}} \approx 0.79
+	\]
+
+	Максимальный КПД трансформатора:
+	\[
+		\eta_{max} = \frac{\beta_{max} U_1 I_{1N}}{\beta_{max} U_1 I_{1N} + \beta_{max}^2 \Delta P_{Cu} + \Delta P_{Fe}} \approx 0.937
+	\]
+
+	\section{Выводы}
+	Был рассчитан трансформатор с использованием метода эквивалентной схемы. Из интересных результатов было получено:
+	\begin{itemize}
+		\item Мощность трансформатора составляет 49.5 Вт.
+		\item КПД трансформатора в номинальном режиме составляет 0.79, а в максимальном режиме 0.937.
+	\end{itemize}
+
+
+
+
+	
+
+
+
+
+
+	
+	
+	
+
+
+
+
+	
+	
+	
+	
+
+
+	
+
+	
+\end{document}

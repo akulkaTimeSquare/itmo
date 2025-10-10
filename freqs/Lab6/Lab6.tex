@@ -1,0 +1,906 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[numbered,framed]{matlab-prettifier}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{Лабораторная работа №6}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{Обработка изображений}}
+\fancyfoot[L]{}
+\fancyfoot[C]{Страница \thepage\space из \pageref{LastPage}}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+\usepackage[framed,autolinebreaks,numbered,useliterate]{mcode}
+\usepackage{graphicx}
+\usepackage{subcaption}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+				Научно исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №6 \\
+			Обработка изображений
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{minipage}{.48\linewidth}
+			Выполнил студент группы R3380
+			
+			Преподаватели
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.5\linewidth}
+			\begin{flushright}
+				Мовчан И.Е.
+				\\
+				Пашенко А.В., Перегудин А.А.
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2025
+		\end{center}
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+
+	\section{Фильтрация изображений}
+	Выберем одно из предложенных изображений с ярко выраженными периодическими шумами поверх него. Используем функцию \textbf{imread} и загрузим его в среду matlab для дальнейшего исследования, само изображение представлено ниже.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.75\textwidth]{toedit.png}
+		\caption{Исходное изображение}
+	\end{figure}
+
+	Можно видеть, что тут явно не помешала бы фильтрация - повсюду гармоники, которые явно не к месту. Попробуем исправить ситуацию - выполним нормализацию изображения, поделив массив значений на 255 - максимальное значение яркости цвета, рассчитаем двумерное дискретное преобразование Фурье с помощью функции \textbf{fft2} (для удобства анализа также выполним центрирование за счёт \textbf{fftshift}), разделим результат на модуль и фазу, а также выполним логарифмирование амплитуд, чтобы <<уравнять>> вклад малозаметных гармоник и ярко выраженного центра (дабы избежать логарифма нуля, к аргументу была добавлена 1), аналогично нормализуем полученный массив для корректного отображения данных.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=\textwidth]{log.png}
+		\caption{Нормализованный логарифм модуля спектра}
+		\label{log}
+	\end{figure}
+
+	Найденный образ Фурье позволяет выделить те самые лишние гармоники. На рисунках \ref{log} и \ref{log_with_peaks} можно наблюдать выраженные симметричные белые точки вдали от центра, которые соответствуют шумам изображения, - это проявление разложения синусоид, преобразовывающихся в дельта-фукнции. Эти пики мы и хотим подавить, уменьшив их компоненту до 0. Результаты ручной фильтрации представлены на рисунке \ref{log_edited} - закрашиваются в чёрный цвет те области, в которых наблюдались гармоники (обрабатываются не отдельные точки, так как преобразование Фурье компьютерными средствами приблизительно, и дельта-функции при симуляции проявляются не в конкретных местах, а интервала вокруг них). При восстановлении чёрный цвет превратится в нули на необходимых амплитудных отрезках, остальное же останется нетронутым - этого мы и хотим.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.45\textwidth]{log_with_peaks.png}
+		\caption{Обозначение шумов на нормализованном логаримфе модуля спектра}
+		\label{log_with_peaks}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{log_edited.png}
+		\caption{Фильтрация шума на нормализованном логарифме модуля спектра}
+		\label{log_edited}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{edited.png}
+			\caption{Отфильтрованное изображение}
+			\label{fig:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{orig.png}
+			\caption{Оригинальное изображение}
+			\label{fig:image2}
+		\end{subfigure}
+		\caption{Сравнение восстановленного и исходного изображений}
+		\label{fig:two_images}
+	\end{figure}
+
+	Теперь выполним обратные описанным выше шаги, то есть умножим на сохраненное максимальное значение логарифма, экспоненциируем, вычтем единицу, возьмём обратное преобразование Фурье и найдём отредактированное изображение через полученные модули и фазы оригинальной картинки. Результаты представлены на рисунке \ref{fig:image1}, сравнение с исходными данными - на рисунке \ref{fig:two_images}. На изображении видно, что выраженные шумы были успешно удалены, а общая структура и формы объектов осталась близка к оригинальным.
+
+	Таким образом, преобразование Фурье позволило выявить периодические компоненты изображения в частотной области, а также отфильтровать нежелательные пики, чтобы восстановленная картинка стала визуально чище. Однако стоит отметить, что хоть ручной метод и показал себя с эффективной стороны, он всё ещё требует очень большой аккуратности в выборе подавляемой области (то, что мы закрашиваем чёрным цветом), ведь одно малейшее движение в сторону может испортить детали изображения. Собственно, именно поэтому в реальности применяют различные маски, которые заглушают лишнее автоматически.
+
+	\section{Исследование свёртки}
+	Что ж, пришло время исследовать эффекты, которые мы можем накладывать на изображения, проделывая их свёртку с различные ядрами. Для начала найдем на просторах интернета изображение малого размера, с которым и будем в дальнейшем работать весь этот пункт, и преобразуем его в черно-белые оттенки для упрощения анализа командой \textbf{im2gray}. Проделанное представлено ниже
+
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.4\textwidth]{2.png}
+		\caption{Исходное изображение (оттенки серого)}
+	\end{figure}
+	\subsection{Размытие по Гауссу}
+	Мы будем изучать каждый из эффектов отдельно. Их применение возможно через использование свёртки ядра - предварительно заданной квадратной матрицы - с изображением. Именно правильное задание матрицы, как мы увидим после, позволяет достигать необходимых эффектов.
+	
+	Итак, начнём с эффекта размытия. Сформируем ядро Гауссовского фильтра при $N = 7$ (нечётное значение необходимо, для того чтобы существовал центральный элемент матрицы):
+	$$
+	\sigma = \frac{N - 1}{6},\hspace{2mm} A_{ij} = exp\Big(-\frac{-(i - \frac{N+1}{2})^2 + (j - \frac{N+1}{2})^2}{2\sigma^2}\Big),\hspace{2mm} i,j\in\{1... N\},
+	$$
+	$$
+	K_\sigma = \frac{A}{\sum_{ij}A_{ij}}, \hspace{2mm} A - \text{вся матрица.}
+	$$
+	
+	Отметим, что нормировка была необходима для сохранения средней яркости всего изображения, не было пересветов, белых пятен и прочих побочных эффектов.
+
+	Используем функция \textbf{conv2} для выполнения двумерной свертки. Результаты изображены на рисунках ниже
+	\begin{figure}[h]
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{2.png}
+			\caption{Исходное изображение}
+			\label{fig1:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{3.png}
+			\caption{Размытое изображение}
+			\label{fig1:image2}
+		\end{subfigure}
+		\caption{Сравнение исходного и размытого по Гауссу ($N = 7$) изображений}
+		\label{fig1:two_images}
+	\end{figure}
+	
+	Как можно видеть, полученное изображение действительно достаточно размыто, а границы смягчены, то есть свёртка с ядром работает и даёт ожидаемую картину!
+
+	Попробуем теперь иной подход: мы знаем, что свёртка во временной области эквивалентна умножению в частотной. Первое мы уже делали, испытаем второе, для этого найдём образ Фурье исходного изображения (рисунок \ref{fig2:image1}) и выбранного нами ядра (рисунок \ref{fig2:image2}).
+	\begin{figure}[h]
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{4.png}
+			\caption{Логарифм модуля образа изображения}
+			\label{fig2:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{5.png}
+			\caption{Логарифм модуля образа ядра}
+			\label{fig2:image2}
+		\end{subfigure}
+		\caption{Модули образов изображения и ядра размытия по Гауссу $N = 7$}
+		\label{fig2:two_images}
+	\end{figure}
+
+	Спектр ядра размытия по Гауссу был расширен до размеров исследуемого изображения, и мы можем совершить поэлементное перемножение образов, получив спектр фильтрованного сигнала (рисунок \ref{6}).
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{6.png}
+		\caption{Фильтрация изображения с помощью размытия Гаусса $N = 7$}
+		\label{6}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{3.png}
+			\caption{Размытие по Гауссу (свёртка)}
+			\label{fig3:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{7.png}
+			\caption{Размытие по Гауссу (умножение)}
+			\label{fig3:image2}
+		\end{subfigure}
+		\caption{Свёртка и частотное умножение при размытии по Гауссу $N = 7$}
+		\label{fig3:two_images}
+	\end{figure}
+
+	Полученный результат показывает, что размытие по Гауссу подавляет высокие частоты образа изображения, действуя как низкочастотный фильтр (именно поэтому он и имеет такую округлую форму с ярким белым пятном в центре).
+
+	Теперь восстановим изображение и сравним его  с полученным в предыдущем методе (рисунок \ref{fig3:two_images}, где оба способа выведены рядом). По итогу получаются практически идентичные результаты, что подтверждает эквивалентность операций свёртки и перемножения в частотной области (однако последнее может быть чуть более предпочтительным на больших изображениях, так как совершается меньшее число операций).
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{2.png}
+			\caption{Исходное изображение}
+			\label{fig4:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{8.png}
+			\caption{Размытое изображение}
+			\label{fig4:image2}
+		\end{subfigure}
+		\caption{Сравнение исходного и размытого по Гауссу ($N = 5$) изображений}
+		\label{fig4:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{4.png}
+			\caption{Логарифм модуля образа изображения}
+			\label{fig5:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{9.png}
+			\caption{Логарифм модуля образа ядра}
+			\label{fig5:image2}
+		\end{subfigure}
+		\caption{Модули образов изображения и ядра размытия по Гауссу $N = 5$}
+		\label{fig5:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{10.png}
+		\caption{Фильтрация изображения с помощью размытия Гаусса $N = 5$}
+		\label{10}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{8.png}
+			\caption{Размытие по Гауссу (свёртка)}
+			\label{fig6:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{11.png}
+			\caption{Размытие по Гауссу (умножение)}
+			\label{fig6:image2}
+		\end{subfigure}
+		\caption{Свёртка и частотное умножение при размытии по Гауссу $N = 5$}
+		\label{fig6:two_images}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{2.png}
+			\caption{Исходное изображение}
+			\label{fig7:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{12.png}
+			\caption{Размытое изображение}
+			\label{fig7:image2}
+		\end{subfigure}
+		\caption{Сравнение исходного и размытого по Гауссу ($N = 13$) изображений}
+		\label{fig7:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{4.png}
+			\caption{Логарифм модуля образа изображения}
+			\label{fig8:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{13.png}
+			\caption{Логарифм модуля образа ядра}
+			\label{fig8:image2}
+		\end{subfigure}
+		\caption{Модули образов изображения и ядра размытия по Гауссу $N = 13$}
+		\label{fig8:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{200.png}
+		\caption{Фильтрация изображения с помощью размытия Гаусса $N = 13$}
+		\label{14}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{12.png}
+			\caption{Размытие по Гауссу (свёртка)}
+			\label{fig9:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{201.png}
+			\caption{Размытие по Гауссу (умножение)}
+			\label{fig9:image2}
+		\end{subfigure}
+		\caption{Свёртка и частотное умножение при размытии по Гауссу $N = 13$}
+		\label{fig9:two_images}
+	\end{figure}
+
+	Также были проделаны аналогичные шаги для параметров $N = 5$ (рисунки \ref{fig4:two_images}-\ref{fig6:two_images}) и $N = 13$ (рисунки \ref{fig7:two_images}-\ref{fig9:two_images}). Полученное говорит о том, что увеличение $N$ влечет увеличение и $\sigma = \frac{N-1}{6}$, участвующей в формировании ядра размытия по Гауссу и задающую <<силу>> данного размытия. Соответственно, чем большие параметры мы задаём, тем больший эффект получаем за счёт уменьшения круга частот (рисунок \ref{fig11:two_images}), чьих амплитуд мы мало касаемся и оставляем практически нетронутыми (широкие области заметны при малых значениях $N$, в этом случае мы оставляем частотную область практически нетронутой). Получается, матрицы полностью формируют то, как будет действовать наш фильтр, и именно поэтому им уделяется такое особое внимание. По вышеприведенным результатам можно понять и то, что высокие частоты в изображении отвечают за мелкие детали, а низкие, объёмные, - за его главные состовляющие (его <<суть>>).
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.32\textwidth}
+			\includegraphics[width=\textwidth]{8.png}
+			\caption{Размытие при $N = 5$}
+			\label{fig10:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.32\textwidth}
+			\includegraphics[width=\textwidth]{3.png}
+			\caption{Размытие при $N = 7$}
+			\label{fig10:image2}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.32\textwidth}
+			\includegraphics[width=\textwidth]{12.png}
+			\caption{Размытие при $N = 13$}
+			\label{fig10:image3}
+		\end{subfigure}
+		\caption{Сравнение применения размытия по Гауссу для различных $N$}
+		\label{fig10:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.32\textwidth}
+			\includegraphics[width=\textwidth]{9.png}
+			\caption{Размытие при $N = 5$}
+			\label{fig11:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.32\textwidth}
+			\includegraphics[width=\textwidth]{5.png}
+			\caption{Размытие при $N = 7$}
+			\label{fig11:image2}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.32\textwidth}
+			\includegraphics[width=\textwidth]{13.png}
+			\caption{Размытие при $N = 13$}
+			\label{fig11:image3}
+		\end{subfigure}
+		\caption{Сравнение логарифмов модулей образов Фурье размытий по Гауссу для различных $N$}
+		\label{fig11:two_images}
+	\end{figure}
+
+	\subsection{Блочное размытие}
+	В качестве альтернативного фильтра применим блочное размытие. Для начала зададим ядро с помощью матрицы размера $5 \times 5$ ($N = 5$), заполненной единицами, и отнормируем её. Это означает, что свёртка будет вычислять простое среднее значение по каждому квадрату пикселей. Математически результат можно записать так:
+	$$
+	A_{ij} = 1,\hspace{3mm} i,j\in\{1, ..., N\}, \hspace{3mm} K_{\square} = \frac{A}{\sum_{i,j} A_{ij}}, \hspace{3mm} N = 5.
+	$$
+
+	Осуществим операцию свёртки аналогичной предыдущему пункту функцией \textbf{conv2} и получим изображение на рисунке \ref{fig12:image2}.
+	\begin{figure}[h]
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{2.png}
+			\caption{Исходное изображение}
+			\label{fig12:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{14.png}
+			\caption{Размытое изображение}
+			\label{fig12:image2}
+		\end{subfigure}
+		\caption{Сравнение исходного и блочно размытого ($N = 5$) изображений}
+		\label{fig12:two_images}
+	\end{figure}
+
+	Так же, как и прежде, проверим теорему о свёртке. Для перехода к частотной области воспользуемся двумерным быстрым преобразованием Фурье, а для лучшего восприятия воспользуемся логарифмической шкалой, позволяющей усилить контраст между различными частотными компонентами. Найденные образы показаны на рисунках \ref{fig13:two_images} и \ref{16} (для фильтрации было применено поэлементное умножение спектров изображения и ядра).
+	\begin{figure}[h]
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{4.png}
+			\caption{Логарифм модуля образа изображения}
+			\label{fig13:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{15.png}
+			\caption{Логарифм модуля образа ядра}
+			\label{fig13:image2}
+		\end{subfigure}
+		\caption{Модули образов изображения и ядра блочного размытия при $N = 5$}
+		\label{fig13:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.5\textwidth]{16.png}
+		\caption{Фильтрация изображения с блочным размытия при $N = 5$}
+		\label{16}
+	\end{figure}
+
+	Видим, что образ ядра представляет из себя фильтр, всё так же глушащий высокие частоты, только чуть иным в сравнении с Гауссовым размытием способом: в первом случае идёт пропуск в заданном квадратном диапазоне (к тому же имеются некоторые периодические прямоугольные <<выделения>> на высоких частотах, а это означает, что глушатся они всё же не полностью), во втором - в круге.
+
+	Восстановление изображения из его отфильтрованного Фурье-образа даёт аналогичные свёртке результаты (рисунок \ref{fig14:two_images}, сравнивающий эти два метода подхода к получению эффектов на изображениях), что в очередной раз подтверждает изученную нами теорему о свёртке, показывающую эквивалентность операций этой самой свёртки во временной области и умножения в частотной.
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{14.png}
+			\caption{Блочное размытие (свёртка)}
+			\label{fig14:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{17.png}
+			\caption{Блочное размытие (умножение)}
+			\label{fig14:image2}
+		\end{subfigure}
+		\caption{Свёртка и частотное умножение при блочном размытии при $N = 5$}
+		\label{fig14:two_images}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{2.png}
+			\caption{Исходное изображение}
+			\label{fig15:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{18.png}
+			\caption{Размытое изображение}
+			\label{fig15:image2}
+		\end{subfigure}
+		\caption{Сравнение исходного и блочно размытого ($N = 7$) изображений}
+		\label{fig15:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{4.png}
+			\caption{Логарифм модуля образа изображения}
+			\label{fig16:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{19.png}
+			\caption{Логарифм модуля образа ядра}
+			\label{fig16:image2}
+		\end{subfigure}
+		\caption{Модули образов изображения и ядра блочного размытия при $N = 7$}
+		\label{fig16:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{20.png}
+		\caption{Фильтрация изображения с блочного размытия при $N = 7$}
+		\label{20}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{18.png}
+			\caption{Блочное размытие (свёртка)}
+			\label{fig17:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{21.png}
+			\caption{Блочное размытие (умножение)}
+			\label{fig17:image2}
+		\end{subfigure}
+		\caption{Свёртка и частотное умножение при блочном размытии при $N = 7$}
+		\label{fig17:two_images}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{2.png}
+			\caption{Исходное изображение}
+			\label{fig18:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{22.png}
+			\caption{Размытое изображение}
+			\label{fig18:image2}
+		\end{subfigure}
+		\caption{Сравнение исходного и блочно размытого ($N = 13$) изображений}
+		\label{18:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{4.png}
+			\caption{Логарифм модуля образа изображения}
+			\label{19:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{23.png}
+			\caption{Логарифм модуля образа ядра}
+			\label{19:image2}
+		\end{subfigure}
+		\caption{Модули образов изображения и ядра блочного размытия при $N = 13$}
+		\label{19:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{24.png}
+		\caption{Фильтрация изображения с блочным размытием при $N = 13$}
+		\label{24}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{22.png}
+			\caption{Блочное размытие (свёртка)}
+			\label{20:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{25.png}
+			\caption{Блочное размытие (умножение)}
+			\label{20:image2}
+		\end{subfigure}
+		\caption{Свёртка и частотное умножение при блочном размытии при $N = 13$}
+		\label{20:two_images}
+	\end{figure}
+	
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.32\textwidth}
+			\includegraphics[width=\textwidth]{14.png}
+			\caption{Размытие при $N = 5$}
+			\label{21:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.32\textwidth}
+			\includegraphics[width=\textwidth]{18.png}
+			\caption{Размытие при $N = 7$}
+			\label{21:image2}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.32\textwidth}
+			\includegraphics[width=\textwidth]{22.png}
+			\caption{Размытие при $N = 13$}
+			\label{21:image3}
+		\end{subfigure}
+		\caption{Сравнение применения блочного размытия для различных $N$}
+		\label{21:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.32\textwidth}
+			\includegraphics[width=\textwidth]{15.png}
+			\caption{Размытие при $N = 5$}
+			\label{22:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.32\textwidth}
+			\includegraphics[width=\textwidth]{19.png}
+			\caption{Размытие при $N = 7$}
+			\label{22:image2}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.32\textwidth}
+			\includegraphics[width=\textwidth]{23.png}
+			\caption{Размытие при $N = 13$}
+			\label{22:image3}
+		\end{subfigure}
+		\caption{Сравнение логарифмов модулей образов блочных размытий для $N$}
+		\label{22:two_images}
+	\end{figure}
+
+	Шаги были также проделаны для значений $N = 7$ (рисунки \ref{fig15:two_images} - \ref{fig17:two_images}) и $N = 13$ (рисунки \ref{18:two_images} и \ref{20:two_images}). Увеличение размера матрицы также приводит к снижению пропускаемой области, более сильно давятся верхние частоты, а значит, сильней происходит фильтрация. Также были проверены и соотнесены результаты наложения эффекта через свёртку и умножения образов, всё оказалось равным друг другу.
+
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{12.png}
+			\caption{Размытие по Гауссу $N = 13$}
+			\label{23:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{18.png}
+			\caption{Блочное размытие $N = 7$}
+			\label{23:image2}
+		\end{subfigure}
+		\caption{Сравнение фильтров размытия}
+		\label{23:two_images}
+	\end{figure}
+	На рисунке \ref{23:two_images} сравниваются исследованные нами фильтры размытия. Заметно, что блочное размытие при тех же $N$ является более сильным в сравнении с Гауссовым (так как даже при $N=13$ размытие по Гауссу находится на уровне блочного при $N = 7$), но приводит к более резкому виду границ и менее естественному результату (в том числе и из-за образовывающихся прямоугольных <<окон>> на высоких частотах образа Фурье ядра). Всё дело в том, что в отличие от блочного, размытие по Гауссу придаёт пикселям, расположенным ближе к центру, больший вес. Это создаёт гладкий переход и помогает в естественности, и именно поэтому Гауссовский фильтр предпочтителеней в задачах предварительной обработки изображений (однако блочное размытие всё ещё может пригодится, например, если необходимо достичь большего эффекта за меньшее число операций).
+		
+	\subsection{Увеличение резкости}
+	Отлично, с размытием разобрались. Перейдём теперь к другим доступным возможностям операции свёртки. На очереди - ядро повышения резкости, задающееся матрицей
+	\[
+	K_* = \begin{bmatrix}
+	0 & -1 & 0 \\
+	-1 & 5 & -1 \\
+	0 & -1 & 0
+	\end{bmatrix}.
+	\]
+
+	Как и прежде, посмотрим, на что введённое способно, как раньше, загрузим  всё то же изображение в matlab и с помощью функции \textbf{conv2} найдём его свертку с ядром $K_*$. Получим следующее:
+	\begin{figure}[h]
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{2.png}
+			\caption{Исходное изображение}
+			\label{24:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{26.png}
+			\caption{Изображение с увеличенной резкостью}
+			\label{24:image2}
+		\end{subfigure}
+		\caption{Сравнение исходного изображения и с увеличенной резкостью}
+		\label{24:two_images}
+	\end{figure}
+
+	На отфильтрованном изображении улучшилось чёткость контуров (шляпы, волосы, перо стали более выраженными), также повысилась контрастность вблизи границ. Однако проявился и некий побочный недостаток в виде общей серости изображения.
+
+	Проверим теперь теорему о свёртке, для этого проделаем уже знакомые нам шаги по нахождению образов, их модулей, а также произведения спектров ядра и изображения. Все результаты изображены на рисунках \ref{25:two_images}, \ref{28} и \ref{26:two_images}. Можно видеть, что всё предполагаемое в действительности выполняется.
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{4.png}
+			\caption{Логарифм модуля образа изображения}
+			\label{25:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{27.png}
+			\caption{Логарифм модуля образа ядра}
+			\label{25:image2}
+		\end{subfigure}
+		\caption{Модули образов изображения и ядра повышения резкости}
+		\label{25:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{28.png}
+		\caption{Фильтрация изображения (повышение резкости)}
+		\label{28}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{26.png}
+			\caption{Фильтрация через свёртку}
+			\label{26:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{29.png}
+			\caption{Фильтрация через умножение}
+			\label{26:image2}
+		\end{subfigure}
+		\caption{Свёртка и частотное умножение при ядре, повышающего резкость}
+		\label{26:two_images}
+	\end{figure}
+
+	Вид модуля образа ядра повышения резкости представляет из себя тёмный круг со светлым фоном. То есть картина противоположна сглаживанию - мы подавляем низкие частоты, находящиеся около центра, и улучшаем действие высоких частот, отвечающих, как уже было отмечено, за мелкие детали изображения (в том числе контуры). Образ Фурье ядра также объясняет и возникший побочное явление <<серости>> в фильтрованном изображении - так как все главные цветовые составляющие находятся возле точки $(0, 0)$ частотной области, а мы эту область подавляем, то немного искажается и цветовая гамма исходного изображения.
+
+	\subsection{Выделение краёв}
+	Испытаем наш аппарат в контексте применения эффекта выделения краёв, для зададим ядро свёртки через матрицу
+	\[
+	K_{\nabla}
+	= \begin{bmatrix}
+	-1 & -1 & -1 \\
+	-1 & 8 & -1 \\
+	-1 & -1 & -1
+	\end{bmatrix}.
+	\]
+
+	Введенное ядро усиливает центральный пиксель относительно его соседей, тем самым выделяя, как мы увидим далее, резкие изменения яркости и границы объектов. Применим свёртку ядра, используя обычный метод:
+	\begin{figure}[h]
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{2.png}
+			\caption{Исходное изображение}
+			\label{27:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{30.png}
+			\caption{Изображение с выделенными краями}
+			\label{27:image2}
+		\end{subfigure}
+		\caption{Сравнение исходного изображения и с выделенными краями}
+		\label{27:two_images}
+	\end{figure}
+
+	Итак, полученное изображение обладает яркими, определёнными границами и контрастными переходами. Шляпа, силуэт девушки и его отражение в зеркале, волосы - всё обладает отчётливым и ярко выраженным контуром. Так что фильтрованное изображение в действительности задаёт выделение краёв.
+
+	Посмотрим на непрямой метод получения эффектов - через умножение в частотной области образов Фурье изображения и ядра:
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{4.png}
+			\caption{Логарифм модуля образа изображения}
+			\label{28:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{31.png}
+			\caption{Логарифм модуля образа ядра}
+			\label{28:image2}
+		\end{subfigure}
+		\caption{Модули образов изображения и ядра выделения краёв}
+		\label{28:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{32.png}
+		\caption{Фильтрация изображения (выделение краёв)}
+		\label{32}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{30.png}
+			\caption{Фильтрация через свёртку}
+			\label{29:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{33.png}
+			\caption{Фильтрация через умножение}
+			\label{29:image2}
+		\end{subfigure}
+		\caption{Свёртка и частотное умножение при ядре, выделяющего края}
+		\label{29:two_images}
+	\end{figure}
+
+	На рисунке \ref{29:two_images} сравниваются пространственный и частотный методы применения эффекта к изображения. Как видим, они дают практически одинаковые результаты, а значит выполняется теорема о свёртке. По рисунку \ref{28:image2} же можно понять, что ядро выделения краёв работает как фильтр низких частот (равно как и увеличения резкости, только тут достигается меньший объём и большая концентрация тёмного пятна в центре, снижающего влияние низких частот, проявляющихся в общих паттернах (макро-детали) на изображении; белый фон же наоборот работает на высокие компоненты, влияющие такие микро-детали, как контуры, поэтому-то рассматриваемое ядро и работает соответствующим образом).
+
+	\subsection{Своё ядро}
+	До этого мы изучали уже данные нам ядра. Как можно было понять, они полностью задаются матрицами, с которыми после мы проделываем свёртки, находим модули образов, проводим фильтрации в частотной области, дающие эквивалентные результаты и немногое другое. Именно матрицы влияют на то, каким будет наш эффект. Так давайте создадим свой, опять-таки через ядра:
+	$$
+	G = \begin{bmatrix}
+	-1 & -1 & -1 \\
+	-1 & 0 & -1 \\
+	-1 & -1 & -1
+	\end{bmatrix},
+	$$
+	который мы не медля испытаем в действии:
+	\begin{figure}[h]
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{2.png}
+			\caption{Исходное изображение}
+			\label{30:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{34.png}
+			\caption{Изображение после свёртки}
+			\label{30:image2}
+		\end{subfigure}
+		\caption{Сравнение исходного изображения и свёрнутого с собственным ядром}
+		\label{30:two_images}
+	\end{figure}
+
+	На рисунке \ref{30:two_images} заметны эффекты, которые даёт свёртка с ядром, - самое заметное то, что однотонные части изображения (шляпа, перо, цвет лица) стали тёмными, а все контуры были инвертированы: тёмные тона обводок стали светлыми, вышла <<негативная маска краёв>>.
+
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{4.png}
+			\caption{Логарифм модуля образа изображения}
+			\label{31:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{35.png}
+			\caption{Логарифм модуля образа ядра}
+			\label{31:image2}
+		\end{subfigure}
+		\caption{Модули образов изображения и собственного}
+		\label{31:two_images}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{36.png}
+		\caption{Фильтрация изображения (собственное ядро)}
+		\label{36}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{34.png}
+			\caption{Фильтрация через свёртку}
+			\label{32:image1}
+		\end{subfigure}
+		\hfill
+		\begin{subfigure}{0.495\textwidth}
+			\includegraphics[width=\textwidth]{37.png}
+			\caption{Фильтрация через умножение}
+			\label{32:image2}
+		\end{subfigure}
+		\caption{Свёртка и частотное умножение при собственном ядре}
+		\label{32:two_images}
+	\end{figure}
+	Погрузимся детальнее в суть и посмотрим, что же происходит в частотной области (рисунки \ref{31:two_images}-\ref{32:two_images}); теорема о свёртке работает. Область логарифма модуля образа ядра возле <<0>> светлая, ярко белая, а значит, главные паттерны изображения остаются неизменными. В то же время с какой-то (малой) степенью давятся высокочастотные компоненты (<<в краях>>), а где-то посередине образуется область тёмного оттенка, то есть хорошо тушится определённый отрезок средних частот. Всё это вкупе и даёт то отфильтрованное изображение с инверсиями (которые существуют за счёт нулевого вклада рассматриваемого пикселя и обратных значений расположенных остальных), которое мы и получаем на выходе.
+
+
+	\section{Общие выводы}
+	В ходе лабораторной работы было выяснено, что фильтрация изображений в частотной области позволяет эффективно устранять периодичные шумы, проявляющиеся в виде дельта-пиков на спектре. Применение свёртки с различными ядрами показало разнообразные эффекты: гауссово и блочное размытие сглаживают изображение, но гауссов фильтр обеспечило более естественный результат. Ядра повышения резкости, выделения краёв и контрастности позволили усилить детали и структуру изображения, подчеркнуть границы объектов. Сравнение прямого и частотного подходов к свёртке подтвердило их эквивалентность, однако частотный метод с перемножением образов Фурье может быть вычислительно более выгоден для больших изображений за счёт меньшего числа совершаемых операций.
+
+	\section{Приложение}
+	\begin{lstlisting}[caption={Сохранение логарифмированного модуля Фурье-образа изображения}]
+temp_initial = imread("toedit.png");
+imshow(temp_initial, [])
+img_initial = double(temp_initial)/255;
+fourier = fftshift(fft2(img_initial));
+ab = abs(fourier);
+an = angle(fourier);
+l = log(ab+1);
+m = max(l(:));
+ul = l/m;
+imwrite(ul, "log.png");
+	\end{lstlisting}
+
+	\begin{lstlisting}[caption={Код для восстановления отфильтрованного изображения}]
+temp_out = imread("log_edited.png");
+img_out = double(temp_out)/255;
+abs_out = exp(img_out*m) - 1;
+fourier_out = abs_out.*exp(1i.*an);
+img_prepared = ifft2(ifftshift(fourier_out));
+%imwrite(img_prepared, "edited.png");
+imshow(img_prepared, []);-
+	\end{lstlisting}
+
+	\newpage
+	\begin{lstlisting}[caption={Код для исследования ядра, дающего размытие по Гауссу}]
+img = imread('1.png');
+gray_img = im2gray(img);
+gray_img = im2double(gray_img);
+
+N = 13;
+sigma = (N - 1) / 6;
+center = (N + 1) / 2;
+
+[X, Y] = meshgrid(1:N, 1:N);
+G = exp(-((X - center).^2 + (Y - center).^2) / (2 * sigma^2));
+G = G / sum(G(:));
+
+conv_img = conv2(gray_img, G, 'same');
+
+[h, w] = size(gray_img);
+[hk, wk] = size(G);
+H = fft2(gray_img, h + hk - 1, w + wk - 1);
+Gf = fft2(G, h + hk - 1, w + wk - 1);
+
+filtered = H .* Gf;
+result_fft = real(ifft2(filtered));
+start_row = floor((hk - 1) / 2) + 1;
+start_col = floor((wk - 1) / 2) + 1;
+result_fft = result_fft(start_row:start_row+h-1, start_col:start_col+w-1);
+
+fourier = fftshift(filtered);
+ab = abs(fourier);
+an = angle(fourier);
+l = log(ab+1);
+ul = l/m;
+	\end{lstlisting}
+
+		\begin{lstlisting}[caption={Код для остальных ядер (общая структура, как в предыдущем)}]
+%N = 13;
+%G = ones(N, N);
+%G = G / sum(G(:));
+
+%G = [0 -1 0; -1 5 -1; 0 -1 0];
+
+%G = [-1 -1 -1; -1 8 -1; -1 -1 -1];
+
+G = [-1 -1 -1; -1 0 -1; -1 -1 -1];
+	\end{lstlisting}
+
+\end{document}

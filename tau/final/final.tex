@@ -1,0 +1,2933 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{Курсовой проект}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{Управление перевернутым маятником}}
+\fancyfoot[L]{}
+\fancyfoot[C]{\thepage\space}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\color[gray]{0.7}\ttfamily\small,
+    stepnumber=1,
+    numbersep=8pt,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4,
+    breaklines=true
+}
+\usepackage{subcaption}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+                Научно-исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{45mm}
+		
+		\begin{center}
+			Отчет по курсовому проекту \\
+			Управление перевернутым маятником на тележке \\
+			Вариант 11
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{minipage}{.48\linewidth}
+			Выполнил студент группы R3480
+			
+			Преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.5\linewidth}
+			\begin{flushright}
+				Мовчан Игорь Евгеньевич
+				\\
+				Пашенко Артем Витальевич
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2025
+		\end{center}
+		
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\section{Построение математической модели}
+    \subsection{Вывод уравнений}
+	Рассмотрим объект управления - перевернутый маятник на тележке (представлен на рисунке \ref{fig:pendulum}). В качестве переменных состояния выберем линейную координату тележки $a$, скорость тележки $\dot{a}$, угол отклонения маятника от вертикали $\varphi$, угловую скорость маятника $\dot{\varphi}$. В качестве управляющей переменной $u$ примем горизонтальную силу, приложенную к тележке. В качестве внешнего возмущения $f$ примем вращающий момент, действующий на маятник. В качестве выходных (измеряемых) величин примем $y_1 = a$ и $y_2 = \varphi$. Будем также считать, что трение в системе отсутствует, а масса маятника равномерно распределена вдоль стержня.
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.5\textwidth]{images/pendulum.png}
+        \caption{Перевернутый маятник на тележке}
+        \label{fig:pendulum}
+    \end{figure}
+
+    Теперь выведем математическую модель перевернутого маятника на тележке. Для начала найдем координаты центра масс стержня:
+    \begin{equation}
+    x_G = a - \frac{l}{2}\sin\varphi,\quad
+    y_G = \frac{l}{2}\cos\varphi
+    \end{equation}
+
+    А также его скорости:
+    \begin{equation}
+    \dot x_G = \dot a - \frac{l}{2}\cos\varphi\,\dot\varphi,\quad
+    \dot y_G = -\frac{l}{2}\sin\varphi\,\dot\varphi
+    \end{equation}
+
+    Откуда квадрат скорости стержня:
+    \begin{equation}
+    v_G^2 = \dot x_G^2+\dot y_G^2
+    = \dot a^2 - l\cos\varphi\,\dot a\,\dot\varphi + \frac{l^2}{4}\dot\varphi^2
+    \end{equation}
+
+    Момент инерции однородного стержня через центр масс примем
+    \[
+    I_G = \frac{1}{12} m l^2
+    \]
+
+    По теореме Кёнига (аддитивность кинетической энергии):
+    \begin{equation}
+    T_{\text{стерж}} = \frac12 m v_G^2 + \frac12 I_G \dot\varphi^2
+    = \frac12 m\Big(\dot a^2 - l\cos\varphi\,\dot a\,\dot\varphi + \frac{l^2}{4}\dot\varphi^2\Big)
+    + \frac{1}{24} m l^2 \dot\varphi^2
+    \end{equation}
+
+    Сложим с кинетической энергией тележки \(T_{\text{тел}}=M\dot a^2/2\):
+    \begin{equation}
+    \begin{aligned}
+    T &= T_{\text{стерж}} + T_{\text{тел}} = \frac12 (M+m)\dot a^2 - \frac{1}{2} m l \cos\varphi\,\dot a\,\dot\varphi + \frac{1}{6} m l^2 \dot\varphi^2
+    \end{aligned}
+    \end{equation}
+
+    Потенциальная энергия стержня (ноль на уровне шарнира):
+    \begin{equation}
+    V = m g y_G = m g \frac{l}{2}\cos\varphi
+    \end{equation}
+
+    Из кинетической и потенциальной энергий получим Лагранжиан:
+    \begin{equation}
+    \mathcal{L} = T - V
+    = \frac12 (M+m)\dot a^2 - \frac{1}{2} m l \cos\varphi\,\dot a\,\dot\varphi + \frac{1}{6} m l^2 \dot\varphi^2 - m g \frac{l}{2}\cos\varphi.
+    \end{equation}
+
+    На систему действуют две силы:
+    \[
+    Q_a = u, \quad
+    Q_\varphi = f
+    \]
+
+    \textbf{Для координаты \(a\):}
+    \begin{equation}
+    \frac{d}{dt}\frac{\partial\mathcal{L}}{\partial\dot a} - \frac{\partial\mathcal{L}}{\partial a} = Q_a
+    \end{equation}
+
+    Поскольку \(\partial\mathcal{L}/\partial a=0\):
+    \begin{equation}
+    \frac{\partial\mathcal{L}}{\partial\dot a}=(M+m)\dot a - \frac{m l}{2}\cos\varphi\,\dot\varphi
+    \end{equation}
+    \begin{equation}
+    \frac{d}{dt}\frac{\partial\mathcal{L}}{\partial\dot a}=(M+m)\ddot a - \frac{m l}{2}\big(\cos\varphi\,\ddot\varphi - \sin\varphi\,\dot\varphi^2\big)
+    \end{equation}
+
+    Отсюда получаем первое уравнение:
+    \begin{equation}
+    (M+m)\ddot a - \frac{m l}{2}\cos\varphi\,\ddot\varphi + \frac{m l}{2}\sin\varphi\,\dot\varphi^{2} = u
+    \end{equation}
+
+    \textbf{Для координаты \(\varphi\):}
+    \begin{equation}
+    \frac{d}{dt}\frac{\partial\mathcal{L}}{\partial\dot\varphi} - \frac{\partial\mathcal{L}}{\partial\varphi} = Q_\varphi
+    \end{equation}
+
+    Вычисления:
+    \begin{equation}
+    \frac{\partial\mathcal{L}}{\partial\dot\varphi} = - \frac{m l}{2}\cos\varphi\,\dot a + \frac{m l^2}{3}\dot\varphi
+    \end{equation}
+    \begin{equation}
+    \frac{d}{dt}\frac{\partial\mathcal{L}}{\partial\dot\varphi}
+    = \frac{m l}{2}\big(\sin\varphi\,\dot\varphi\,\dot a - \cos\varphi\,\ddot a\big) + \frac{m l^2}{3}\ddot\varphi
+    \end{equation}
+    \begin{equation}
+    \frac{\partial\mathcal{L}}{\partial\varphi} = \frac{m l}{2}\sin\varphi\,\dot\varphi\,\dot a + \frac{m g l}{2}\sin\varphi
+    \end{equation}
+
+    Подставляя и сокращая, получаем второе уравнение:
+    \begin{equation}
+    \frac{m l^2}{3}\,\ddot\varphi - \frac{m l}{2}\cos\varphi\,\ddot a - \frac{m g l}{2}\sin\varphi = f.
+    \end{equation}
+
+    Запишем полученную систему в матричной форме:
+    \begin{equation}
+    \begin{pmatrix}
+    M+m & -\dfrac{m l}{2}\cos\varphi\\[6pt]
+    -\dfrac{m l}{2}\cos\varphi & \dfrac{m l^2}{3}
+    \end{pmatrix}
+    \begin{pmatrix}\ddot a\\[6pt]\ddot\varphi\end{pmatrix}
+    =
+    \begin{pmatrix}
+    u - \dfrac{m l}{2}\sin\varphi\,\dot\varphi^{2}\\[8pt]
+    f + \dfrac{m g l}{2}\sin\varphi
+    \end{pmatrix}
+    \end{equation}
+
+    Из обратной матрицы получаем явные выражения:
+    \begin{equation}
+    \begin{aligned}
+    \ddot a &= \dfrac{\dfrac{m l^2}{3}\Big(u - \dfrac{m l}{2}\sin\varphi\,\dot\varphi^2\Big)
+    + \dfrac{m l}{2}\cos\varphi\Big(f + \dfrac{m g l}{2}\sin\varphi\Big)}{\dfrac{m l^2}{3}\Big(M+m\Big)-\Big(\dfrac{m l}{2}\cos\varphi\Big)^2}\\[8pt]
+    \ddot\varphi &= \dfrac{\dfrac{m l}{2}\cos\varphi\Big(u - \dfrac{m l}{2}\sin\varphi\,\dot\varphi^2\Big)
+    + (M+m)\Big(f + \dfrac{m g l}{2}\sin\varphi\Big)}{\dfrac{m l^2}{3}\Big(M+m\Big)-\Big(\dfrac{m l}{2}\cos\varphi\Big)^2}
+    \end{aligned}
+    \end{equation}
+
+
+    Вспомним, что $x_1 = a$, $x_2 = \dot a$, $x_3 = \varphi$, $x_4 = \dot\varphi$. Тогда математическую модель можно записать в виде системы уравнений только с производными первых порядков:
+    \[
+    \begin{cases}
+    \dot x_1 = x_2\\[6pt]
+    \dot x_2 = \dfrac{\dfrac{m l^2}{3}\Big(u - \dfrac{m l}{2}\sin x_3\,x_4^2\Big) + \dfrac{m l}{2}\cos x_3\Big(f + \dfrac{m g l}{2}\sin x_3\Big) }{\dfrac{m l^2}{3}\Big(M+m\Big)-\Big(\dfrac{m l}{2}\cos x_3\Big)^2}\\[14pt]
+    \dot x_3 = x_4\\[6pt]
+    \dot x_4 = \dfrac{\dfrac{m l}{2}\cos x_3\Big(u - \dfrac{m l}{2}\sin x_3\,x_4^2\Big) + (M+m)\Big(f + \dfrac{m g l}{2}\sin x_3\Big) }{\dfrac{m l^2}{3}\Big(M+m\Big)-\Big(\dfrac{m l}{2}\cos x_3\Big)^2}\\[8pt]
+    y_1 = x_1\\[6pt]
+    y_2 = x_3
+    \end{cases}
+    \]
+
+    Можно также чуть упростить, сократив на общее $m l$:
+    \begin{equation}
+    \begin{cases}
+    \dot x_1 = x_2\\[6pt]
+    \dot x_2 = \dfrac{\dfrac{l}{3}\Big(u - \dfrac{m l}{2}\sin x_3\,x_4^2\Big) + \dfrac{\cos x_3}{2}\Big(f + \dfrac{m g l}{2}\sin x_3\Big) }{\dfrac{l}{3}\Big(M+m\Big)-\dfrac{m l}{4}\cos^2 x_3}\\[14pt]
+    \dot x_3 = x_4\\[6pt]
+    \dot x_4 = \dfrac{\dfrac{m l}{2}\cos x_3\Big(u - \dfrac{m l}{2}\sin x_3\,x_4^2\Big) + (M+m)\Big(f + \dfrac{m g l}{2}\sin x_3\Big) }{\dfrac{m l^2}{3}\Big(M+m\Big)-\dfrac{m^2 l^2}{4}\cos^2 x_3}\\[8pt]
+    y_1 = x_1\\[6pt]
+    y_2 = x_3
+    \end{cases}
+    \end{equation}
+
+    Успех! Полученную модель назовем \textit{исходной} либо \textit{нелинейной}.
+    
+    \subsection{Точки равновесия}
+
+    Точки равновесия системы задаются через условие \(\dot x = 0\). Принимая вместе с этим $u\equiv0$ и $f\equiv0$ (отсутствие всякого внешнего воздействия и управления), из того, что $\dot x_1 = 0$ и $\dot x_3 = 0$, имеем:
+    \[
+    x_2 = 0 \quad\text{и}\quad x_4 = 0
+    \]
+
+    Для $\dot{x}_2=0$ и $\dot{x}_4=0$ же обнуление производных вектора состояния и воздействий даёт систему уравнений относительно $x_3$:
+    \[
+    \begin{cases}
+        \dfrac{m g l \sin x_3 \cos x_3}{4}  &= 0 \\[12pt]
+        \dfrac{(M + m) m g l \sin x_3}{2} &= 0
+    \end{cases} \quad \Longrightarrow \quad \begin{cases}
+        \sin x_3 \cos x_3 &= 0 \\
+        \sin x_3 &= 0
+    \end{cases}
+    \]
+
+    Решение целой системы есть пересечение решений приведенных выше уравнений, следовательно:
+    \[
+    \sin x_3 = 0 \quad\Longrightarrow\quad x_3 = k\pi, \quad k\in\mathbb{Z}
+    \]
+
+    На $x_1 = a$ ограничений нет, поэтому она задается произвольно.
+    
+    А значит, все точки равновесия задаются как:
+    \begin{equation}
+    \begin{cases}
+    x_1 = a = a_0 \in \mathbb{R} \\
+    x_2 = \dot a = 0 \\
+    x_3 = \varphi = k\pi, \, k\in\mathbb{Z} \\
+    x_4 = \dot\varphi = 0
+    \end{cases}
+    \end{equation}
+
+    То есть точки равновесия характеризуются тем, что тележка находится в любой произвольной позиции, скорости отсутствуют, а маятник вертикален и находится в верхнем или нижнем положениях.
+
+    \subsection{Линеаризация системы}
+    Линеаризуем уравнения около точки равновесия $(x, u, f) = 0$. Для этого воспользуемся тем, что для малых $x$ и $n \in \mathbb{N}$: $\sin x \approx x$, $\cos x \approx 1$ и $x^{n+1} \approx 0$. Из этого также следует $\cos^2 x = \dfrac{1 + \cos 2x}{2} \approx 1$ для малых $x$. В итоге получим:
+    \[
+    \begin{cases}
+        \dot x_1 = x_2\\[6pt]
+        \dot x_2 = \dfrac{\dfrac{l}{3}u + \dfrac{1}{2}\Big(f + \dfrac{m g l}{2} x_3\Big) }{\dfrac{l}{3}\Big(M+m\Big)-\dfrac{m l}{4}}\\[14pt]
+        \dot x_3 = x_4\\[6pt]
+        \dot x_4 = \dfrac{\dfrac{m l}{2}u + (M+m)\Big(f + \dfrac{m g l}{2}x_3\Big) }{\dfrac{m l^2}{3}\Big(M+m\Big)-\dfrac{m^2 l^2}{4}}
+    \end{cases}
+    \]
+
+    Упростим полученную систему, домножив числитель и знаменатель на общее $12$ и приведя подобные:
+    \[
+    \begin{cases}
+            \dot x_1 = x_2\\[6pt]
+            \dot x_2 = \dfrac{4ul + 6f + 3 m g l x_3 }{(4M+m)l}\\[14pt]
+            \dot x_3 = x_4\\[6pt]
+            \dot x_4 = \dfrac{6 m l u + (M+m)(12 f + 6m g l x_3) }{m l^2(4M+m)}
+    \end{cases}
+    \]
+
+    Откуда:
+    \begin{equation}
+    \begin{cases}
+            \dot x_1 = x_2\\[6pt]
+            \dot x_2 = \dfrac{4}{4M+m}u + \dfrac{6}{l(4M+m)}f + \dfrac{3 m g}{4M+m} x_3\\[14pt]
+            \dot x_3 = x_4\\[6pt]
+            \dot x_4 = \dfrac{6}{l(4M+m)}u + \dfrac{12(M+m)}{ml^2(4M+m)}f + \dfrac{6 g (M+m)}{l(4M+m)} x_3
+    \end{cases}
+    \end{equation}
+
+    Получим \textit{линейную} или \textit{линеаризованную} модель системы:
+    \begin{equation}
+    \begin{cases}
+    \dot x = Ax + Bu + Df \\
+    y = Cx
+    \end{cases}
+    \end{equation}
+    
+    где $A$, $B$, $C$, $D$ – постоянные матрицы, зависящие от значений постоянных $M$, $m$, $g$, $l$.
+    Здесь $x = (x_1, \dots , x_4)$ – совокупный вектор состояния, $y = (y_1, y_2)$ – вектор измеряемых
+    величин.
+
+    В выкладках выше уже разделили на составляющие, поэтому:
+    \[
+    A = \begin{bmatrix}
+        0 & 1 & 0 & 0 \\
+        0 & 0 & \dfrac{3 m g}{4M+m} & 0 \\
+        0 & 0 & 0 & 1 \\
+        0 & 0 & \dfrac{6 g (M+m)}{l(4M+m)} & 0
+    \end{bmatrix}, \quad
+    B = \begin{bmatrix}
+        0 \\
+        \dfrac{4}{4M+m} \\
+        0 \\
+        \dfrac{6}{l(4M+m)}
+    \end{bmatrix}
+    \]
+    \[
+        D = \begin{bmatrix}
+            0 \\
+            \dfrac{6}{l(4M+m)} \\
+            0 \\
+            \dfrac{12(M+m)}{ml^2(4M+m)}
+        \end{bmatrix}, \quad
+        C = \begin{bmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 0 & 1 & 0
+        \end{bmatrix}
+    \]
+
+    \subsection{Выбор исходных данных}
+    Для получения значений массы тележки $M$, массы маятника $m$ и длины стержня $l$ выполним код при номере варианта $n = 11$:
+    \begin{lstlisting}[language=Matlab]
+rng(n, "philox");
+M = randi([100000 1000000]) / 1000 / sqrt(2);
+m = randi([1000 10000]) / 1000 * sqrt(3);
+l = randi([100 1000]) / sqrt(5) / 100;
+    \end{lstlisting}
+
+    Таким образом, в приближенном виде получаем (единицами измерения пусть будут килограммы и метры):
+    \[
+        M \approx 630.88 \text{ кг}, \quad m \approx 2.3642 \text{ кг}, \quad l \approx 1.7039 \text{ м}
+    \]
+
+    Также примем ускорение свободного падения $g = 9.81$ м/с$^2$.
+
+    \section{Анализ математической модели}
+    \subsection{Анализ матриц}
+    Проведем анализ устойчивости линеаризованной системы
+    \[
+    \begin{cases}
+        \dot x = Ax + Bu + Df \\
+        y = Cx
+    \end{cases}
+    \]
+
+    с матрицами:
+    \[
+    A = \begin{bmatrix}
+        0 & 1 & 0 & 0 \\
+        0 & 0 & \dfrac{3 m g}{4M+m} & 0 \\
+        0 & 0 & 0 & 1 \\
+        0 & 0 & \dfrac{6 g (M+m)}{l(4M+m)} & 0
+    \end{bmatrix}, \quad
+    B = \begin{bmatrix}
+        0 \\
+        \dfrac{4}{4M+m} \\
+        0 \\
+        \dfrac{6}{l(4M+m)}
+    \end{bmatrix}
+    \]
+    \[
+        D = \begin{bmatrix}
+            0 \\
+            \dfrac{6}{l(4M+m)} \\
+            0 \\
+            \dfrac{12(M+m)}{ml^2(4M+m)}
+        \end{bmatrix}, \quad
+        C = \begin{bmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 0 & 1 & 0
+        \end{bmatrix}
+    \]
+
+    Для этого сначала найдем собственные числа матрицы $A$:
+    \[
+    \lambda_1 = \lambda_2 = 0, \quad \lambda_3 = 2.9429, \quad \lambda_4 = -2.9429
+    \]
+
+    И соответствующие им собственные векторы:
+    \[
+    v_1 = \begin{bmatrix}
+        1 \\
+        0 \\
+        0 \\
+        0
+    \end{bmatrix}, \quad v_2 = \begin{bmatrix}
+        -1 \\
+        0 \\
+        0 \\
+        0
+    \end{bmatrix}, \quad v_3 = \begin{bmatrix}
+        0.001 \\
+        0.003 \\
+        0.3217 \\
+        0.9468
+    \end{bmatrix}, \quad v_4 = \begin{bmatrix}
+        -0.001 \\
+        0.003 \\
+        -0.3217 \\
+        0.9468
+    \end{bmatrix}
+    \]
+
+    Таким образом, имеется одно положительное собственное число, а значит, линеаризованная система является неустойчивой. В таком случае исходная нелинейная система тем более неустойчива.
+
+    Проанализируем теперь управляемость системы. Сделаем это с помощью критерия Калмана, вычислив матрицу управляемости:
+    \begin{equation}
+    U = \begin{bmatrix}
+        B & AB & A^2B & A^3B
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        0 & 0.0016 & 0 & 0 \\
+        0.0016 & 0 & 0 & 0 \\
+        0 & 0.0014 & 0 & 0.0121 \\
+        0.0014 & 0 & 0.0121 & 0
+    \end{bmatrix}
+    \end{equation}
+
+    Откуда:
+    \[
+    \text{rank}(U) = 4
+    \]
+
+    Ранг найденной матрицы равен размерности вектора состояния, а значит, система полностью управляема, соответственно, и стабилизируема, так как не оказалось неуправляемых мод (направлений).
+
+    Проверим и наблюдаемость системы. Выполним это также с помощью критерия Калмана с вычислением матрицы наблюдаемости:
+    \begin{equation}
+        V = \begin{bmatrix}
+            C \\ CA \\ CA^2 \\ CA^3
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 0 & 1 & 0 \\
+            0 & 1 & 0 & 0 \\
+            0 & 0 & 0 & 1 \\
+            0 & 0 & 0.0275 & 0 \\
+            0 & 0 & 8.6604 & 0 \\
+            0 & 0 & 0 & 0.0275 \\
+            0 & 0 & 0 & 8.6604
+        \end{bmatrix}
+    \end{equation}
+
+    Откуда:
+    \[
+    \text{rank}(V) = 4
+    \]
+
+    Ранг матрицы наблюдаемости равен размерности вектора состояния, а значит, система полностью наблюдаема, следовательно, и обнаруживаема, так как полный ранг $V$ говорит об отсутствии ненаблюдаемых направлений (мод) у системы.
+
+    Таким образом, хоть линеаризованная модель оказалась неустойчивой, но над ней можно строить регуляторы и наблюдатели (есть полная управляемость и наблюдаемость), которые позволят, например, стабилизировать систему в окрестности точек равновесия и оценить ее вектор состояния в случае отсутствия прямых измерений.
+
+    Найдем и проанализируем ещё и передаточные матрицы системы:
+    \begin{equation}
+    W_{u \to y}(s) = C(sI - A)^{-1}B, \quad W_{f \to y}(s) = C(sI - A)^{-1}D
+    \end{equation}
+
+    Откуда:
+    \[
+    W_{u \to y}(s) = \begin{bmatrix}
+        \dfrac{0.002848 s^2 - 0.01536}{s^2(s^2 - 5.525)} \\[15pt]
+        \dfrac{0.001566}{s^2 - 5.525} 
+    \end{bmatrix}, \quad W_{f \to y}(s) = \begin{bmatrix}
+        \dfrac{0.001566}{s^2 - 5.525} \\[15pt]
+        \dfrac{0.03632}{s^2 - 5.525}
+    \end{bmatrix}
+    \]
+
+    Передаточная матрица $W_{u \to y}(s)$ отражает динамическое влияние управляющего воздействия на ее выход — положение тележки и угол отклонения маятника, так как $y = Cx = (x_1, x_3)$. Каждый элемент этой матрицы представляет собой передаточную функцию от управления к одной из выходных координат, тем самым описывая, как управление влияет на соответствующую переменную.
+
+    Аналогично, матрица $W_{f \to y}(s)$ характеризует влияние внешнего возмущения на положение тележки и угол отклонения маятника.
+
+    \textbf{Начнём с $W_{u \to y}(s)$.}
+
+    Рассмотрим первый элемент передаточной матрицы:
+    \[
+    W_{u \to y} (1, 1) = \dfrac{0.002848 s^2 - 0.01536}{s^2(s^2 - 5.525)}
+    \]
+
+    Его динамический порядок равен 4, относительный - равен 2. Нули - $\{\pm 2.9387\}$, полюса - $\{0,\, 0,\, \pm2.9429\}$.
+    
+    Соответственно, управляющее воздействие доходит до координаты тележки не сразу, а через инерцию и связь тележки с маятником.
+    
+    Также наличие двух нулевых полюсов означает, что на тележку не действует сил трения, следовательно, в отсутствие внешних сил тележка сохраняет скорость - со временем без стабилизации тележка будет уезжать в сторону.
+
+    Близкие значения полюсов и нулей приводят к ослаблению влияния управления на положение тележки вблизи этих частот.
+
+    Действительный положительный полюс также говорит о неустойчивости системы, как минимум, вблизи точек равновесия.
+
+    Рассмотрим второй элемент передаточной матрицы:
+    \[
+    W_{u \to y} (2, 1) = \dfrac{0.001566}{s^2 - 5.525}
+    \]
+
+    Динамический и относительный порядки равны 2. Нули отсутствуют, так как числитель является константой, полюса - $\{\pm2.9429\}$.
+
+    Таким образом, влияние управления на угол происходит с задержкой, связанной с инерцией и связью тележки с маятником.
+
+    Положительный полюс, как и прежде, говорит о неустойчивости положения маятника вблизи точек равновесия.
+
+    \textbf{Перейдём ко второй передаточной матрице $W_{f \to y}(s)$.}
+    
+    Рассмотрим первый элемент:
+    \[
+    W_{f \to y} (1, 1) = \dfrac{0.001566}{s^2 - 5.525}
+    \]
+
+    Динамический и относительный порядки равны 2. Нули отсутствуют, полюса - $\{\pm2.9429\}$.
+
+    В итоге внешнее возмущение $f$ действует на координату тележки через динамику маятника, обладающую инерционным характером второго порядка. Наличие положительного полюса отражает неустойчивость системы при действии возмущений.
+    
+    Рассмотрим второй элемент передаточной матрицы:
+    \[
+    W_{f \to y} (2, 1) = \dfrac{0.03632}{s^2 - 5.525}
+    \]
+
+    Динамический и относительный порядки равны 2. Нули отсутствуют, полюса - $\{\pm2.9429\}$.
+
+    Числитель данного элемента значительно больше, чем у предыдущего, что указывает на более сильное влияние возмущения $f$ на угол отклонения маятника по сравнению с перемещением тележки. Система остается неустойчивой, существует инерция. 
+
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution1_x_1_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution1_x_1.png}
+        \end{subfigure}
+        \caption{\centering$x_1(t)=a(t)$ с начальным состоянием $x_0 = \begin{bmatrix}
+            0.001 & 0.001 & 0 & 0
+        \end{bmatrix}^T$}
+        \label{fig:solution1_x_1}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution1_x_2_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution1_x_2.png}
+        \end{subfigure}
+        \caption{\centering$x_2(t)=\dot{a}(t)$ с начальным состоянием $x_0 = \begin{bmatrix}
+            0.001 & 0.001 & 0 & 0
+        \end{bmatrix}^T$ }
+        \label{fig:solution1_x_2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution1_x_3_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution1_x_3.png}
+        \end{subfigure}
+        \caption{\centering$x_3(t)=\varphi(t)$ с начальным состоянием $x_0 = \begin{bmatrix}
+            0.001 & 0.001 & 0 & 0
+        \end{bmatrix}^T$}
+        \label{fig:solution1_x_3}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution1_x_4_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution1_x_4.png}
+        \end{subfigure}
+        \caption{\centering$x_4(t)=\dot{\varphi}(t)$ с начальным состоянием $x_0 = \begin{bmatrix}
+            0.001 & 0.001 & 0 & 0
+        \end{bmatrix}^T$}
+        \label{fig:solution1_x_4}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution2_x_1_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution2_x_1.png}
+        \end{subfigure}
+        \caption{\centering$x_1(t)=a(t)$ с начальным состоянием $x_0 = \begin{bmatrix}
+            0 & 0 & 0.001 & 0.001
+        \end{bmatrix}^T$}
+        \label{fig:solution2_x_1}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution2_x_2_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution2_x_2.png}
+        \end{subfigure}
+        \caption{\centering$x_2(t)=\dot{a}(t)$ с начальным состоянием $x_0 = \begin{bmatrix}
+            0 & 0 & 0.001 & 0.001
+        \end{bmatrix}^T$ }
+        \label{fig:solution2_x_2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution2_x_3_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution2_x_3.png}
+        \end{subfigure}
+        \caption{\centering$x_3(t)=\varphi(t)$ с начальным состоянием $x_0 = \begin{bmatrix}
+            0 & 0 & 0.001 & 0.001
+        \end{bmatrix}^T$}
+        \label{fig:solution2_x_3}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution2_x_4_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution2_x_4.png}
+        \end{subfigure}
+        \caption{\centering$x_4(t)=\dot{\varphi}(t)$ с начальным состоянием $x_0 = \begin{bmatrix}
+            0 & 0 & 0.001 & 0.001
+        \end{bmatrix}^T$}
+        \label{fig:solution2_x_4}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution3_x_1_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution3_x_1.png}
+        \end{subfigure}
+        \caption{\centering$x_1(t)=a(t)$ с состоянием $x_0 = \begin{bmatrix}
+            -0.001 & -0.001 & -0.001 & -0.001
+        \end{bmatrix}^T$}
+        \label{fig:solution3_x_1}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution3_x_2_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution3_x_2.png}
+        \end{subfigure}
+        \caption{\centering$x_2(t)=\dot{a}(t)$ с состоянием $x_0 = \begin{bmatrix}
+            -0.001 & -0.001 & -0.001 & -0.001
+        \end{bmatrix}^T$ }
+        \label{fig:solution3_x_2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution3_x_3_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution3_x_3.png}
+        \end{subfigure}
+        \caption{\centering$x_3(t)=\varphi(t)$ с состоянием $x_0 = \begin{bmatrix}
+            -0.001 & -0.001 & -0.001 & -0.001
+        \end{bmatrix}^T$}
+        \label{fig:solution3_x_3}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution3_x_4_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution3_x_4.png}
+        \end{subfigure}
+        \caption{\centering$x_4(t)=\dot{\varphi}(t)$ с состоянием $x_0 = \begin{bmatrix}
+            -0.001 & -0.001 & -0.001 & -0.001
+        \end{bmatrix}^T$}
+        \label{fig:solution3_x_4}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution4_x_1_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution4_x_1.png}
+        \end{subfigure}
+        \caption{\centering$x_1(t)=a(t)$ с состоянием $x_0 = \begin{bmatrix}
+            -0.005 & -0.003 & 0.007 & -0.002
+        \end{bmatrix}^T$}
+        \label{fig:solution4_x_1}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution4_x_2_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution4_x_2.png}
+        \end{subfigure}
+        \caption{\centering$x_2(t)=\dot{a}(t)$ с состоянием $x_0 = \begin{bmatrix}
+            -0.005 & -0.003 & 0.007 & -0.002
+        \end{bmatrix}^T$ }
+        \label{fig:solution4_x_2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution4_x_3_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution4_x_3.png}
+        \end{subfigure}
+        \caption{\centering$x_3(t)=\varphi(t)$ с состоянием $x_0 = \begin{bmatrix}
+            -0.005 & -0.003 & 0.007 & -0.002
+        \end{bmatrix}^T$}
+        \label{fig:solution4_x_3}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution4_x_4_1sec.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/solution4_x_4.png}
+        \end{subfigure}
+        \caption{\centering$x_4(t)=\dot{\varphi}(t)$ с состоянием $x_0 = \begin{bmatrix}
+            -0.005 & -0.003 & 0.007 & -0.002
+        \end{bmatrix}^T$}
+        \label{fig:solution4_x_4}
+    \end{figure}
+
+    \subsection{Моделирование}
+    Выполним моделирование свободного движения линеаризованного и нелинейного объекта при малых начальных условиях.
+
+    На рисунках \ref{fig:solution1_x_1} - \ref{fig:solution4_x_4} можно наблюдать графики свободного движения систем при различных начальных условиях, несильно отличающихся от нуля, при малом и большом времени моделирования.
+
+    Таким образом, линеаризованная система прекрасно приближает исходную в окрестности точек равновесия при малом времени моделирования. При увеличении последнего наблюдаются серьезные отклонения, так как из-за неустойчивости системы со временем происходит отдаление от точек равновесия.
+
+    Также можно заключить, что свободное движение тележки никак не влияет на движение маятника. А вот обратное не работает - маятник оказывает сильное влияние на движение тележки.
+
+    Кроме того, свободное движение линеаризованной системы полностью описывается линейно-порожденными функциями (оно и логично - она ведь линейна). В исходной же системе наблюдаются более сложные движения, присутствуют и некоторые колебания.
+    
+    \newpage
+    \section{Стабилизация: модальное управление}
+    \subsection{Синтез регулятора по состоянию}
+    Полученный объект управления оказался неустойчивым, поэтому актуальной становится задача стабилизации. Для её решения используем модальное управление и статический регулятор:
+    \begin{equation}
+        u = Kx
+    \end{equation}
+
+    Все расчеты будем основывать на линеаризованной модели, а применять их к нелинейной (исходной) системе, пытаясь этим способом решить основную поставленную задачу стабилизации объекта.
+
+    Итак, имеем линеаризованную систему:
+    \[
+    \begin{cases}
+        \dot x = Ax + Bu + Df \\
+        y = Cx
+    \end{cases}
+    \]
+
+    с матрицами:
+    \[
+    A = \begin{bmatrix}
+        0 & 1 & 0 & 0 \\
+        0 & 0 & \dfrac{3 m g}{4M+m} & 0 \\
+        0 & 0 & 0 & 1 \\
+        0 & 0 & \dfrac{6 g (M+m)}{l(4M+m)} & 0
+    \end{bmatrix}, \quad
+    B = \begin{bmatrix}
+        0 \\
+        \dfrac{4}{4M+m} \\
+        0 \\
+        \dfrac{6}{l(4M+m)}
+    \end{bmatrix}
+    \]
+    \[
+        D = \begin{bmatrix}
+            0 \\
+            \dfrac{6}{l(4M+m)} \\
+            0 \\
+            \dfrac{12(M+m)}{ml^2(4M+m)}
+        \end{bmatrix}, \quad
+        C = \begin{bmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 0 & 1 & 0
+        \end{bmatrix}
+    \]
+
+    Для нахождения матрицы обратной связи регулятора будем решать уравнение Сильвестра, а после находить $K$:
+    \begin{equation}
+    \begin{cases}
+        AP - PG = BY \\
+        K = -Y P^{-1}
+    \end{cases}
+    \end{equation}
+
+    Напомним условия существования единственного обратимого решения $P$ ($\sigma$ - спектр матрицы):
+    \begin{equation}
+        \begin{cases}
+            \sigma(A) \cap \sigma(G) = \varnothing \\
+            (A, B) - \text{управляемая пара} \\
+            (Y, G) - \text{наблюдаемая пара}
+        \end{cases}
+    \end{equation}
+
+    Зададимся матрицами $G$ и $Y$:
+    \[
+        G = \begin{bmatrix}
+            -1 & 0 & 0 & 0 \\
+            0 & -2 & 0 & 0 \\
+            0 & 0 & -3 & 0 \\
+            0 & 0 & 0 & -4
+        \end{bmatrix}, \quad
+        Y = \begin{bmatrix}
+            1 & 1 & 1 & 1
+        \end{bmatrix}
+    \]
+
+    Таким образом, $\sigma(G) = \{-1, -2, -3, -4\}$.
+
+    С помощью введенных матриц получим $K$ обратной связи:
+    \[
+        K= \begin{bmatrix}
+            1754.8677 & 3655.9743 & -33311.0953 & -11325.9253
+        \end{bmatrix}
+    \]
+
+    Теперь исследуем работоспособность синтезированного регулятора на нелинейной модели с различными начальными условиями в отсутствие внешних возмущений $f = 0$.
+    
+    Итак, примем следующие начальные условия:
+    \[
+        x_{0a} = \begin{bmatrix}
+            0.01 & 0 & 0 & 0
+        \end{bmatrix}^T, \quad x_{0\dot{a}} = \begin{bmatrix}
+            0 & 0.01 & 0 & 0
+        \end{bmatrix}^T
+    \]
+    \[
+        x_{0\varphi} = \begin{bmatrix}
+            0 & 0 & 0.01 & 0
+        \end{bmatrix}^T, \quad x_{0\dot{\varphi}} = \begin{bmatrix}
+            0 & 0 & 0 & 0.01
+        \end{bmatrix}^T
+    \]
+
+    А также <<ломающие>> начальные условия, при которых регулятор уже не справляется со стабилизацией:
+    \[
+        x'_{0a} = \begin{bmatrix}
+            20 & 0 & 0 & 0
+        \end{bmatrix}^T, \quad x'_{0\dot{a}} = \begin{bmatrix}
+            0 & 9 & 0 & 0
+        \end{bmatrix}^T
+    \]
+    \[
+        x'_{0\varphi} = \begin{bmatrix}
+            0 & 0 & 1.1 & 0
+        \end{bmatrix}^T, \quad x'_{0\dot{\varphi}} = \begin{bmatrix}
+            0 & 0 & 0 & 6
+        \end{bmatrix}^T
+    \]
+
+    Выполним моделирование. На рисунках \ref{fig:third_part_reg_sost_a} - \ref{fig:third_part_reg_sost_dot_phi_broken} можно наблюдать состояния нелинейной модели при различных начальных условиях и выбранном регуляторе.
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_a.png}
+        \caption{Состояния нелинейной модели при $x_{0a} = \begin{bmatrix}0.01 & 0 & 0 & 0\end{bmatrix}^T$}
+        \label{fig:third_part_reg_sost_a}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_a_broken.png}
+        \caption{Состояния нелинейной модели при ломающем $x'_{0a} = \begin{bmatrix}20 & 0 & 0 & 0\end{bmatrix}^T$}
+        \label{fig:third_part_reg_sost_a_broken}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_dot_a.png}
+        \caption{Состояния нелинейной модели при $x_{0\dot{a}} = \begin{bmatrix}0 & 0.01 & 0 & 0\end{bmatrix}^T$}
+        \label{fig:third_part_reg_sost_dot_a}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_dot_a_broken.png}
+        \caption{Состояния нелинейной модели при ломающем $x'_{0\dot{a}} = \begin{bmatrix}0 & 9 & 0 & 0\end{bmatrix}^T$}
+        \label{fig:third_part_reg_sost_dot_a_broken}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_phi.png}
+        \caption{Состояния нелинейной модели при $x_{0\varphi} = \begin{bmatrix}0 & 0 & 0.01 & 0\end{bmatrix}^T$}
+        \label{fig:third_part_reg_sost_phi}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_phi_broken.png}
+        \caption{Состояния нелинейной модели при ломающем $x'_{0\varphi} = \begin{bmatrix}0 & 0 & 1.1 & 0\end{bmatrix}^T$}
+        \label{fig:third_part_reg_sost_phi_broken}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_dot_phi.png}
+        \caption{Состояния нелинейной модели при $x_{0\dot{\varphi}} = \begin{bmatrix}0 & 0 & 0 & 0.01\end{bmatrix}^T$}
+        \label{fig:third_part_reg_sost_dot_phi}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_dot_phi_broken.png}
+        \caption{Состояния нелинейной модели при ломающем $x'_{0\dot{\varphi}} = \begin{bmatrix}0 & 0 & 0 & 6\end{bmatrix}^T$}
+        \label{fig:third_part_reg_sost_dot_phi_broken}
+    \end{figure}
+
+    Можем видеть, что регулятор успешно справляется со стабилизацией системы при малых начальных условиях, однако уже недостаточно силен при больших - там вектор состояния системы стремится к бесконечности при увеличении времени. Наиболее это ощутимо для угла $\varphi$ - для него синтезированный регулятор перестает работать уже на значении начального угла $\varphi_0 = 1.1$. Понятно, что полученное связано с тем, что все вычисления производились на основе линеаризованной модели, которая является хорошим приближением нелинейной модели только в окрестности точек равновесия.
+
+    \subsection{Исследование регулятора по состоянию}
+    Теперь посмотрим, можно ли каким-то образом качественно улучшить регулятор. Для этого исследуем влияние выбранных собственных чисел на получающиеся процессы для нелинейной системы.
+
+    Сперва зафиксируем начальные условия системы
+    \[
+        x_0 = \begin{bmatrix}
+            -0.01 & -0.2 & 0.3 & -0.15
+        \end{bmatrix}^T
+    \]
+
+    После чего зададимся различными матрицами $G$, характеризующими собственные числа замкнутой системы:
+    \[
+    G_{r1} = \begin{bmatrix}
+        -0.25 & 0 & 0 & 0 \\
+        0 & -0.5 & 0 & 0 \\
+        0 & 0 & -0.75 & 0 \\
+        0 & 0 & 0 & -1
+    \end{bmatrix}, \quad
+    G_{r2} = \begin{bmatrix}
+        -2 & 1 & 0 & 0 \\
+        0 & -2 & 0 & 0 \\
+        0 & 0 & -3 & 1 \\
+        0 & 0 & 0 & -3
+    \end{bmatrix}
+    \]
+    \[
+    G_{r3} = \begin{bmatrix}
+        -2 & 4 & 0 & 0 \\
+        -4 & -2 & 0 & 0 \\
+        0 & 0 & -3 & 4 \\
+        0 & 0 & -4 & -3
+    \end{bmatrix}, \quad
+    G_{r4} = \begin{bmatrix}
+        -4 & 0 & 0 & 0 \\
+        0 & -6 & 0 & 0 \\
+        0 & 0 & -8 & 0 \\
+        0 & 0 & 0 & -10
+    \end{bmatrix}
+    \]
+
+    Таким образом, хотим получить следующие спектры:
+    \[
+        \sigma(G_{r1}) = \{-0.25, -0.5, -0.75, -1\}, \quad \sigma(G_{r2}) = \{-2, -2, -3, -3\}
+    \]
+    \[
+        \sigma(G_{r3}) = \{-2\pm 4i, -3 \pm 4i\}, \quad \sigma(G_{r4}) = \{-4, -6, -8, -10\}
+    \]
+
+    Также зададимся матрицей $Y$:
+    \[
+        Y = \begin{bmatrix}
+            1 & 1 & 1 & 1
+        \end{bmatrix}
+    \]
+
+    С помощью введенных матриц получим $K$ обратной связи с помощью уже введенного уравнения Сильвестра для регулятора:
+    \[
+        K_1 = \begin{bmatrix}
+            6.8550 & 57.1246 & -7789.0109 & -1858.1445
+        \end{bmatrix}
+    \]
+    \[
+        K_2 = \begin{bmatrix}
+            2632.3015 & 4387.1692 & -35742.3965 & -12156.5060
+        \end{bmatrix}
+    \]
+    \[
+        K_3 = \begin{bmatrix}
+            36559.7434 & 16086.2871 & -97235.0116 & -25445.7977
+        \end{bmatrix}
+    \]
+    \[
+        K_4 = \begin{bmatrix}
+            140389.4148 & 90083.2079 & -369397.4406 & -122412.006
+        \end{bmatrix}
+    \]
+
+    Выполним моделирование. На рисунках \ref{fig:third_part_reg_sost_an_1_u} - \ref{fig:third_part_reg_sost_an_4} можно наблюдать состояния нелинейной модели и управления при различных матрицах $G$ и получающихся при этом регуляторах.
+
+    Проведем анализ полученных процессов. Для этого найдем максимальные отклонения маятника от вертикали:
+    \[
+        \varphi_{1max} = 0.3, \quad \varphi_{2max} = 0.3, \quad \varphi_{3max} = 0.4301, \quad \varphi_{4max} = 0.3465
+    \]
+
+    Максимальные горизонтальные смещения тележки:
+    \[
+        a_{1max} = 7.5503, \quad a_{2max} = 0.8904, \quad a_{3max} = 0.9119, \quad a_{4max} = 0.7933
+    \]
+
+    А также максимальные управляющие воздействия:
+    \[
+        u_{1max} = 2069.5, \quad u_{2max} = 9803, \quad u_{3max} = 28936, \quad u_{4max} = 111878
+    \]
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_an_1_u.png}
+        \caption{График управления при $\sigma(G_{r1}) = \{-0.25, -0.5, -0.75, -1\}$}
+        \label{fig:third_part_reg_sost_an_1_u}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_an_1.png}
+        \caption{График состояния при $\sigma(G_{r1}) = \{-0.25, -0.5, -0.75, -1\}$}
+        \label{fig:third_part_reg_sost_an_1}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_an_2_u.png}
+        \caption{График управления при $\sigma(G_{r2}) = \{-2, -2, -3, -3\}$}
+        \label{fig:third_part_reg_sost_an_2_u}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_an_2.png}
+        \caption{График состояния нелинейной модели при $\sigma(G_{r2}) = \{-2, -2, -3, -3\}$}
+        \label{fig:third_part_reg_sost_an_2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_an_3_u.png}
+        \caption{График управления при $\sigma(G_{r3}) = \{-2\pm 4i, -3 \pm 4i\}$}
+        \label{fig:third_part_reg_sost_an_3_u}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_an_3.png}
+        \caption{График состояния нелинейной модели при $\sigma(G_{r3}) = \{-2\pm 4i, -3 \pm 4i\}$}
+        \label{fig:third_part_reg_sost_an_3}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_an_4_u.png}
+        \caption{График управления при $\sigma(G_{r4}) = \{-4, -6, -8, -10\}$}
+        \label{fig:third_part_reg_sost_an_4_u}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/third_part_reg_sost_an_4.png}
+        \caption{График состояния нелинейной модели при $\sigma(G_{r4}) = \{-4, -6, -8, -10\}$}
+        \label{fig:third_part_reg_sost_an_4}
+    \end{figure}
+
+    Можем заключить, что более отдаленные от мнимой оси собственные числа требуют больших по величине управляющих воздействий, однако при этом процессы стабилизации происходят в разы быстрее, а величина максимального смещения тележки значительно меньше.
+    
+    Добавление комплексно-сопряженных собственных чисел позволяет добиться небольшого ускорения переходных процессов, но при этом появляются заметные колебания, увеличивается и максимальное затрачиваемое управление.
+    
+    На мой взгляд, наиболее сбалансированным по всем критериям получился второй регулятор с матрицей $K_2$ обратной связи.
+
+    \subsection{Синтез наблюдателя}
+    
+    Если доступными к измерению являются только $y_1$ и $y_2$ выходного сигнала, то для решения задачи стабилизации необходимо также добавить наблюдателей для оценки всего вектора состояния. Для начала рассмотрим наблюдатель полного порядка:
+    \begin{equation}
+        \begin{cases}
+            \dot{\hat{x}} = A\hat{x} + Bu + L(\hat{y} - y) \\
+            \hat{y} = C\hat{x}
+        \end{cases}
+    \end{equation}
+
+    Синтезируем матрицу $L$ с помощью уравнения Сильвестра:
+    \begin{equation}
+        \begin{cases}
+            G Q - Q A = Y C\\
+            L = Q^{-1}Y
+        \end{cases}
+    \end{equation}
+
+    Напомним условия существования единственного обратимого решения $Q$ ($\sigma$ - спектр матрицы):
+    \begin{equation}
+    \begin{cases}
+        \sigma(A) \cap \sigma(Q) = \varnothing \\
+        (C, A) - \text{наблюдаемая пара} \\
+        (G, Y) - \text{управляемая пара}
+    \end{cases}
+    \end{equation}
+
+    Начальные условия объекта и наблюдателя примем равными
+    \[
+        x_0 = \begin{bmatrix}
+            0.025 & 0.03 & 0.015 & -0.01
+        \end{bmatrix}^T
+    \]
+    \[
+        \hat{x}_0 = \begin{bmatrix}
+            0 & 0 & 0 & 0
+        \end{bmatrix}^T
+    \]
+    
+    Все вычисления, как и прежде, будем проводить для линеаризованной модели, но применять их к нелинейной системе, так как было получено, что в окрестности точек равновесия линейное является хорошим приближением нелинейного.
+
+    Также замкнем систему первым регулятором по состоянию из предыдущего пункта, как наиболее <<слабым>> - у наблюдателя будет больше времени оценить состояние:
+    \[
+        K = \begin{bmatrix}
+            6.8550 & 57.1246 & -7789.0109 & -1858.1445
+        \end{bmatrix}
+    \]
+
+    Итак, зададимся матрицами $G$ и $Y$:
+    \[
+        G_{L1} = \begin{bmatrix}
+            -0.75 & 0 & 0 & 0 \\
+            0 & -1.25 & 0 & 0 \\
+            0 & 0 & -1.5 & 0 \\
+            0 & 0 & 0 & -2
+        \end{bmatrix}, \quad
+        G_{L2} = \begin{bmatrix}
+            -2 & 1 & 0 & 0 \\
+            0 & -2 & 0 & 0 \\
+            0 & 0 & -4 & 1 \\
+            0 & 0 & 0 & -4
+        \end{bmatrix}
+    \]
+    \[
+        G_{L3} = \begin{bmatrix}
+            -2 & 4 & 0 & 0 \\
+            -4 & -2 & 0 & 0 \\
+            0 & 0 & -4 & 4 \\
+            0 & 0 & -4 & -4
+        \end{bmatrix}, \quad
+        G_{L4} = \begin{bmatrix}
+            -7 & 0 & 0 & 0 \\
+            0 & -7.5 & 0 & 0 \\
+            0 & 0 & -8 & 0 \\
+            0 & 0 & 0 & -8.5
+        \end{bmatrix}
+    \]
+
+    Таким образом:
+    \[
+        \sigma(G_{L1}) = \{-0.75, -1.25, -1.5, -2\}, \quad \sigma(G_{L2}) = \{-2, -2, -4, -4\}
+    \]
+    \[
+        \sigma(G_{L3}) = \{-2\pm 4i, -4 \pm 4i\}, \quad \sigma(G_{L4}) = \{-7, -7.5, -8, -8.5\}
+    \]
+
+    Также зададимся матрицей $Y$:
+    \[
+        Y = \begin{bmatrix}
+            1 & 1 \\
+            1 & 1 \\
+            1 & 1 \\
+            1 & 1
+        \end{bmatrix}
+    \]
+
+    С помощью введенных матриц получим $L$ коррекции:
+    \[
+        L_1 = \begin{bmatrix}
+            1.0509 & 1.0509  \\
+            0.2616 & 0.2616  \\
+            -6.5509 & -6.5509  \\
+            -19.8595 & -19.8595
+        \end{bmatrix}, \quad
+        L_2 = \begin{bmatrix}
+            11.0117 & 11.0117  \\
+            7.1742 & 7.1742  \\
+            -23.0117 & -23.0117  \\
+            -67.8346 & -67.8346
+        \end{bmatrix}
+    \]
+    \[
+        L_3 = \begin{bmatrix}
+            33.1113 & 33.1113  \\
+            73.3715 & 73.3715  \\
+            -45.1113 & -45.1113  \\
+            -166.0319 & -166.0319
+        \end{bmatrix}, \quad
+        L_4 = \begin{bmatrix}
+            213.0993 & 213.0993  \\
+            409.7459 & 409.7459  \\
+            -244.0993 & -244.0993  \\
+            -778.1563 & -778.1563
+        \end{bmatrix}
+    \]
+
+    Перейдем к моделированию (рисунки \ref{fig:third_part_observer1_e_1} - \ref{fig:third_part_observer4_x_4}). Зная, что регулятор и так стабилизирует систему, будем смотреть только на то, как быстро наблюдатель сойдется к состоянию нелинейной модели.
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.65\textwidth]{images/third_part_observer_e_1.png}
+        \caption{График ошибки оценок при $\sigma(G_{L1}) = \{-0.75, -1.25, -1.5, -2\}$}
+        \label{fig:third_part_observer1_e_1}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer1_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer1_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при $\sigma(G_{L1}) = \{-0.75, -1.25, -1.5, -2\}$}
+        \label{fig:third_part_observer1_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer1_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer1_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при $\sigma(G_{L1}) = \{-0.75, -1.25, -1.5, -2\}$}
+        \label{fig:third_part_observer1_x_3}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.65\textwidth]{images/third_part_observer_e_2.png}
+        \caption{График ошибки оценок при $\sigma(G_{L2}) = \{-2, -2, -4, -4\}$}
+        \label{fig:third_part_observer2_e_2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer2_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer2_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при $\sigma(G_{L2}) = \{-2, -2, -4, -4\}$}
+        \label{fig:third_part_observer2_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer2_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer2_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при $\sigma(G_{L2}) = \{-2, -2, -4, -4\}$}
+        \label{fig:third_part_observer2_x_3}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.65\textwidth]{images/third_part_observer_e_3.png}
+        \caption{График ошибки оценок при $\sigma(G_{L3}) = \{-2\pm 4i, -4 \pm 4i\}$}
+        \label{fig:third_part_observer3_e_3}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer3_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer3_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при $\sigma(G_{L3}) = \{-2\pm 4i, -4 \pm 4i\}$}
+        \label{fig:third_part_observer3_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer3_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer3_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при $\sigma(G_{L3}) = \{-2\pm 4i, -4 \pm 4i\}$}
+        \label{fig:third_part_observer3_x_4}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.65\textwidth]{images/third_part_observer_e_4.png}
+        \caption{График ошибки оценок при $\sigma(G_{L4}) = \{-7, -7.5, -8, -8.5\}$}
+        \label{fig:third_part_observer4_e_4}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer4_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer4_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при $\sigma(G_{L4}) = \{-7, -7.5, -8, -8.5\}$}
+        \label{fig:third_part_observer4_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer4_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer4_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при $\sigma(G_{L4}) = \{-7, -7.5, -8, -8.5\}$}
+        \label{fig:third_part_observer4_x_4}
+    \end{figure}
+
+    Можем видеть, что качество сходимости наблюдателей прямо зависит от выбранных спектров. При отдалении собственных чисел от мнимой оси оценка сходится быстрее, однако и начальная ошибка становится значительней.
+
+    Добавление комплексно-сопряженных собственных чисел также привело к большим колебаниям в наблюдателе и ошибке - время сходимости при этом даже увеличилось.
+
+    Исследуем и наблюдатель пониженной размерности, так как измерения $y_1 = x_1$ и $y_2 = x_3$ снимаются нами напрямую:
+    \begin{equation}
+        \begin{cases}
+            \hat{z} = G\hat{z} - Y y + QBu \\
+            \hat{x} = \begin{bmatrix}
+                C \\
+                Q
+            \end{bmatrix}^{-1}\begin{bmatrix}
+                Cx \\
+                \hat{z}
+            \end{bmatrix}
+        \end{cases}
+    \end{equation}
+
+    Будем решать уравнение для $Q$:
+    \begin{equation}
+        G Q - Q A = Y C
+    \end{equation}
+
+    Зададимся желаемыми матрицами спектров и $Y$:
+    \[
+        G_{Q1} = \begin{bmatrix}
+            -0.5 & 0 \\
+            0 & -0.75
+        \end{bmatrix}, \quad
+        G_{Q2} = \begin{bmatrix}
+            -3 & 0 \\
+            0 & -4
+        \end{bmatrix}, \quad
+        Y = \begin{bmatrix}
+            -1 & 1 \\
+            1 & 0
+        \end{bmatrix}
+    \]
+
+    В итоге желаемые собственные числа наблюдателей:
+    \[
+        \sigma_{Q1} = \{-0.5, -0.75\}, \quad \sigma_{Q2} = \{-3, -4\}
+    \]
+
+    Решаем уравнения с введенными выше матрицами, получаем $Q$:
+    \[
+        Q_{1} = \begin{bmatrix}
+            2.0000 &  -4.0000 & 0.0529 & -0.1058 \\
+            -1.3333 & 1.7778 & 0.0045 & -0.0060
+        \end{bmatrix}
+    \]
+    \[
+        Q_{2} = \begin{bmatrix}
+            0.3333  & -0.1111 &   -8.8070 &   2.9357 \\
+            -0.2500  & 0.0625 &   -0.0009 &   0.0002
+        \end{bmatrix}
+    \]
+
+    Также примем начальные условия системы и наблюдателя:
+    \[
+        x_0 = \begin{bmatrix}
+            0.025 & 0.03 & 0.015 & -0.01
+        \end{bmatrix}^T, \quad
+        \hat{z}_0 = \begin{bmatrix}
+            0 & 0
+        \end{bmatrix}^T
+    \]
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.65\textwidth]{images/third_part_observer_red_e_1.png}
+        \caption{График ошибки оценок при $G_{Q1} = \{-0.5, -0.75\}$}
+        \label{fig:third_part_observer1_red_e_1}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer1_red_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer1_red_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при $G_{Q1} = \{-0.5, -0.75\}$}
+        \label{fig:third_part_observer1_red_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer1_red_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer1_red_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при $G_{Q1} = \{-0.5, -0.75\}$}
+        \label{fig:third_part_observer1_red_x_4}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.65\textwidth]{images/third_part_observer_red_e_2.png}
+        \caption{График ошибки оценок при $G_{Q2} = \{-3, -4\}$}
+        \label{fig:third_part_observer2_red_e_2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer2_red_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer2_red_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при $G_{Q2} = \{-3, -4\}$}
+        \label{fig:third_part_observer2_red_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer2_red_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.44\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_observer2_red_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при $G_{Q2} = \{-3, -4\}$}
+        \label{fig:third_part_observer2_red_x_4}
+    \end{figure}
+
+    Выполним моделирование. На рисунках \ref{fig:third_part_observer1_red_e_1} - \ref{fig:third_part_observer2_red_x_4} представлены графики ошибки оценок наблюдения и графики состояния нелинейной системы и наблюдателя вместе.
+
+    Таким образом, наблюдатель пониженной размерности успешно оценивает состояния, собирая $x_1$ и $x_3$ при этом напрямую с измеряемых выходов $y_1=x_1$ и $y_2=x_3$. Это сильно упрощает систему, снижая затрачиваемые ресурсы на вычисления. Отдаление от мнимой оси собственных чисел, как и в случае наблюдателя полной размерности, приводит к ускорению сходимости к исходному оцениваемомувектору состоянию.
+
+    \subsection{Синтез регулятора по выходу}
+    Наконец, объединим регулятор по состоянию и наблюдатель в один регулятор по выходу, тем самым решая задачу стабилизации в условиях измерений только $y_1$ и $y_2$. Итак, полная система:
+    \begin{equation}
+        \begin{cases}
+            \dot{x} = Ax + Bu + Df \\
+            y = Cx \\
+            \dot{\hat{x}} = A\hat{x} + Bu + L(\hat{y} - y) \\
+            \hat{y} = C\hat{x}
+        \end{cases}
+    \end{equation}
+
+    Внешнее воздействие $f$, как и прежде, примем нулевым.
+
+    Используем закон управления, основанный на наблюдателе:
+    \begin{equation}
+        u = K\hat{x}
+    \end{equation}
+
+    Рассмотрим теперь несколько наборов желаемых спектров регулятора и наблюдателя, для каждого из них найдем соответствующие матрицы $K_i$ обратной связи и $L_i$ коррекции:
+    \[
+        \sigma_{r1} = \{-0.5, -0.75, -1, -1.25\}, \quad \sigma_{l1} = \{-3.25, -4, -3.4, -3.8\}
+    \]
+
+    Получаем матрицы регулятора и наблюдателя:
+    \[
+        K_1 = \begin{bmatrix}
+            34.2748 & 175.9438 & -9434.0876 & -2710.4161
+        \end{bmatrix}
+    \]
+    \[
+        L_1 = \begin{bmatrix}
+            -7.6819 & -14.7274 & 0.1057 & 0.4018 \\
+            -1.1519 & -4.6342 & -6.7681 & -19.9393
+        \end{bmatrix}^T
+    \]
+
+    Второй набор спектров:
+    \[
+        \sigma_{r2} = \{-0.5, -0.75, -1, -1.25\}, \quad \sigma_{l2} = \{-8, -7.5, -8.25, -8.5\}
+    \]
+
+    Получаем матрицы регулятора и наблюдателя:
+    \[
+        K_2 = \begin{bmatrix}
+            34.2748 &  175.9438 & -9434.0876 & -2710.4161  
+        \end{bmatrix}
+    \]
+    \[
+        L_2 = \begin{bmatrix}
+            -15.8731 & -62.7979 & -0.3228 & -2.7436 \\
+            0.1428 & 1.0440 & -16.3769 & -75.6142
+        \end{bmatrix}^T
+    \]
+
+    Третий набор спектров:
+    \[
+        \sigma_{r3} = \{-2, -2.25, -2.8, -2.75\}, \quad \sigma_{l3} = \{-3.25, -4, -3.4, -3.8\}
+    \]
+
+    Получаем матрицы:
+    \[
+        K_3 = \begin{bmatrix}
+            2533.5902 & 4218.9944 & -34760.5392 & -11822.0120 
+        \end{bmatrix}
+    \]
+    \[
+        L_3 = \begin{bmatrix}
+            -7.6819 & -14.7274 & 0.1057 & 0.4018 \\
+            -1.1519 & -4.6342 & -6.7681 & -19.9393
+        \end{bmatrix}^T
+    \]
+
+    Четвертый набор спектров:
+    \[
+        \sigma_{r4} = \{-2, -2.25, -2.8, -2.75\}, \quad \sigma_{l4} = \{-8, -7.5, -8.25, -8.5\}
+    \]
+
+    Получаем матрицы:
+    \[
+        K_4 = \begin{bmatrix}
+            2533.5902 & 4218.9944 & -34760.5392 & -11822.0120  
+        \end{bmatrix}
+    \]
+    \[
+        L_4 = \begin{bmatrix}
+            -15.8731 & -62.7979 & -0.3228 & -2.7436 \\
+            0.1428 & 1.0440 & -16.3769 & -75.6142
+        \end{bmatrix}^T
+    \]
+
+    Проведем моделирование со следующими начальными условиями системы и наблюдателя:
+    \[
+        x_0 = \begin{bmatrix}
+            0.05 & 0.06 & 0.07 & 0.02
+        \end{bmatrix}^T, \quad \hat{x}_0 = \begin{bmatrix}
+            0 & 0 & 0 & 0
+        \end{bmatrix}^T
+    \]
+
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out_u1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out_e_1.png}
+        \end{subfigure}
+        \caption{\centering Графики управления и ошибки наблюдения при матрицах $K_1$ и $L_1$}
+        \label{fig:third_part_reg_out_u1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out1_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out1_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при матрицах $K_1$ и $L_1$}
+        \label{fig:third_part_reg_out1_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out1_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out1_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при матрицах $K_1$ и $L_1$}
+        \label{fig:third_part_reg_out1_x_4}
+    \end{figure}
+
+
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out2_u2.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out2_e_2.png}
+        \end{subfigure}
+        \caption{\centering Графики управления и ошибки наблюдения при матрицах $K_2$ и $L_2$}
+        \label{fig:third_part_reg_out2_u2}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out2_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out2_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при матрицах $K_2$ и $L_2$}
+        \label{fig:third_part_reg_out2_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out2_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out2_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при матрицах $K_2$ и $L_2$}
+        \label{fig:third_part_reg_out2_x_4}
+    \end{figure}
+
+
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out3_u3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out3_e_3.png}
+        \end{subfigure}
+        \caption{\centering Графики управления и ошибки наблюдения при матрицах $K_3$ и $L_3$}
+        \label{fig:third_part_reg_out3_u3}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out3_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out3_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при матрицах $K_3$ и $L_3$}
+        \label{fig:third_part_reg_out3_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out3_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out3_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при матрицах $K_3$ и $L_3$}
+        \label{fig:third_part_reg_out3_x_4}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out4_u4.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out4_e_4.png}
+        \end{subfigure}
+        \caption{\centering Графики управления и ошибки наблюдения при матрицах $K_4$ и $L_4$}
+        \label{fig:third_part_reg_out4_u4}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out4_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out4_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при матрицах $K_4$ и $L_4$}
+        \label{fig:third_part_reg_out4_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out4_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/third_part_reg_out4_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при матрицах $K_4$ и $L_4$}
+        \label{fig:third_part_reg_out4_x_4}
+    \end{figure}
+
+    Проведем небольшое исследование полученных результатов. Для этого выведем максимальные отклонения маятника, смещения тележки и управления для каждого синтезированного регулятора:
+    \[    
+        \varphi_{1max} = 0.1305, \ \varphi_{2max} = 0.1096, \ \varphi_{3max} = 0.1109, \ \varphi_{4max} = 0.1042
+    \]
+    \[
+        a_{1max} = 1.5232, \ a_{2max} = 0.4938, \ a_{3max} = 0.2286, \ a_{4max} = 0.2159
+    \]
+    \[
+        u_{1max} = 1301, \ u_{2max} = 1622.4, \ u_{3max} = 1812, \ u_{4max} = 2950
+    \]
+
+    Наиболее <<дешевым>> на управление оказался первый регулятор. Наиболее <<дорогим>> - четвертый. Причем можно понять, что удаление как собственных чисел наблюдателя, так и регулятора, приводит к увеличению прикладываемого управления к системе.
+
+    Самым <<быстрым>> оказался регулятор с матрицами $K_4$ и $L_4$ - он сумел стабилизировать систему за наименьшее время.
+
+    На мой субъективный взгляд, лучше всех показал себя третий регулятор - он не так медленно стабилизирует систему и прикладывает при этом не так много управления.
+
+    \newpage
+    \section{Стабилизация: заданная устойчивость}
+    \subsection{Синтез регулятора по состоянию}
+    Подойдем к той же задаче стабилизации с другой стороны. Пусть хочется получить определенную степень устойчивости и синтезировать регулятор, который её обеспечит. Сделать это можно с помощью решения линейного матричного неравенства Ляпунова для экспоненциальной устойчивости, а после нахождения $K$ обратной связи:
+    \begin{equation}
+        P A^T + AP + 2\alpha P + Y^T B^T + BY \preceq 0, \quad K = YP^{-1}
+    \end{equation}
+
+    Важно, что будет использоваться тот же статический регулятор
+    \[
+        u = Kx
+    \]
+
+    Как и прежде, синтез будем проводить для линейной системы, а пытаться применять к исходной нелинейной.
+
+    Так как степень устойчивости $\alpha$ в силу полной управляемости линеаризованной системы можно брать произвольно, возьмем $\alpha = 1$.
+
+    В итоге получим матрицу $K$:
+    \[
+        K = \begin{bmatrix}
+            19272.1510 & 18036.3694 & -83311.9552 & -28341.4070
+        \end{bmatrix}
+    \]
+
+    Теперь исследуем работоспособность синтезированного регулятора при управлении нелинейной системой в зависимости от начальных условий и отсутствии воздействий $f = 0$:
+    \[
+        x_{0a} = \begin{bmatrix}
+            0.01 & 0 & 0 & 0
+        \end{bmatrix}^T, \quad x_{0\dot{a}} = \begin{bmatrix}
+            0 & 0.01 & 0 & 0
+        \end{bmatrix}^T
+    \]
+    \[
+        x_{0\varphi} = \begin{bmatrix}
+            0 & 0 & 0.01 & 0
+        \end{bmatrix}^T, \quad x_{0\dot{\varphi}} = \begin{bmatrix}
+            0 & 0 & 0 & 0.01
+        \end{bmatrix}^T
+    \]
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_a.png}
+        \caption{Состояния при $x_{0a} = \begin{bmatrix}0.01 & 0 & 0 & 0\end{bmatrix}^T$ и заданной устойчивости}
+        \label{fig:fourth_part_reg_sost_a}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_a_broken.png}
+        \caption{Состояния при $x'_{0a} = \begin{bmatrix}2.25 & 0 & 0 & 0\end{bmatrix}^T$ и заданной устойчивости}
+        \label{fig:fourth_part_reg_sost_a_broken}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_dot_a.png}
+        \caption{Состояния при $x_{0\dot{a}} = \begin{bmatrix}0 & 0.01 & 0 & 0\end{bmatrix}^T$ и заданной устойчивости}
+        \label{fig:fourth_part_reg_sost_dot_a}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_dot_a_broken.png}
+        \caption{Состояния при $x'_{0\dot{a}} = \begin{bmatrix}0 & 2.25 & 0 & 0\end{bmatrix}^T$ и заданной устойчивости}
+        \label{fig:fourth_part_reg_sost_dot_a_broken}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_phi.png}
+        \caption{Состояния при $x_{0\varphi} = \begin{bmatrix}0 & 0 & 0.01 & 0\end{bmatrix}^T$ и заданной устойчивости}
+        \label{fig:fourth_part_reg_sost_phi}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_phi_broken.png}
+        \caption{Состояния при $x'_{0\varphi} = \begin{bmatrix}0 & 0 & 0.55 & 0\end{bmatrix}^T$ и заданной устойчивости}
+        \label{fig:fourth_part_reg_sost_phi_broken}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_dot_phi.png}
+        \caption{Состояния при $x_{0\dot{\varphi}} = \begin{bmatrix}0 & 0 & 0 & 0.01\end{bmatrix}^T$ и заданной устойчивости}
+        \label{fig:fourth_part_reg_sost_dot_phi}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_dot_phi_broken.png}
+        \caption{Состояния при $x'_{0\dot{\varphi}} = \begin{bmatrix}0 & 0 & 0 & 1.85\end{bmatrix}^T$ и заданной устойчивости}
+        \label{fig:fourth_part_reg_sost_dot_phi_broken}
+    \end{figure}
+
+    Также обозначим <<ломающие>> начальные условия, при которых замкнутая нелинейная система остается неустойчивой:
+    \[
+        x'_{0a} = \begin{bmatrix}
+            2.25 & 0 & 0 & 0
+        \end{bmatrix}^T, \quad x'_{0\dot{a}} = \begin{bmatrix}
+            0 & 2.25 & 0 & 0
+        \end{bmatrix}^T
+    \]
+    \[
+        x'_{0\varphi} = \begin{bmatrix}
+            0 & 0 & 0.55 & 0
+        \end{bmatrix}^T, \quad x'_{0\dot{\varphi}} = \begin{bmatrix}
+            0 & 0 & 0 & 1.85
+        \end{bmatrix}^T
+    \]
+
+    На рисунках \ref{fig:fourth_part_reg_sost_a} - \ref{fig:fourth_part_reg_sost_dot_phi_broken} приведены состояния нелинейной модели при различных начальных условиях и регуляторе, обеспечивающем заданную степень устойчивости $\alpha = 1$.
+
+    Синтезированный регулятор, как и модальный, работает только при начальных условиях, близких к точкам равновесия, так как он основан на линейной модели. При превышении некоторых значений положения тележки и угла маятника, а также их скоростей, система остается неустойчивой, уходя со временем в бесконечность.
+
+    \subsection{Исследование регулятора по состоянию}
+    Рассмотрим теперь влияние задаваемой желаемой степени устойчивости $\alpha$ на синтезируемый регулятор и его работу по стабилизации исходной нелинейной модели.
+
+    Для начала возьмем малые начальные условия системы:
+    \[
+        x_{0} = \begin{bmatrix}
+            -0.1 & 0.05 & -0.15 & 0.075
+        \end{bmatrix}^T
+    \]
+
+    После чего зададимся различными значениями желаемой степени устойчивости $\alpha$ для линейной системы (так как именно на её основе и проводим вычисления):
+    \[
+        \alpha_1 = 0.5, \quad \alpha_2 = 1.5, \quad \alpha_3 = 3, \quad \alpha_4 = 6
+    \]
+    
+    Далее для каждого из введенных устойчивости $\alpha$ вычислим матрицу $K$ обратной связи регулятора:
+    \[
+        K_1 = \begin{bmatrix}
+            2458.4146 & 5274.4174 & -40300.1766 & -13706.3374
+        \end{bmatrix}
+    \]
+    \[
+        K_2 = \begin{bmatrix}
+            21774.6526 & 22697.8618 & -109734.8749 & -37336.0399
+        \end{bmatrix}
+    \]
+    \[
+        K_3 = \begin{bmatrix}
+            163727.7004 & 112940.3903 & -440549.0139 & -149231.0812
+        \end{bmatrix}
+    \]
+    \[
+        K_4 = \begin{bmatrix}
+            1943798.0931 & 617159.2608 & -2893249.2820 & -731828.1682
+        \end{bmatrix}
+    \]
+
+    Теперь выполним моделирование процессов для каждого регулятора. На рисунках \ref{fig:fourth_part_reg_sost_an_1_u} - \ref{fig:fourth_part_reg_sost_an_3} приведены графики управления системой и состояния нелинейной модели при различных значениях $\alpha$.
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_an_1_u.png}
+        \caption{График управления системой при степени устойчивости $\alpha_1 = 0.5$}
+        \label{fig:fourth_part_reg_sost_an_1_u}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_an_1.png}
+        \caption{График состояния при $\alpha_1 = 0.5$}
+        \label{fig:fourth_part_reg_sost_an_1}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_an_2_u.png}
+        \caption{График управления при $\alpha_2 = 1.5$}
+        \label{fig:fourth_part_reg_sost_an_2_u}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_an_2.png}
+        \caption{График состояния нелинейной модели при $\alpha_2 = 1.5$}
+        \label{fig:fourth_part_reg_sost_an_2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_an_3_u.png}
+        \caption{График управления при $\alpha_3 = 3$}
+        \label{fig:fourth_part_reg_sost_an_3_u}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_an_3.png}
+        \caption{График состояния нелинейной модели при $\alpha_3 = 3$}
+        \label{fig:fourth_part_reg_sost_an_3}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_an_4_u.png}
+        \caption{График управления при $\alpha_4 = 6$}
+        \label{fig:fourth_part_reg_sost_an_4_u}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_an_4.png}
+        \caption{График состояния нелинейной модели при $\alpha_4 = 6$}
+        \label{fig:fourth_part_reg_sost_an_4}
+    \end{figure}
+
+    Проведем анализ полученных процессов. Для этого найдем максимальные отклонения маятника от вертикали:
+    \[
+        \varphi_{1max} = 0.15, \quad \varphi_{2max} = 0.15, \quad \varphi_{3max} = 0.15, \quad \varphi_{4max} = 0.2159
+    \]
+
+    Максимальные горизонтальные смещения тележки:
+    \[
+        a_{1max} = 0.2775, \quad a_{2max} = 0.1867, \quad a_{3max} = 0.1686, \quad a_{4max} = 0.3163
+    \]
+
+    А также максимальные управляющие воздействия:
+    \[
+        u_{1max} = 5034.9, \quad u_{2max} = 12617, \quad u_{3max} = 44164, \quad u_{4max} = 215578
+    \]
+
+    Таким образом, при увеличении $\alpha$ растет величина управления и отклонений состояний, однако скорость стабилизации ускоряется в разы. Здесь важно отметить, что $\alpha$ напрямую влияет на собственные числа, а значит, по сути наблюдается та же ситуация, что и при модальном синтезе регулятора.
+
+    В итоге, $\alpha_1$ даёт самые маленькие отклонения состояний (при учёте скоростей) и величину управления, однако регулятор получается медленным, $\alpha_4$ — его полная противоположность, а $\alpha_2$ и $\alpha_3$ находятся где-то между ними, представляя нечто среднее.
+
+    \subsection{Регулятор по состоянию с ограничениями}
+    Для параметров $\alpha_1 = 0.5$ и $\alpha_2 = 1.5$ из предыдущего пункта выполним расчет такого статического регулятора, чтобы наибольшее значение модуля управляющего сигнала $u$ было наименьшим из возможных. Для этого добавим к задаче стабилизации минимизацию управления. В итоге будем решать систему относительно $P$ и $Y$:
+    \begin{equation}
+        \begin{cases}
+            P A^T + AP + 2\alpha P + Y^T B^T + BY \preceq 0 \\
+            \begin{bmatrix}
+                P & Y^T \\
+                Y & \mu^2
+            \end{bmatrix} \succ 0 \\[16pt]
+            \begin{bmatrix}
+                P & x_0 \\
+                x_0' & 1
+            \end{bmatrix} \succ 0 \\[14pt]
+            \mu^2 = \gamma \to \min
+        \end{cases}
+    \end{equation}
+
+    После находить регулятор через $K = YP^{-1}$.
+
+    Начальные условия для расчёта регуляторов $K_1$ и $K_2$, соответствующих $\alpha_1 = 0.5$ и $\alpha_2 = 1.5$, примем:
+    \[
+        x_{01} = \begin{bmatrix}
+            0.01 & 0.01 & 0.01 & 0.01
+        \end{bmatrix}^T, \quad x_{02} = \begin{bmatrix}
+            0.1 & 0 & 0.01 & 0
+        \end{bmatrix}^T
+    \]
+
+    Итак, решая системы, получаем матрицы $K_i$ обратных связей:
+    \[
+        K_1 = \begin{bmatrix}
+            327.6221 & 873.9577 & -12295.1768 & -4180.3975
+        \end{bmatrix}
+    \]
+    \[
+        K_2 = \begin{bmatrix}
+            2468.5155 & 3452.8787 & -27230.0330 & -9261.2414
+        \end{bmatrix}
+    \]
+
+    Для моделирования выберем одинаковые малые положительные начальные условия для обоих регуляторов, как и прежде:
+    \[
+        x_{0a} = \begin{bmatrix}0.01 & 0 & 0 & 0\end{bmatrix}^T, \quad x_{0\dot{a}} = \begin{bmatrix}0 & 0.01 & 0 & 0\end{bmatrix}^T
+    \]
+    \[
+        x_{0\varphi} = \begin{bmatrix}0 & 0 & 0.01 & 0\end{bmatrix}^T, \quad x_{0\dot{\varphi}} = \begin{bmatrix}0 & 0 & 0 & 0.01\end{bmatrix}^T
+    \]
+
+    Также примем условия, при которых регуляторы уже перестают справляться с задачей стабилизации:
+    \[
+        x'_{0a} = \begin{bmatrix}25 & 0 & 0 & 0\end{bmatrix}^T, \quad x'_{0\dot{a}} = \begin{bmatrix}0 & 10 & 0 & 0\end{bmatrix}^T
+    \]
+    \[
+        x'_{0\varphi} = \begin{bmatrix}0 & 0 & 1.5 & 0\end{bmatrix}^T, \quad x'_{0\dot{\varphi}} = \begin{bmatrix}0 & 0 & 0 & 5\end{bmatrix}^T
+    \]
+
+    Для моделирования всё готово - выполним его. На рисунках \ref{fig:fourth_part_reg_sost_min_a} - \ref{fig:fourth_part_reg_sost_min_dot_phi_broken_k2} приведены графики состояний нелинейной модели при различных начальных условиях и регуляторах с ограничениями.
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_a_k1.png}
+        \caption{График $x(t)$ при $x_{0a} = \begin{bmatrix}0.01 & 0 & 0 & 0\end{bmatrix}^T$ и $\alpha_1 = 0.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_a}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_a_broken_k1.png}
+        \caption{График $x(t)$ при $x'_{0a} = \begin{bmatrix}25 & 0 & 0 & 0\end{bmatrix}^T$ и $\alpha_1 = 0.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_a_broken}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_dot_a_k1.png}
+        \caption{График $x(t)$ при $x_{0\dot{a}} = \begin{bmatrix}0 & 0.01 & 0 & 0\end{bmatrix}^T$ и $\alpha_1 = 0.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_dot_a}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_dot_a_broken_k1.png}
+        \caption{График $x(t)$ при $x'_{0\dot{a}} = \begin{bmatrix}0 & 10 & 0 & 0\end{bmatrix}^T$ и $\alpha_1 = 0.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_dot_a_broken}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_phi_k1.png}
+        \caption{График $x(t)$ при $x_{0\varphi} = \begin{bmatrix}0 & 0 & 0.01 & 0\end{bmatrix}^T$ и $\alpha_1 = 0.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_phi}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_phi_broken_k1.png}
+        \caption{График $x(t)$ при $x'_{0\varphi} = \begin{bmatrix}0 & 0 & 1.5 & 0\end{bmatrix}^T$ и $\alpha_1 = 0.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_phi_broken}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_dot_phi_k1.png}
+        \caption{График $x(t)$ при $x_{0\dot{\varphi}} = \begin{bmatrix}0 & 0 & 0 & 0.01\end{bmatrix}^T$ и $\alpha_1 = 0.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_dot_phi}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_dot_phi_broken_k1.png}
+        \caption{График $x(t)$ при $x'_{0\dot{\varphi}} = \begin{bmatrix}0 & 0 & 0 & 5\end{bmatrix}^T$ и $\alpha_1 = 0.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_dot_phi_broken}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_a_k2.png}
+        \caption{График $x(t)$ при $x_{0a} = \begin{bmatrix}0.01 & 0 & 0 & 0\end{bmatrix}^T$ и $\alpha_2 = 1.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_a_k2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_a_broken_k2.png}
+        \caption{График $x(t)$ при $x'_{0a} = \begin{bmatrix}25 & 0 & 0 & 0\end{bmatrix}^T$ и $\alpha_2 = 1.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_a_broken_k2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_dot_a_k2.png}
+        \caption{График $x(t)$ при $x_{0\dot{a}} = \begin{bmatrix}0 & 0.01 & 0 & 0\end{bmatrix}^T$ и $\alpha_2 = 1.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_dot_a_k2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_dot_a_broken_k2.png}
+        \caption{График $x(t)$ при $x'_{0\dot{a}} = \begin{bmatrix}0 & 10 & 0 & 0\end{bmatrix}^T$ и $\alpha_2 = 1.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_dot_a_broken_k2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_phi_k2.png}
+        \caption{График $x(t)$ при $x_{0\varphi} = \begin{bmatrix}0 & 0 & 0.01 & 0\end{bmatrix}^T$ и $\alpha_2 = 1.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_phi_k2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_phi_broken_k2.png}
+        \caption{График $x(t)$ при $x'_{0\varphi} = \begin{bmatrix}0 & 0 & 1.5 & 0\end{bmatrix}^T$ и $\alpha_2 = 1.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_phi_broken_k2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_dot_phi_k2.png}
+        \caption{График $x(t)$ при $x_{0\dot{\varphi}} = \begin{bmatrix}0 & 0 & 0 & 0.01\end{bmatrix}^T$ и $\alpha_2 = 1.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_dot_phi_k2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_dot_phi_broken_k2.png}
+        \caption{График $x(t)$ при $x'_{0\dot{\varphi}} = \begin{bmatrix}0 & 0 & 0 & 5\end{bmatrix}^T$ и $\alpha_2 = 1.5$ с ограничениями}
+        \label{fig:fourth_part_reg_sost_min_dot_phi_broken_k2}
+    \end{figure}
+
+    Можно видеть, что здесь наблюдается та же ситуация, что и во всех созданных до этого регуляторах: при отдалении от нуля - точек равновесия системы - линейная модель уже не так хорошо аппроксимирует нелинейную, стабилизации не происходит.
+
+    Важно и то, что задача минимизации управления также замедлила стабилизацию системы. Так, при $\alpha_2 = 1.5$ с ограничениями на величину управления переходные процессы в сравнении с ранее изученными для $\alpha = 1 > \alpha_2$ без ограничений происходят заметно дольше при всех начальных состояниях системы.
+    
+    \subsection{Исследование регулятора с ограничениями}
+    Исследуем теперь влияние параметра желаемой степени устойчивости $\alpha$ на получаемые регуляторы с ограничениями на управление, то есть решим совместную задачу стабилизации состояний и минимизации $u = Kx$ для различных значений степени устойчивости $\alpha$.
+
+    Внешнее воздействие $f$, как и прежде, примем нулевым.
+
+    Также зафиксируем начальные условия системы, использовавшиеся ранее при исследовании регулятора по состоянию с заданной степенью устойчивости без ограничений на управление:
+    \[
+        x_0 = \begin{bmatrix}
+            -0.1 & 0.05 & -0.15 & 0.075
+        \end{bmatrix}^T
+    \]
+
+    Итак, зададимся параметрами $\alpha$:
+    \[
+        \alpha_1 = 0.25, \quad \alpha_2 = 0.5, \quad \alpha_3 = 1, \quad \alpha_4 = 1.5
+    \]
+
+    Найдем соответствующие им матрицы $K$ путем решения матричного неравенства Ляпунова с задачей минимизации:
+    \[
+        K_1 = \begin{bmatrix}
+            72.1719 & 340.1094 & -8929.2995 & -3035.2326  
+        \end{bmatrix}
+    \]
+    \[
+        K_2 = \begin{bmatrix}
+            327.6221 & 873.9577 & -12295.1768 & -4180.3975 
+        \end{bmatrix}
+    \]
+    \[
+        K_3 = \begin{bmatrix}
+            1398.5630 & 2304.0552 & -20234.4474 & -6881.6022 
+        \end{bmatrix}
+    \]
+    \[
+        K_4 = \begin{bmatrix}
+            2468.5155 & 3452.8787 & -27230.0330 & -9261.2414
+        \end{bmatrix}
+    \]
+
+    Выполним моделирование. На рисунках \ref{fig:fourth_part_reg_sost_min_an_1_u} - \ref{fig:fourth_part_reg_sost_min_an_4} можно наблюдать состояния нелинейной модели и управления при различных матрицах $K$ и получающихся при этом регуляторах.
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_an_1_u.png}
+        \caption{График управления $u(t) = K_1x(t)$ при $\alpha_1 = 0.25$ c ограничениями}
+        \label{fig:fourth_part_reg_sost_min_an_1_u}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_an_1.png}
+        \caption{График $x(t)$ при $u(t) = K_1x(t)$ и $\alpha_1 = 0.25$ c ограничениями}
+        \label{fig:fourth_part_reg_sost_min_an_1}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_an_2_u.png}
+        \caption{График управления $u(t) = K_2x(t)$ при $\alpha_2 = 0.5$ c ограничениями}
+        \label{fig:fourth_part_reg_sost_min_an_2_u}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_an_2.png}
+        \caption{График $x(t)$ при $u(t) = K_2x(t)$ и $\alpha_2 = 0.5$ c ограничениями}
+        \label{fig:fourth_part_reg_sost_min_an_2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_an_3_u.png}
+        \caption{График управления $u(t) = K_3x(t)$ при $\alpha_3 = 1$ c ограничениями}
+        \label{fig:fourth_part_reg_sost_min_an_3_u}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_an_3.png}
+        \caption{График $x(t)$ при $u(t) = K_3x(t)$ и $\alpha_3 = 1$ c ограничениями}
+        \label{fig:fourth_part_reg_sost_min_an_3}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_an_4_u.png}
+        \caption{График управления $u(t) = K_4x(t)$ при $\alpha_4 = 1.5$ c ограничениями}
+        \label{fig:fourth_part_reg_sost_min_an_4_u}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_reg_sost_min_an_4.png}
+        \caption{График $x(t)$ при $u(t) = K_4x(t)$ и $\alpha_4 = 1.5$ c ограничениями}
+        \label{fig:fourth_part_reg_sost_min_an_4}
+    \end{figure}
+
+
+    Проведем анализ полученных регуляторов. Для этого выведем максимальные отклонения маятника, смещения тележки $(\varphi_{1max} = \varphi_{2max} = \varphi_{3max} = \varphi_{4max} = 0.15)$ и управления для каждого синтезированного регулятора:
+    \[
+        a_{1max} = 1.4313, \ a_{2max} = 0.7122, \ a_{3max} = 0.4114, \ a_{4max} = 0.3405
+    \]
+    \[
+        u_{1max} = 1121.5, \ u_{2max} = 1541.7, \ u_{3max} = 2494.4, \ u_{4max} = 3315.7
+    \]
+
+    Таким образом, увеличение степени устойчивости $\alpha$, как и прежде, привело к увеличению затрачиваемого управления, но при этом переходные процессы ускорились, а смещение тележки уменьшилось.
+
+    Важно, что в сравнении с регуляторами без ограничений скорость переходных процессов выведенных регуляторов (при тех же степенях устойчивости $\alpha$) замедляется, а смещение тележки возрастает, но при этом затрачиваемое управление меньше. То есть ограничения дали более <<щадящие>> регуляторы.
+
+    \subsection{Синтез наблюдателя}
+    С помощью решения матричного неравенства Ляпунова для экспоненциальной устойчивости также можно синтезировать и наблюдатели полной размерности:
+    \[
+        \begin{cases}
+            \dot{\hat{x}} = A\hat{x} + Bu + L(\hat{y} - y) \\
+            \hat{y} = C\hat{x}
+        \end{cases}
+    \]
+
+    Но сперва нам необходимо стабилизировать систему (она ведь неустойчива), для чего синтезируем статический регулятор $u = Kx$ со степенью устойчивости $\alpha_R = 1$. Получаем матрицу $K$:
+    \[
+        K = \begin{bmatrix}
+            4725.0490 & 6731.9196 & -39423.0675 & -13410.3853
+        \end{bmatrix}
+    \]
+
+    Зададимся начальными условиями для системы и наблюдателя:
+    \[
+        x_0 = \begin{bmatrix}
+            0.05 & 0.1 & 0.1 & -0.02
+        \end{bmatrix}^T, \quad \hat{x}_0 = \begin{bmatrix}
+            0 & 0 & 0 & 0
+        \end{bmatrix}^T
+    \]
+
+    Перейдем к синтезу наблюдателя. Будем решать неравенство Ляпунова относительно $Q$, а после находить матрицу коррекции $L$:
+    \begin{equation}
+        A^T Q + QA + 2\alpha_L Q + C^T Y^T + YC \preceq 0, \quad L = Q^{-1}Y
+    \end{equation}
+
+    Зададимся $\alpha_L = 1.5$, тогда:
+    \[
+        L = \begin{bmatrix}
+            -12.5024 &  -35.8967 & 0.0486 & 0.1356  \\
+            -0.0486 & -0.1631 & -12.5024 & -44.5571
+        \end{bmatrix}^T
+    \]
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_observer_e.png}
+        \caption{График ошибки оценки наблюдателя при $\alpha_L = 1.5$}
+        \label{fig:fourth_part_observer_e}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_observer_x_1.png}
+        \caption{График $x_1(t) = a(t)$ системы и наблюдателя при $\alpha_L = 1.5$}
+        \label{fig:fourth_part_observer_x_1}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_observer_x_2.png}
+        \caption{График $x_2(t) = \dot{a}(t)$ системы и наблюдателя при $\alpha_L = 1.5$}
+        \label{fig:fourth_part_observer_x_2}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_observer_x_3.png}
+        \caption{График $x_3(t) = \varphi(t)$ системы и наблюдателя при $\alpha_L = 1.5$}
+        \label{fig:fourth_part_observer_x_3}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fourth_part_observer_x_4.png}
+        \caption{График $x_4(t) = \dot{\varphi}(t)$ системы и наблюдателя при $\alpha_L = 1.5$}
+        \label{fig:fourth_part_observer_x_4}
+    \end{figure}
+
+    Выполним моделирование. На рисунках \ref{fig:fourth_part_observer_e} - \ref{fig:fourth_part_observer_x_4} изображены графики состояния системы и наблюдателя, а также ошибки оценок.
+
+    Видим, что синтезированный наблюдатель работает корректно - ошибка оценки сходится к нулю и уже после 2 секунды она визуально неотличима от нуля.
+
+    \subsection{Синтез регулятора по выходу}
+    Предположим, что доступными к измерению являются только выходные сигналы $y_1$ и $y_2$. При этом решить задачу стабилизации системы всё ещё хочется. В этом случае можно использовать регулятор по выходу - объединение регулятора по состоянию и наблюдателя:
+    \[
+        \begin{cases}
+            \dot{x} = Ax + Bu + Df \\
+            y = Cx \\
+            \dot{\hat{x}} = A\hat{x} + Bu + L(\hat{y} - y) \\
+            \hat{y} = C\hat{x}
+        \end{cases}
+    \]
+
+    Прикладываемое к системе управление тогда будет равно:
+    \[
+        u = K\hat{x}
+    \]
+
+    Синтезировать регуляторы и наблюдатели будем из матричных неравенств Ляпунова для экспоненциальной устойчивости, введенных для обоих случаев нами ранее.
+
+    Внешнее воздействие $f$, как и прежде, примем нулевым.
+
+    А начальные условия для системы и наблюдателя:
+    \[
+        x_0 = \begin{bmatrix}
+            0.05 & 0.06 & 0.07 & 0.02
+        \end{bmatrix}^T, \quad \hat{x}_0 = \begin{bmatrix}
+            0 & 0 & 0 & 0
+        \end{bmatrix}^T
+    \]
+
+    Зададимся четырьмя наборами степеней устойчивости для регуляторов и сходимости для наблюдателей:
+    \[
+        \alpha_{R1} = 1, \quad \alpha_{L1} = 1 \qquad\qquad
+        \alpha_{R2} = 1, \quad \alpha_{L2} = 4
+    \]
+    \[
+        \alpha_{R3} = 4, \quad \alpha_{L3} = 1 \qquad\qquad
+        \alpha_{R4} = 4, \quad \alpha_{L4} = 4
+    \]
+
+    Для начала найдем матрицы регуляторов:
+    \[
+        K_1 = K_2 = \begin{bmatrix}
+            6086.0892 & 8287.9115 & -47250.8105 & -16075.4857
+        \end{bmatrix}
+    \]
+    \[
+        K_3 = K_4 = \begin{bmatrix}
+            191186.0401 & 88805.5312 & -386128.8032 & -114422.7347  
+        \end{bmatrix}
+    \]
+
+    А затем матрицы наблюдателей:
+    \[
+        L_1 = L_3 = \begin{bmatrix}
+            -3.2983 & -5.5813 & 0.0207 & 0.0287  \\
+            -0.0207 & -0.0563 & -3.2983 & -14.2417 
+        \end{bmatrix}^T
+    \]
+    \[
+        L_2 = L_4 = \begin{bmatrix}
+            -11.9424 & -63.5693 & 0.0093 & 0.0489  \\
+            -0.0093 & -0.0764 & -11.9424 & -72.2297
+        \end{bmatrix}^T
+    \]
+
+    Перейдем к моделированию. На рисунках \ref{fig:fourth_part_out_u1} - \ref{fig:fourth_part_out4_x_4} можем видеть состояния системы и наблюдателя, а также управления и ошибки наблюдения при различных наборах степеней устойчивости.
+
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out_u1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out_e_1.png}
+        \end{subfigure}
+        \caption{\centering Графики управления и ошибки наблюдения при $\alpha_{R1} = 1$ и $\alpha_{L1} = 1$}
+        \label{fig:fourth_part_out_u1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out1_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out1_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при $\alpha_{R1} = 1$ и $\alpha_{L1} = 1$}
+        \label{fig:fourth_part_out1_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out1_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out1_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при $\alpha_{R1} = 1$ и $\alpha_{L1} = 1$}
+        \label{fig:fourth_part_out1_x_4}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out2_u2.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out2_e_2.png}
+        \end{subfigure}
+        \caption{\centering Графики управления и ошибки наблюдения при $\alpha_{R2} = 1$ и $\alpha_{L2} = 4$}
+        \label{fig:fourth_part_out2_u2}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out2_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out2_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при $\alpha_{R2} = 1$ и $\alpha_{L2} = 4$}
+        \label{fig:fourth_part_out2_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out2_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out2_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при $\alpha_{R2} = 1$ и $\alpha_{L2} = 4$}
+        \label{fig:fourth_part_out2_x_4}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out3_u3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out3_e_3.png}
+        \end{subfigure}
+        \caption{\centering Графики управления и ошибки наблюдения при $\alpha_{R3} = 4$ и $\alpha_{L3} = 1$}
+        \label{fig:fourth_part_out3_u3}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out3_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out3_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при $\alpha_{R3} = 4$ и $\alpha_{L3} = 1$}
+        \label{fig:fourth_part_out3_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out3_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out3_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при $\alpha_{R3} = 4$ и $\alpha_{L3} = 1$}
+        \label{fig:fourth_part_out3_x_4}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out4_u4.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out4_e_4.png}
+        \end{subfigure}
+        \caption{\centering Графики управления и ошибки наблюдения при $\alpha_{R4} = 4$ и $\alpha_{L4} = 4$}
+        \label{fig:fourth_part_out4_u4}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out4_x_1.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out4_x_2.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_1$ и $x_2$ при $\alpha_{R4} = 4$ и $\alpha_{L4} = 4$}
+        \label{fig:fourth_part_out4_x_1}
+    \end{figure}    
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out4_x_3.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.495\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{images/fourth_part_out4_x_4.png}
+        \end{subfigure}
+        \caption{\centering Графики состояний $x_3$ и $x_4$ при $\alpha_{R4} = 4$ и $\alpha_{L4} = 4$}
+        \label{fig:fourth_part_out4_x_4}
+    \end{figure}
+
+    Проведем небольшой анализ результатов. Для этого найдем максимальные отклонения маятника от вертикали:
+    \[
+        \varphi_{1max} = 0.1305, \ \varphi_{2max} = 0.1096, \ \varphi_{3max} = 0.1109, \ \varphi_{4max} = 0.1042
+    \]
+
+    Максимальные горизонтальные смещения тележки:
+    \[
+        a_{1max} = 1.5232, \ a_{2max} = 0.4938, \ a_{3max} = 0.2286, \ a_{4max} = 0.2159
+    \]
+
+    Максимальные управляющие воздействия:
+    \[
+        u_{1max} = 1553.5, \ u_{2max} = 3261, \ u_{3max} = 4686.6, \ u_{4max} = 11486
+    \]
+
+    Таким образом, повышение степеней устойчивости регулятора $\alpha_{R}$ и сходимости наблюдателя $\alpha_{L}$ приводит к росту величины управления и уменьшению максимальных отклонений маятника от вертикали и горизонтального смещения тележки.
+
+    При увеличении степеней $\alpha_{R}$ и $\alpha_{L}$ также наблюдается небольшое ускорение переходных процессов.
+
+    Наблюдатель при сильном управлении сходится к исходному вектору состояния системы немного дольше (особенно это заметно при сравнении рисунков \ref{fig:fourth_part_out1_x_1} и \ref{fig:fourth_part_out3_x_1}).
+
+    Наиболее оптимальным, на мой субъективный взгляд, оказался регулятор с матрицами $K_2$ и $L_2$ с соответствующими степенями устойчивости $\alpha_{R2} = 1$ и сходимости $\alpha_{L2} = 4$. В нём присутствует небольшое управление при хорошей скорости стабилизации системы, наблюдатель дает точную оценку, а это позволяет добиться устойчивых внутренних процессов.
+
+    \newpage
+    \section{Слежение и компенсация}
+    \subsection{Решение задачи компенсации}
+    Ранее внешнее воздействие $f$ принималось нулевым и вообще не учитывалось. Теперь же зададим его как сумму не менее пяти гармоник с разными частотами, амплитудами и фазами:
+    \[
+    \begin{aligned}
+    f(t) =\;& 0.8 \cos(0.5t + 0.1) 
+        + 0.5 \cos(1.2t + 1) + 0.3 \cos(2t - 0.5)\ + \\
+        & + 0.2 \cos(3.5t + 0.7) + 0.15 \cos(5t - 1.2)
+    \end{aligned}
+    \]
+
+    Немного упростим:
+    \[
+    \begin{aligned}
+    f(t) =\;& 0.8 \cos(0.1) \cos(0.5t) + 0.8 \sin(0.1) \sin(0.5t) \ + \\
+        & + 0.5 \cos(1) \cos(1.2t) + 0.5 \sin(1) \sin(1.2t) \ + \\
+        & + 0.3 \cos(-0.5) \cos(2t) + 0.3 \sin(-0.5) \sin(2t) \ + \\
+        & + 0.2 \cos(0.7) \cos(3.5t) + 0.2 \sin(0.7) \sin(3.5t) \ + \\
+        & + 0.15 \cos(-1.2) \cos(5t) + 0.15 \sin(-1.2) \sin(5t)
+    \end{aligned}
+    \]
+
+    Создадим этот сигнал через генератор внешнего возмущения:
+    \begin{equation}
+    \begin{cases}
+        \dot{\omega_f} = \Gamma \omega_f \\
+        f = Y_f \omega_f
+    \end{cases}
+    \end{equation}
+
+    Зададим матрицы $\Gamma$, $Y_f$ и начальные условия для $\omega_f$, зная, что в нулевой момент времени в сигнале $f$ остаются только косинусы:
+    \[
+    \Gamma = \begin{bmatrix}
+        0 & 0.5 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        -0.5 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 1.2 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        0 & 0 & -1.2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 2 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 0 & -2 & 0 & 0 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 0 & 0 & 3.5 & 0 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 0 & -3.5 & 0 & 0 & 0 \\
+        0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 5 \\
+        0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & -5 & 0 \\
+    \end{bmatrix}
+    \]
+    \[
+    Y_f^T = \begin{bmatrix}
+        0.8\cos(0.1) \\ 0.8\sin(0.1) \\ 0.5\cos(1) \\ 0.5\sin(1) \\ 0.3\cos(-0.5) \\ 0.3\sin(-0.5) \\ 0.2\cos(0.7) \\ 0.2\sin(0.7) \\ 0.15\cos(-1.2) \\ 0.15\sin(-1.2)
+    \end{bmatrix}, \quad \omega_f(0) = \begin{bmatrix}
+        1 \\ 0 \\ 1 \\ 0 \\ 1 \\ 0 \\ 1 \\ 0 \\ 1 \\ 0
+    \end{bmatrix}
+    \]
+
+    Отлично, теперь построим компенсирующий регулятор, гарантирующий выполнение целевого условия:
+    \begin{equation}
+        \lim_{t \to \infty} \left| \left| \varphi(t) \right| \right| = 0
+    \end{equation}
+
+    Будем считать весь вектор состояния доступным для измерения.
+    
+    Сам регулятор будет иметь вид:
+    \begin{equation}
+        u = K_1 x + K_2 \omega_f
+    \end{equation}
+
+    Для решения задачи используем виртуальный выход:
+    \begin{equation}
+        \varphi = x_3 = z = C_z x, \quad C_z = \begin{bmatrix}
+            0 & 0 & 1 & 0
+        \end{bmatrix}
+    \end{equation}
+
+    Матрицу $K_1$ найдем с помощью модального управления:
+    \[
+        \sigma(G) = \{-1, -2, -3, -4\} \quad \Rightarrow \quad G = \begin{bmatrix}
+            -1 & 0 & 0 & 0 \\
+            0 & -2 & 0 & 0 \\
+            0 & 0 & -3 & 0 \\
+            0 & 0 & 0 & -4
+        \end{bmatrix}
+    \]
+
+    Откуда:
+    \[
+        K_1 = \begin{bmatrix}
+            1754.8677 & 3655.9743 & -33311.0953 & -11325.9253
+        \end{bmatrix}
+    \]
+
+    Синтез <<feedforward>>-компоненты проведем с помощью решения системы уравнений, обеспечивающих выполнение целевого условия:
+    \begin{equation}
+        \begin{cases}
+            P \Gamma - A P = B Y + D Y_f\\
+            C_z P = 0 \\
+        \end{cases}
+    \end{equation}
+
+    Итак, с помощью решения системы находим $K_2 = Y - K_1 P$:
+    \[
+        K_2 = \begin{bmatrix}
+            -2734 & -3193 & 388 & -795 & -271 & -162 & 8 & -129 & -70 & 29
+        \end{bmatrix}
+    \]
+
+    Проверим полученный регулятор в действии. Для этого промоделируем замкнутые линейную и нелинейную системы с начальными условиями 
+    \[
+        x_0 = \begin{bmatrix}
+        0.02 & -0.05 & 0.1 & 0.01
+    \end{bmatrix}^T
+    \]
+    
+    На рисунках \ref{fig:fifth_part_comp_f} - \ref{fig:fifth_part_comp_x_lin} можем видеть графики сигнала внешнего воздействия, формируемых управлений, виртуальных выходов, а также состояний систем.
+
+    В результате генератор сигнала корректно формирует внешнее воздействие, повторяя исходный гармонический сигнал. Целевая переменная идет к нулю как для линейной, так и для нелинейной системы - регулятор успешно справляется с задачей компенсации для угла маятника $\varphi(t)$. Линеаризация около нуля приближает нелинейную модель идеально - графики для них практически идентичны.
+    
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fifth_part_comp_f.png}
+        \caption{Сигнал $f(t)$ для компенсации}
+        \label{fig:fifth_part_comp_f}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fifth_part_comp_u.png}
+        \caption{Формируемое управление $u(t)$ нелинейной и линейной систем}
+        \label{fig:fifth_part_comp_u}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fifth_part_comp_z.png}
+        \caption{Виртуальный выход $z(t)$ нелинейной и линейной систем}
+        \label{fig:fifth_part_comp_z}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fifth_part_comp_x_nonlin.png}
+        \caption{Состояния $x(t)$ нелинейной системы при $u = K_1 x + K_2 \omega_f$}
+        \label{fig:fifth_part_comp_x_nonlin}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fifth_part_comp_x_lin.png}
+        \caption{Состояния $x(t)$ линейной системы при $u = K_1 x + K_2 \omega_f$}
+        \label{fig:fifth_part_comp_x_lin}
+    \end{figure}
+
+    \subsection{Решение задачи слежения}
+    Положим теперь $f(t) = 0$. Зададимся целевым сигналом $g(t)$, для этого воспользуемся сигналом $f(t)$ из предыдущего пункта, но уменьшим его амплитуду в 20 раз:
+    \[
+    \begin{aligned}
+        g(t) =\;& 0.05f(t) = 0.04\cos(0.5t + 0.1) + 0.025\cos(1.2t + 1)\ + \\
+        & + 0.015\cos(2t - 0.5) + 0.01\cos(3.5t + 0.7)\ + \\
+        & + 0.0075\cos(5t - 1.2)
+    \end{aligned}
+    \]
+
+    Аналогично предыдущему пункту создадим генератор сигнала:
+    \begin{equation}
+    \begin{cases}
+        \dot{\omega_g} = \Gamma \omega_g \\
+        g = Y_g \omega_g
+    \end{cases}
+    \end{equation}
+
+    Матрица $\Gamma$ и начальные условия $\omega_g(0)=\omega_f(0)$ генератора остаются теми же, что и в предыдущем пункте.
+
+    А вот $Y_g$ будет другим:
+    \[
+    Y_g^T = \begin{bmatrix}
+        0.04\cos(0.1) \\ 0.04\sin(0.1) \\ 0.025\cos(1) \\ 0.025\sin(1) \\ 0.015\cos(-0.5) \\ 0.015\sin(-0.5) \\ 0.01\cos(0.7) \\ 0.01\sin(0.7) \\ 0.0075\cos(-1.2) \\ 0.0075\sin(-1.2)
+    \end{bmatrix}
+    \]
+
+    Хорошо, теперь перейдем к синтезу регулятора, гарантирующего выполнение условия:
+    \begin{equation}
+        \lim_{t \to \infty} \left| \left| \varphi(t) - g(t) \right| \right| = 0
+    \end{equation}
+    
+    Считаем весь вектор состояния доступным для измерения, тогда регулятор будет иметь вид:
+    \begin{equation}
+        u = K_1 x + K_2 \omega_g
+    \end{equation}
+    
+    Для решения задачи используем виртуальный выход, который и будем устремлять к нулю:
+    \begin{equation}
+        z = C_z x + D_z \omega_g
+    \end{equation}
+    
+    Составим матрицы $C_z$ и $D_z$ для выполнения поставленного выше условия слежения угла маятника $\varphi(t)$ за сигналом $g(t)$:
+    \[
+        C_z = \begin{bmatrix}
+            0 & 0 & 1 & 0
+        \end{bmatrix}, \quad D_z = -Y_g
+    \]
+
+    Далее найдем матрицу $K_1$ с помощью модального управления:
+    \[
+        \sigma(G) = \{-1, -2, -3, -4\} \quad \Rightarrow \quad G = \begin{bmatrix}
+            -1 & 0 & 0 & 0 \\
+            0 & -2 & 0 & 0 \\
+            0 & 0 & -3 & 0 \\
+            0 & 0 & 0 & -4
+        \end{bmatrix}
+    \]
+
+    Откуда:
+    \[
+        K_1 = \begin{bmatrix}
+            1754.8677 & 3655.9743 & -33311.0953 & -11325.9253
+        \end{bmatrix}
+    \]
+
+    Синтез <<feedforward>>-компоненты проведем с помощью решения системы уравнений, обеспечивающих выполнение целевого условия на виртуальный выход $z \to 0$:
+    \begin{equation}
+        \begin{cases}
+            P \Gamma - A P = B Y \\
+            C_z P + D_z = 0
+        \end{cases}
+    \end{equation}
+
+    С помощью решения системы находим матрицу $K_2 = Y - K_1 P$:
+    \[
+        K_2 = \begin{bmatrix}
+            -1476 & -2888 & 611 & -33 & 210 & -176 & 18 & 210 & 218 & 33
+        \end{bmatrix}
+    \]
+
+    Проверим слежение в действии. Для этого промоделируем замкнутые линейную и нелинейную системы (рисунки \ref{fig:fifth_part_slezh_g_nonlin} - \ref{fig:fifth_part_slezh_x_lin}) с начальными условиями 
+    \[
+        x_0 = \begin{bmatrix}
+            0.025 & -0.06 & 0.1 & 0.015
+    \end{bmatrix}^T
+    \]
+
+    Можем видеть, что регулятор успешно справляется с задачей слежения за \textit{небольшим} сигналом $g(t)$, так как вблизи точек равновесия линеаризованная и исходная нелинейная системы ведут себя одинаково. Также виртуальный выход в обоих случаях идет к нулю.
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fifth_part_slezh_g_nonlin.png}
+        \caption{Сигнал $g(t)$ для слежения}
+        \label{fig:fifth_part_slezh_g_nonlin}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fifth_part_slezh_u.png}
+        \caption{Формируемое управление $u(t)$ нелинейной и линейной систем}
+        \label{fig:fifth_part_slezh_u}
+    \end{figure}
+    \begin{figure}
+        \centering  
+        \includegraphics[width=0.8\textwidth]{images/fifth_part_slezh_x_3.png}
+        \caption{$x_3(t) = \varphi(t)$ нелинейной и линейной систем при $u = K_1 x + K_2 \omega_g$}
+        \label{fig:fifth_part_slezh_x_3}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fifth_part_slezh_z.png}
+        \caption{Виртуальный выход $z(t)$ систем при $u = K_1 x + K_2 \omega_g$}
+        \label{fig:fifth_part_slezh_z}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fifth_part_slezh_x_nonlin.png}
+        \caption{Состояния $x(t)$ нелинейной системы при $u = K_1 x + K_2 \omega_g$}
+        \label{fig:fifth_part_slezh_x_nonlin}
+    \end{figure}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/fifth_part_slezh_x_lin.png}
+        \caption{Состояния $x(t)$ линейной системы при $u = K_1 x + K_2 \omega_g$}
+        \label{fig:fifth_part_slezh_x_lin}
+    \end{figure}
+
+    \section{Выводы}
+    В ходе выполнения курсовой работы была получена нелинейная модель маятника на тележке методом Лагранжа, выполнена линеаризация и построены её матрицы $A$, $B$, $C$ и $D$.
+
+    Далее проверены управляемость и наблюдаемость системы. Их полнота позволила синтезировать регуляторы и наблюдатели для последующей задачи стабилизации, слежения и компенсации, так как исходный объект оказался неустойчивым.
+
+    Также сравнение нелинейной и линейной моделей показало корректность линейного приближения в окрестности равновесия и расхождение при больших отклонениях и временах.
+
+    После чего был синтезирован регулятор по состоянию (модальное управление) и исследовано влияние размещения полюсов на быстродействие, смещение тележки и величину управления - их отдаление от мнимой оси ускоряет сходимость, но увеличивает начальные ошибки и колебания. Были получены и наблюдатели полной и пониженной размерности, а также регулятор по выходу. Наблюдатель пониженной размерности позволил сократить затраты на вычисления за счет снятия оценки уже измеряемых состояний, а регулятор по выходу позволил выполнить задачу стабилизации в условиях измерений только выходного сигнала.
+
+    Потом на основе линейных матричных неравенств получены регуляторы с заданной степенью устойчивости и с ограничениями на управление - последние позволили достичь меньших затрат на управление за счет замедления переходных процессов. Было показано, что увеличение требуемой устойчивости ускоряет переход, но повышает величину управления. Были также синтезированы наблюдатели и регуляторы по выходу с заданными степенями устойчивости.
+
+    В заключительном пункте реализованы компенсация возмущения $f(t)$, действующего на маятник, и слежение за сигналом $g(t)$ углом поворота - для малых отклонений цели достигаются, а динамика линейной и нелинейной моделей оказалась близкой.
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+
+    
+
+
+
+
+
+
+    
+
+	
+\end{document}

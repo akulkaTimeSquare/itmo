@@ -1,0 +1,186 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+
+\usepackage{minted, xcolor}
+\usemintedstyle{monokai}
+\definecolor{bg}{HTML}{282828}
+\setminted{bgcolor=bg}
+\setminted{fontsize=\scriptsize}
+\setminted{}
+
+\fancyhead[R]{\textit{Моделирование систем}}
+\fancyhead[L]{Лабораторная работа №1}
+\fancyfoot[C]{Страница \thepage\space из \pageref{LastPage}}
+\fancyfoot[R]{}
+\fancyfoot[L]{}
+\pagestyle{fancy}
+\setlength{\headheight}{17.0pt}
+
+\newcommand{\anonsection}[1]{\section*{#1}\addcontentsline{toc}{section}{#1}}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+				Научно исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №1 \\
+			Моделирование линейных динамических систем
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{minipage}{.48\linewidth}
+			Выполнил студент группы R3380
+			
+			Преподаватели
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.5\linewidth}
+			\begin{flushright}
+				Мовчан И.Е.
+				\\
+				Лопарев А.В., Золотаревич В.П.
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2024
+		\end{center}
+		
+	\end{titlepage}
+	
+	\section{Цель работы}
+	Ознакомление с пакетом прикладных программ SIMULINK и основными приемами моделирования линейных динамических систем.
+	
+	\section{Модель вход-выход}
+	Согласно данным из 11 варианта, построим схему моделирования динамической системы вида
+	$$
+	y^{(2)} + 0.8y' + 30y = 3u' + 30u ,
+	$$
+	переписываемую через оператор дифференцирования $s = \frac{d}{dt}$:
+	$$
+	y = \frac{1}{s}(3u-0.8y) + \frac{1}{s^2}(30u - 30y).
+	$$
+	Вводя новые переменные $z_1 = y$ и $z_2 = y' - 3u + 0.8y$ (выходы интеграторов), можем смоделировать систему в simulink:
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.5]{./images/1.png}
+		\caption{Схема модели вход-выход}
+	\end{figure}
+
+	Теперь, если задать вход $u = 1(t)$, то нулевым начальным условиям по непрерывности слева входа будут соответствовать условия $z_1(0) = y(0) = 0$, а $z_2(0) = y'(0) - 3u(0-) + 0.8y(0) = 0$ (аналогично для входа $2\sin (t)$).
+
+	Графики $u(t)$ и $y(t)$ (при интервале времени от 0 до 15) будут следующими:
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.5]{./images/2.png}
+		\caption{Графики модели вход-выход при $u = 1(t)$}
+	\end{figure}
+
+	Аналогичные рассуждения для $u = 2\sin (t)$ дают рисунок \ref{3} (схема представлена на рисунке \ref{4}):
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.5]{./images/3.png}
+		\caption{Графики модели вход-выход при $u = 2\sin (t)$}
+		\label{3}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.5]{./images/4.png}
+		\caption{Схема модели вход-выход при $u = 2\sin (t)$}
+		\label{4}
+	\end{figure}
+
+	Попробуем теперь поставить ненулевые начальные условия (согласно варианту) $y(0) = 1, y'(0) = 0.5$, а в качестве входной сигнал оставить нулевым. Тогда $z_1(0) = y(0) = 1$, а $z_2(0) = y'(0) - 3u(0) + 0.8y(0) = 0.5 + 0.8 = 1.3$; график $y(t)$ c интервалом времени от о до 15 секунд представлен на рисунке \ref{5}.
+	
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.65]{./images/5.png}
+		\caption{График выходного сигнала с ненулевыми начальными условиями}
+		\label{5}
+	\end{figure}
+
+	\newpage
+	\newpage
+	\newpage
+	
+	\section{Модель вход-состояние-выход}
+	Модель задаётся системой: 
+	$$
+	\begin{cases*}
+		\dot{x}_1 = \phantom{-}0\cdot x_1 +1\cdot x_2 + 1\cdot x_3 + 0\cdot u \\
+		\dot{x}_2 = -4\cdot x_1 - 1\cdot x_2 + 2\cdot x_3 + 2\cdot u \\
+		\dot{x}_3 = \phantom{-}0\cdot x_1 + 1\cdot x_2 - 2\cdot x_3 + 1 \cdot u \\
+		y = _1 + 0\cdot x_2 + 0.5 \cdot x_3
+	\end{cases*}	
+	$$
+
+	Соответствующая схема моделирования:
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.45]{./images/6.png}
+		\caption{Схема модели вход-выход при $u=1(t)$}
+		\label{6}
+	\end{figure}
+	
+	Графики $u(t)$ и $y(t)$ при $u = 1(t)$ и $u = 2\sin (t)$ и нулевых начальных условиях представлены на рисунках \ref{7} и \ref{8}, а для ненулевых начальных условий $x_1(0) = 0.5, x_2(0) = -2, x_3(0) = 0$ и константном нулевом на входе на рисунке \ref{9}
+
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.45]{./images/7.png}
+		\caption{Графики модели вход-состояние-выход при $u = 1(t)$}
+		\label{7}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.45]{./images/8.png}
+		\caption{Графики модели вход-состояние-выход при $u=2\sin (t)$}
+		\label{8}
+	\end{figure}
+
+	\newpage
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.45]{./images/9.png}
+		\caption{График выхода модели при ненулевых начальных условиях}
+		\label{9}
+	\end{figure}
+	\section{Выводы}
+	В ходе выполнения лабораторной работы было изучено построение схем моделей вход-состояние-выход и вход-выход, изучен инструмент вывода графиков в simulink.
+
+\end{document}

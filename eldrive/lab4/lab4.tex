@@ -1,0 +1,272 @@
+ \documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{Лабораторная работа №4}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{Механика электропривода}}
+\fancyfoot[L]{}
+\fancyfoot[C]{Страница \thepage\space из \pageref{LastPage}}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+				Научно исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №4 \\
+			Механика электропривода
+		\end{center}
+		
+		\vspace{45mm}
+		
+		\begin{minipage}{.37\linewidth}
+			Выполнили студенты \\
+			\\
+			\\
+			\\
+			Преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.60\linewidth}
+			\begin{flushright}
+				Мовчан Игорь Евгеньевич \\
+				Демкин Алексей Игоревич \\
+				Ле Ван Хынг \\
+				Будков Ярослав Антонович \\
+				Маматов Александр Геннадьевич
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2025
+		\end{center}
+		
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\section{Исходные данные}
+	Для начала зададимся трёхфазным асинхронным двигателем из каталога. Выберем модель 5AM112M4, для которого:
+	\begin{itemize}
+		\item номинальная мощность $P_n = 5.5$ кВт;
+		\item Номинальная частота вращения $n_n = 1440$ об/мин;
+		\item КПД $\eta = 86\%$
+		\item Коэффициент мощности $\cos \phi = 0.83$
+		\item Номинальное напряжение $U_n = 380$ В;
+		\item Номинальный ток $I_n = 11.7$ А;
+		\item Номинальный момент $M_n = 36.5$ Нм;
+		\item Отношение пускового момента к номинальному $M_p/M_n = 2.6$
+		\item Отношение пускового тока к номинальному $I_p/I_n = 6.7$
+		\item Отношение $\lambda = M_{max}/M_n = 2.2$
+		\item Момент инерции $J = 0.02$ кгм$^2$
+		\item Масса 56.5 кг
+		\item Сервис-фактор $F_s = 1.15$
+	\end{itemize}
+
+	Также имеем:
+	\begin{itemize}
+		\item Частота питания $f_s = 50$ Гц;
+		\item Число фаз двигателя $m_1 = 3$
+	\end{itemize}
+
+	\newpage
+
+	\section{Расчёт параметров схемы замещения}
+	Расчитаем дополнительные параметры:
+	\[
+		U_{1N} = \frac{U_n}{\sqrt{3}} = \frac{380}{\sqrt{3}} \approx 219.393 \text{ В}
+	\]
+	\[
+		I_{1N} = I_n = 11.7 \text{ А}
+	\]
+	
+	Угловая частота сети:
+	\[
+		\omega_1 = 2\pi f \approx 314.16 \text{ рад/с}
+	\]
+
+	Скольжение:
+	\[
+		s_n = 1 - \frac{n_n}{n_1} = 1 - \frac{1440}{1500} = 0.04
+	\]
+
+	Определим активное сопротивление статора через потери:
+	\[
+		\Delta P_{1 Cu} = m_1 I_{1N}^2 r_1 = m_1 U_{1N} I_{1N} \cos \phi - \frac{M_n \omega_1}{z_p}
+	\]
+
+	Откуда:
+	\[
+		r_1 = \frac{m_1 U_{1N} I_{1N} \cos \phi - \frac{M_n \omega_1}{z_p}}{m_1 I_{1N}^2} \approx 1.6 \text{ Ом}
+	\]
+
+	Здесь принято $z_p = 2$ - число пар полюсов.
+
+	Активное сопротивление ротора:
+	\[
+		r'_2 = \frac{m_1 z_p U_{1N}^2 s_n}{M_n \omega_1} \approx 1.007 \text{ Ом}
+	\]
+
+	Вычислим:
+	\[
+		a(r'_2) = \frac{r_1}{r'_2} = 1 - 2a(r'_2)s_n(\lambda - 1) \approx 1.589
+	\]
+	\[
+		s_m(r'_2) = s_n(\lambda + \sqrt{\lambda^2 - a(r'_2)}) \approx 0.16
+	\]
+	\[
+		x_{ks}(r'_2) = \sqrt{\left(\frac{r'_2}{s_m(r'_2)}\right)^2 - r_1^2} \approx 6.087
+	\]
+	\[
+		b(r'_2) = \frac{x_{ks}(r'_2)}{(r_1 + \frac{r'_2}{s_n})^2 + (x_{ks}(r'_2))^2} \approx 0.008
+	\]
+	\[
+		x_m(r'_2) = \frac{1}{\frac{I_n\sqrt{1 - cos^2\phi}}{U_{1N}} - b(r'_2)} \approx 45.988
+	\]
+
+	Откуда:
+	\[
+		I'_2(r'_2) = \frac{U_{1N}}{\sqrt{(r_1 + \frac{r'_2}{s_m(r'_2)})^2 + (x_{ks}(r'_2))^2}} \approx 4.7
+	\]
+
+	Также имеем:
+	\[
+		x_{1\sigma} = x_{2\sigma} = x_{ks}(r'_2) / 2 \approx 3.0435
+	\]
+
+	\section{Различные характеристики}
+	Механические характеристики будем рассчитывать по формуле:
+	\[
+		M(s) = \frac{m_1 z_p U_{1N}^2 r'_2}{\omega_1 s ((r_1 + \frac{r'_2}{s})^2 + (x_{1\sigma} + x_{2\sigma})^2)}
+	\]
+	\[
+		I_2 = \frac{U_{1N}}{\sqrt{(r_1 + \frac{r'_2}{s})^2 + (x_{1\sigma} + x_{2\sigma})^2}}
+	\]
+
+	Электромагнитные характеристики:
+	\[
+		M_k(s) = \frac{m_1 z_p U_{1N}^2 r'_2 k_r}{\omega_1 s ((r_1 + \frac{r'_2}{s})^2 + (x_{1\sigma} + x_{2\sigma}k_x)^2)}
+	\]
+	\[
+		I'_{2k} = \frac{U_{1N}}{\sqrt{(r_1 + \frac{r'_2}{s})^2 + (x_{1\sigma} + x_{2\sigma}k_x)^2}}
+	\]
+
+	Рабочие характеристики АД. Активная мощность:
+	\[
+		P_2 = m_1 I_2^2 r'_2 \frac{1 - s}{s}
+	\]
+	\[
+		P_1 = P_2 + m_1 I_1^2 r_1 + m_1 I_2^2 r'_2,
+	\]
+
+	где
+	\[
+		I_1 = I'_2 + \frac{U_{1N}}{c_1 x_m}
+	\]
+
+	КПД:
+	\[
+		\eta = \frac{P_2}{P_1}
+	\]
+	
+	Коэффициент мощности:
+	\[
+		\cos \phi = \frac{P_1}{3U_{1N} I_1}
+	\]
+
+	Перейдем к моделированию.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.7\textwidth]{figures/M_s.png}
+		\caption{Механическая характеристика $M(s)$}
+	\end{figure}
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{figures/M_k_s.png}
+		\caption{Электромагнитная характеристика $M_k(s)$}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{figures/I_2.png}
+		\caption{Ток ротора $I_2(s)$}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{figures/I_2k.png}
+		\caption{Ток ротора $I'_{2k}(s)$}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{figures/P_2.png}
+		\caption{Активная мощность $P_2(s)$}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{figures/P_1.png}
+		\caption{Подводимая мощность $P_1(s)$}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{figures/eta.png}
+		\caption{КПД $\eta(s)$}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\textwidth]{figures/cos_phi.png}
+		\caption{Коэффициент мощности $\cos \phi(s)$}
+	\end{figure}
+
+	\newpage
+	\section{Вывод}
+	В ходе работы мы получили механические и электромагнитные характеристики АД, а также рабочие характеристики.
+	Построенные графики соответствуют теоретическим расчетам, значения на графиках близки к данной справочной информации.
+
+
+
+
+	
+
+
+
+	
+
+
+	
+\end{document}

@@ -1,0 +1,1203 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\large\bfseries}
+  {\thesection}{1em}{}
+\fancyhead[L]{Лабораторная работа Е}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{Управление многоканальной системой}}
+\fancyfoot[L]{}
+\fancyfoot[C]{\thepage}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+\let\oldemptyset\emptyset
+\let\emptyset\varnothing
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+				Научно исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе Е \\
+			Управление многоканальной системой \\
+            Вариант 11
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{minipage}{.48\linewidth}
+			Выполнил студент группы R3480
+			
+			Преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.5\linewidth}
+			\begin{flushright}
+				Мовчан Игорь Евгеньевич
+				\\
+				Пашенко Артем Витальевич
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2025
+		\end{center}
+		
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\section{Исследование свойств многоканальной системы}
+    Рассмотрим многоканальную систему
+    \[
+	\begin{cases}
+		\dot{x} = Ax + Bu \\
+		y = Cx
+	\end{cases}
+    \]
+
+    В соответствии с вариантом, матрицы $A$, $B$ и $C$ имеют вид:
+    \[
+        A = \begin{bmatrix}
+            0 & 1 \\
+            -1 & 1
+        \end{bmatrix}, \quad
+        B = \begin{bmatrix}
+            1 & 2 \\
+            1 & 0
+        \end{bmatrix}, \quad
+        C = \begin{bmatrix}
+            1 & -2 \\
+            0 & 3
+        \end{bmatrix}
+    \]
+
+	Определеим собственные числа матрицы $A$:
+	\[
+		\det(A - \lambda I) = \begin{vmatrix}
+			-\lambda & 1 \\
+			-1 &  1 - \lambda
+		\end{vmatrix} = \lambda^2 - \lambda + 1 = 0 \Rightarrow \lambda = \frac{1 \pm \sqrt{3}i}{2}
+	\]
+
+	Теперь определим передаточную матрицу $W(s)$ системы:
+	\[
+	\begin{cases}
+		\dot{x} = Ax + Bu \\
+		y = Cx
+	\end{cases} \Rightarrow
+	\begin{cases}
+		sX = AX + BU \\
+		Y = CX
+	\end{cases} \Rightarrow
+	\begin{cases}
+		(sI - A)X = BU \\
+		Y = CX
+	\end{cases}
+	\]
+	\[
+		\begin{cases}
+			(sI - A)X = BU \\
+			Y = CX
+		\end{cases} \Rightarrow
+		\begin{cases}
+			X = (sI - A)^{-1}BU \\
+			Y = CX
+		\end{cases}
+	\]
+
+	Откуда:
+	\[
+		Y = CX = C(sI - A)^{-1}BU
+	\]
+	\[
+		W(s) = \frac{Y}{U} = C(sI - A)^{-1}B = \begin{bmatrix}
+			\frac{2 - s}{s^2 - s + 1} &  \frac{2(s + 1)}{s^2 - s + 1} \\
+			\\
+			\frac{3(s - 1)}{s^2 - s + 1} & \frac{-6}{s^2 - s + 1}
+		\end{bmatrix}
+	\]
+
+	Рассчитаем нулей и полюсов системы. Для этого найдем определитель матрицы $W(s)$:
+	\[
+		\det(W(s)) = \begin{vmatrix}
+			\frac{2 - s}{s^2 - s + 1} & \frac{2(s + 1)}{s^2 - s + 1} \\
+			\frac{3(s - 1)}{s^2 - s + 1} & \frac{-6}{s^2 - s + 1}
+		\end{vmatrix} = \frac{-6}{s^2 - s + 1}
+	\]
+
+	Следовательно, нулей у системы нет, а полюса равны $\frac{1 \pm \sqrt{3}i}{2}$. Также важно, что знаменатель определителя матрицы $W(s)$ совпадает с характеристическим полиномом матрицы $A$, значит, полюса системы равны её собственным числам. Таким образом, передаточная матрица полностью отражает динамику системы, и её характеристики можно спокойно рассматривать для исследования свойств.
+
+	Исследуем систему на управляемость по состоянию и стабилизируемость. Для этого найдем матрицу управляемости:
+	\[
+		U = \begin{bmatrix}
+			B & AB
+		\end{bmatrix} = \begin{bmatrix}
+			1 & 2 & 1 & 0 \\
+			1 & 0 & 0 & -2
+		\end{bmatrix}
+	\]
+
+	Откуда:
+	\[
+		\text{rank}(U) = 2
+	\]
+
+	Ранг матрицы $U$ равен размерности вектора состояния, а значит, система полностью управляема, следовательно, и стабилизируема (так как вообще нет неуправляемых мод).
+
+	Исследуем систему на наблюдаемость. Для этого найдем матрицу наблюдаемости:
+	\[
+		V = \begin{bmatrix}
+			C \\ CA
+		\end{bmatrix} = \begin{bmatrix}
+			1 & -2 \\
+			0 & 3 \\
+			2 & -1 \\
+			-3 & 3
+		\end{bmatrix}
+	\]
+
+	Откуда:
+	\[
+		\text{rank}(V) = 2
+	\]
+
+	Ранг матрицы $V$ равен размерности вектора состояния, значит, система полностью наблюдаема, следовательно, обнаруживаема (так как нет ненаблюдаемых мод).
+
+	Исследуем систему на управляемость по выходу. Для этого найдем матрицу управляемости по выходу:
+	\[
+		U_y = CU = \begin{bmatrix}
+			CB & CAB
+		\end{bmatrix} = \begin{bmatrix}
+			-1 & 2 & 1 & 4 \\
+			3 & 0 & 0 & -6
+		\end{bmatrix}
+	\]
+
+	Откуда:
+	\[
+		\text{rank}(U_y) = 2
+	\]
+
+	Ранг матрицы $U_y$ равен количеству выходов, а значит, система полностью управляема по выходу.
+
+	Выведем выражения для временных характеристик системы. Для весовой характеристики (реакции на импульс) поэлементно найдем обратное преобразование Лапласа от передаточной матрицы $W(s)$, найденной ранее:
+	\[
+		\omega(t) = \begin{bmatrix}
+			w_{11}(t) & w_{12}(t) \\
+			w_{21}(t) & w_{22}(t)
+		\end{bmatrix} = \mathcal{L}^{-1}\{W(s)\} = 
+		\mathcal{L}^{-1}\left\{\begin{bmatrix}
+			W_{11}(s) &  W_{12}(s) \\
+			W_{21}(s) & W_{22}(s)
+		\end{bmatrix}\right\} =
+	\]
+	\[
+		= \begin{bmatrix}
+			\mathcal{L}^{-1}\left\{W_{11}(s)\right\} & \mathcal{L}^{-1}\left\{W_{12}(s)\right\} \\
+			\mathcal{L}^{-1}\left\{W_{21}(s)\right\} & \mathcal{L}^{-1}\left\{W_{22}(s)\right\}
+		\end{bmatrix}
+		= \begin{bmatrix}
+			\mathcal{L}^{-1}\left\{\frac{2 - s}{s^2 - s + 1}\right\} & \mathcal{L}^{-1}\left\{\frac{2(s + 1)}{s^2 - s + 1}\right\} \\
+			\mathcal{L}^{-1}\left\{\frac{3(s - 1)}{s^2 - s + 1}\right\} & \mathcal{L}^{-1}\left\{\frac{-6}{s^2 - s + 1}\right\}
+		\end{bmatrix}
+	\]
+
+	Найдем обратный образ Лапласа от каждого элемента, используя таблицу стандартных преобразований:
+	\[
+	\omega_{11}(t) = \mathcal{L}^{-1}\left\{\frac{2-s}{s^{2}-s+1}\right\}
+	=\mathcal{L}^{-1}\left\{\frac{-(s-\frac{1}{2})+\tfrac{3}{2}}{(s-\frac{1}{2})^{2}+\frac{3}{4}}\right\} = 
+	\]
+	\[
+	=e^{\tfrac{t}{2}}\left(-\cos\left(\frac{\sqrt{3}}{2} t\right)+\frac{3}{2}\cdot\frac{1}{\frac{\sqrt{3}}{2}}\sin\left(\frac{\sqrt{3}}{2} t\right)\right) =
+	\]
+	\[
+	= e^{\tfrac{t}{2}}\left(-\cos\left(\frac{\sqrt{3}}{2} t\right)+\sqrt{3}\sin\left(\frac{\sqrt{3}}{2} t\right)\right)
+	\]
+	\[
+	\omega_{12}(t) = \mathcal{L}^{-1}\left\{\frac{2(s+1)}{s^{2}-s+1}\right\}
+	=\mathcal{L}^{-1}\left\{\frac{2(s-\frac{1}{2})+3}{(s-\frac{1}{2})^{2}+\frac{3}{4}}\right\}
+	\]
+	\[
+	= e^{\tfrac{t}{2}}\left(2\cos\left(\frac{\sqrt{3}}{2} t\right)+2\sqrt{3}\sin\left(\frac{\sqrt{3}}{2} t\right)\right)
+	\]
+	\[
+	\omega_{21}(t) = \mathcal{L}^{-1}\left\{\frac{3(s-1)}{s^{2}-s+1}\right\}
+	=\mathcal{L}^{-1}\left\{\frac{3(s-\frac{1}{2})-\tfrac{3}{2}}{(s-\frac{1}{2})^{2}+\frac{3}{4}}\right\}
+	\]
+	\[
+	= e^{\tfrac{t}{2}}\left(3\cos\left(\frac{\sqrt{3}}{2} t\right)-\sqrt{3}\sin\left(\frac{\sqrt{3}}{2} t\right)\right)
+	\]
+	\[
+	\omega_{22}(t)
+	=\mathcal{L}^{-1}\left\{\frac{-6}{s^{2}-s+1}\right\}
+	=\mathcal{L}^{-1}\left\{\frac{-6}{(s-\frac{1}{2})^{2}+\frac{3}{4}}\right\}
+	=
+	\]
+	\[
+	= e^{\tfrac{t}{2}}\left(-4\sqrt{3}\sin\left(\frac{\sqrt{3}}{2} t\right)\right)
+	\]
+
+	Итоговая матрица (весовая характеристика) тогда:
+	\[
+	\omega(t) = e^{\tfrac{t}{2}}\begin{bmatrix}
+	-\cos\left(\tfrac{\sqrt{3}t}{2}\right)+\sqrt{3}\sin\left(\tfrac{\sqrt{3}t}{2}\right) &
+	2\cos\left(\tfrac{\sqrt{3}t}{2}\right)+2\sqrt{3}\sin\left(\tfrac{\sqrt{3}t}{2}\right)\\[6pt]
+	3\cos\left(\tfrac{\sqrt{3}t}{2}\right)-\sqrt{3}\sin\left(\tfrac{\sqrt{3}t}{2}\right) &
+	-4\sqrt{3}\sin\left(\tfrac{\sqrt{3}t}{2}\right)
+	\end{bmatrix}
+	\]
+
+	Выведем также выражения для переходной характеристики:
+	\[
+		h(t) = \begin{bmatrix}
+			h_{11}(t) & h_{12}(t) \\
+			h_{21}(t) & h_{22}(t)
+		\end{bmatrix} = \mathcal{L}^{-1}\left\{\frac{W(s)}{s}\right\}
+	\]
+
+	Найдем обратный образ от каждого элемента:
+	\[
+	h_{11}(t)=\mathcal{L}^{-1}\left\{\frac{2-s}{s(s^{2}-s+1)}\right\}
+	=\mathcal{L}^{-1}\left\{\frac{2}{s}-\frac{2s-1}{s^{2}-s+1}\right\}=
+	\]
+	\[
+	= \mathcal{L}^{-1}\left\{\frac{2}{s}-2\frac{s-\frac{1}{2}}{(s-\frac{1}{2})^{2}+\frac{3}{4}}\right\}
+	= 2-2e^{\tfrac{t}{2}}\cos\left(\frac{\sqrt{3}}{2}t\right)
+	\]
+	\[
+	h_{12}(t)=\mathcal{L}^{-1}\left\{\frac{2(s+1)}{s(s^{2}-s+1)}\right\}
+	=\mathcal{L}^{-1}\left\{\frac{2}{s}+\frac{2(2-s)}{s^{2}-s+1}\right\}=
+	\]
+	\[
+	=
+	2 + 2\mathcal{L}^{-1}\left\{-\frac{s-\frac{1}{2} - \frac{3}{2}}{(s-\frac{1}{2})^{2}+\frac{3}{4}}\right\}=
+	\]
+	\[
+	= 2+2e^{\tfrac{t}{2}}\left(-\cos\left(\frac{\sqrt{3}}{2}t\right)+\sqrt{3}\sin\left(\frac{\sqrt{3}}{2}t\right)\right)
+	\]
+	\[
+	h_{21}(t)=\mathcal{L}^{-1}\left\{\frac{3(s-1)}{s(s^{2}-s+1)}\right\}
+	=\mathcal{L}^{-1}\left\{-\frac{3}{s}+\frac{3s}{s^{2}-s+1}\right\}= 
+	\]
+	\[
+	=-3+\mathcal{L}^{-1}\left\{\frac{3(s-\frac{1}{2})+\frac{3}{2}}{(s-\frac{1}{2})^{2}+\frac{3}{4}}\right\}=
+	\]
+	\[
+	=
+	-3+e^{\tfrac{t}{2}}\left(3\cos\left(\frac{\sqrt{3}}{2}t\right)+\sqrt{3}\sin\left(\frac{\sqrt{3}}{2}t\right)\right)
+	\]
+	\[
+	h_{22}(t)=\mathcal{L}^{-1}\left\{\frac{-6}{s(s^{2}-s+1)}\right\}
+	=\mathcal{L}^{-1}\left\{-\frac{6}{s}+\frac{6(s-1)}{s^{2}-s+1}\right\}=
+	\]
+	\[
+	=-6+\mathcal{L}^{-1}\left\{\frac{6(s-\frac{1}{2})-3}{(s-\frac{1}{2})^{2}+\frac{3}{4}}\right\} =
+	\]
+	\[
+	=
+	-6+e^{\tfrac{t}{2}}\left(6\cos\left(\frac{\sqrt{3}}{2}t\right)-2\sqrt{3}\sin\left(\frac{\sqrt{3}}{2}t\right)\right)
+	\]
+
+	Итоговая матрица переходной характеристики:
+	\[
+	h(t)=
+	\small
+	\begin{bmatrix}
+	2-2e^{\tfrac{t}{2}}\cos\tfrac{\sqrt{3}}{2}t &
+	2+e^{\tfrac{t}{2}}\left(-2\cos\tfrac{\sqrt{3}}{2}t+2\sqrt{3}\sin\tfrac{\sqrt{3}}{2}t\right)\\[8pt]
+	-3+e^{\tfrac{t}{2}}\left(3\cos\tfrac{\sqrt{3}}{2}t+\sqrt{3}\sin\tfrac{\sqrt{3}}{2}t\right) &
+	-6+e^{\tfrac{t}{2}}\left(6\cos\tfrac{\sqrt{3}}{2}t-2\sqrt{3}\sin\tfrac{\sqrt{3}}{2}t\right)
+	\end{bmatrix}
+	\]
+
+	Построим графики найденных временных характеристик:
+
+	Теперь найдем частотные характеристики системы. Для этого сначала вычислим матрицу $W(j\omega)$:
+	\[
+		W(j\omega) = \begin{bmatrix}
+			W_{11}(j\omega) & W_{12}(j\omega) \\
+			W_{21}(j\omega) & W_{22}(j\omega)
+		\end{bmatrix} = \begin{bmatrix}
+			\frac{2 - j\omega}{(j\omega)^2 - j\omega + 1} & \frac{2(j\omega + 1)}{(j\omega)^2 - j\omega + 1} \\
+			\frac{3(j\omega - 1)}{(j\omega)^2 - j\omega + 1} & \frac{-6}{(j\omega)^2 - j\omega + 1}
+		\end{bmatrix} = 
+	\]
+	\[
+		= \begin{bmatrix}
+			\frac{2 - j\omega}{1 - \omega^2 - j\omega} & \frac{2(j\omega + 1)}{1 - \omega^2 - j\omega} \\
+			\frac{3(j\omega - 1)}{1 - \omega^2 - j\omega} & \frac{-6}{1 - \omega^2 - j\omega}
+		\end{bmatrix}
+	\]
+
+	Найдем модуль каждого элемента:
+	\[
+		|W_{11}(j\omega)| = \left|\frac{2 - j\omega}{1 - \omega^2 - j\omega}\right| = \sqrt{\frac{4 + \omega^2}{(1 - \omega^2)^2 + \omega^2}} = \sqrt{\frac{4 + \omega^2}{1 - \omega^2 + \omega^4}}
+	\]
+	\[
+		|W_{12}(j\omega)| = \left|\frac{2(j\omega + 1)}{1 - \omega^2 - j\omega}\right| = 2\sqrt{\frac{1 + \omega^2}{(1 - \omega^2)^2 + \omega^2}} = 2\sqrt{\frac{1 + \omega^2}{1 - \omega^2 + \omega^4}}
+	\]
+	\[
+		|W_{21}(j\omega)| = \left|\frac{3(j\omega - 1)}{1 - \omega^2 - j\omega}\right| = 3\sqrt{\frac{1 + \omega^2}{(1 - \omega^2)^2 + \omega^2}} = 3\sqrt{\frac{1 + \omega^2}{1 - \omega^2 + \omega^4}}
+	\]
+	\[
+		|W_{22}(j\omega)| = \left|\frac{-6}{1 - \omega^2 - j\omega}\right| = 6\sqrt{\frac{1}{(1 - \omega^2)^2 + \omega^2}} = 6\sqrt{\frac{1}{1 - \omega^2 + \omega^4}}
+	\]
+
+	Таким образом, получим АЧХ:
+	\[
+		A(\omega) =
+		\frac{1}{\sqrt{1 - \omega^2 + \omega^4}}\begin{bmatrix}
+			\sqrt{4 + \omega^2} & 2\sqrt{1 + \omega^2} \\
+			3\sqrt{1 + \omega^2} & 6
+		\end{bmatrix}
+	\]
+
+	Также можно получить ЛАЧХ:
+	\[
+		L(\omega) = \begin{bmatrix}
+			L_{11}(\omega) & L_{12}(\omega) \\
+			L_{21}(\omega) & L_{22}(\omega)
+		\end{bmatrix} =20\lg (A(\omega)) = 20\lg|W(j\omega)|
+	\]
+
+	Где, вычисляя каждый элемент, можно получить:
+	\[
+		L_{11}(\omega) = 20\lg|W_{11}(j\omega)| = 10\lg(4 + \omega^2) - 10\lg(1 - \omega^2 + \omega^4)
+	\]
+	\[
+		L_{12}(\omega) = 20\lg|W_{12}(j\omega)| = 20\lg2 + 10\lg(1 + \omega^2) - 10\lg(1 - \omega^2 + \omega^4)
+	\]
+	\[
+		L_{21}(\omega) = 20\lg|W_{21}(j\omega)| = 20\lg3 + 10\lg(1 + \omega^2) - 10\lg(1 - \omega^2 + \omega^4)
+	\]
+	\[
+		L_{22}(\omega) = 20\lg|W_{22}(j\omega)| = 20\lg6 - 10\lg(1 - \omega^2 + \omega^4)
+	\]
+	
+	Найдем теперь фазу каждого элемента. Для этого воспользуемся тем, что фаза дроби равна разности фаз числителя и знаменателя. Знаменатель $D(j \omega) = 1 - \omega^2 - j\omega$ общий для всех элементов: 
+	\[
+		\arg (D(j \omega)) = \text{atan2}(-\omega, 1 - \omega^2) = -\text{atan2}(\omega, 1 - \omega^2)
+	\]
+
+	Фазы числителей же:
+	\[
+		N_{11}(\omega) = 2 - j\omega \Rightarrow \arg (N_{11}(\omega)) = \text{atan2}(-\omega, 2) = -\text{atan2}(\omega, 2)
+	\]
+	\[
+		N_{12}(\omega) = 2(1 + j\omega) \Rightarrow \arg (N_{12}(\omega)) = \text{atan2}(\omega, 1)
+	\]
+	\[
+		N_{21}(\omega) = 3(1 - j\omega) \Rightarrow \arg (N_{21}(\omega)) = \text{atan2}(\omega, -1)
+	\]
+	\[
+		N_{22}(\omega) = -6 \Rightarrow \arg (N_{22}(\omega)) = \pi
+	\]
+
+	Таким образом, ФЧХ каждого элемента:
+	\[
+		\Phi_{11}(\omega) = -\text{atan2}(\omega, 2) + \text{atan2}(\omega, 1 - \omega^2)
+	\]
+	\[
+		\Phi_{12}(\omega) = \text{atan2}(\omega, 1) + \text{atan2}(\omega, 1 - \omega^2)
+	\]
+	\[
+		\Phi_{21}(\omega) = \text{atan2}(\omega, -1) + \text{atan2}(\omega, 1 - \omega^2)
+	\]
+	\[
+		\Phi_{22}(\omega) = \pi + \text{atan2}(\omega, 1 - \omega^2)
+	\]
+
+	В виде матрицы:
+	\[
+		\Phi(\omega) = 
+		\small
+		\begin{bmatrix}
+			-\text{atan2}(\omega, 2) + \text{atan2}(\omega, 1 - \omega^2) & \text{atan2}(\omega, 1) + \text{atan2}(\omega, 1 - \omega^2) \\
+			\text{atan2}(\omega, -1) + \text{atan2}(\omega, 1 - \omega^2) & \pi + \text{atan2}(\omega, 1 - \omega^2)
+		\end{bmatrix}
+	\]
+
+	Построим графики всех найденных характеристик. На рисунках \ref{fig:W} и \ref{fig:H} изображены весовая и переходная характеристики (реакции на импульс и единичный скачок соответственно), а на рисунках \ref{fig:A}-\ref{fig:F_log} - графики АЧХ, ЛАЧХ, ФЧХ и ЛФЧХ (частотные характеристики) соответственно.
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/W.png}
+		\caption{Весовая характеристика многоканальной системы}
+		\label{fig:W}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/H.png}
+		\caption{Переходная характеристика многоканальной системы}
+		\label{fig:H}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/A.png}
+		\caption{АЧХ многоканальной системы}
+		\label{fig:A}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/L.png}
+		\caption{ЛАЧХ многоканальной системы}
+		\label{fig:L}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/F.png}
+		\caption{ФЧХ многоканальной системы}
+		\label{fig:F}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/F_log.png}
+		\caption{ЛФЧХ многоканальной системы}
+		\label{fig:F_log}
+	\end{figure}
+
+	Таким образом, была определена передаточная матрица системы, найдены её нули (пустое множество) и полюса, получено, что последние полностью совпадают с собственными числами матрицы $A$. Исследуемая система оказалась полностью управляемой по состоянию и выходу, полностью наблюдаемой. Были выведены и замоделированы временные (весовая и переходная) и частотные (АЧХ, ЛАЧХ, ФЧХ и ЛФЧХ) характеристики системы.
+	
+	\newpage
+	\section{Слежение в условиях внешних возмущений}
+
+	Рассмотрим многоканальную систему
+	\[
+	\begin{cases}
+		\dot{x} = A x + B u + B_f f_1 \\
+		z = C_z x + D_z u - g \\
+		y = C x + D u + D_f f_2
+	\end{cases}\quad 
+	x(0) = \begin{bmatrix}
+		1 &
+		1
+	\end{bmatrix}^T
+	\]
+
+	Оставим матрицы $A$, $B$ и $C$ теми же, $D$ зададим, в итоге получим:
+	\[
+		A = \begin{bmatrix}
+			0 & 1 \\
+			-1 & 1
+		\end{bmatrix}, \quad
+		B = \begin{bmatrix}
+			1 & 2 \\
+			1 & 0
+		\end{bmatrix}, \quad
+		C = \begin{bmatrix}
+			1 & -2 \\
+			0 & 3
+		\end{bmatrix}, \quad
+		D = \begin{bmatrix}
+			-3 & 0 \\
+			0 & 1
+		\end{bmatrix}
+	\]
+
+	А матрицы $B_f$, $D_f$, $C_z$ и $D_z$ согласно варианту, имеют вид:
+	\[
+		B_f = \begin{bmatrix}
+			1 & 2 \\
+			1 & 3
+		\end{bmatrix}, \quad
+		D_f = \begin{bmatrix}
+			1 & 0 \\
+			0 & 1
+		\end{bmatrix}, \quad
+		C_z = \begin{bmatrix}
+			1 & 2 \\
+			4 & 0
+		\end{bmatrix}, \quad
+		D_z = \begin{bmatrix}
+			4 & 0 \\
+			0 & 1
+		\end{bmatrix}
+	\]
+
+	Также рассмотрим внешние воздействия $f_1$, $f_2$ и $g$:
+	\[
+		f_1 = \begin{bmatrix}
+			7 \cos(7t) \\
+			3 \sin(t)
+		\end{bmatrix}, \quad
+		f_2 = \begin{bmatrix}
+			5 \sin(3t) \\
+			3 \cos(7t)
+		\end{bmatrix}, \quad
+		g = \begin{bmatrix}
+			2 \cos(2t) \\
+			3 \sin(2t)
+		\end{bmatrix}
+	\]
+
+	Далее будем считать, что только величины $y(t)$ и $g(t)$ являются доступными к измерению.
+
+	Исследуем систему на управляемость по состоянию и стабилизируемость. Найдем матрицу управляемости:
+	\[
+		U = \begin{bmatrix}
+			B & AB
+		\end{bmatrix} = \begin{bmatrix}
+			1 & 2 & 1 & 0 \\
+			1 & 0 & 0 & -2
+		\end{bmatrix}
+	\]
+
+	Откуда:
+	\[
+		\text{rank}(U) = 2
+	\]
+	
+	Ранг оказался равен размерности вектора состояния, значит, система является полностью управляемой по состоянию, следовательно, и стабилизируемой (так как не оказалось неуправляемых мод).
+
+	Проверим теперь систему на наблюдаемость и обнаруживаемость относительно выхода $y(t)$. Найдем матрицу наблюдаемости:
+	\[
+		V_y = \begin{bmatrix}
+			C \\
+			CA
+		\end{bmatrix} = \begin{bmatrix}
+			1 & -2 \\
+			0 & 3 \\
+			2 & -1 \\
+			-3 & 3
+		\end{bmatrix}
+	\]
+
+	Откуда:
+	\[
+		\text{rank}(V_y) = 2
+	\]
+	
+	Опять-таки, ранг равен размерности вектора состояния, значит, система является полностью наблюдаемой относительно выхода $y(t)$, следовательно, и обнаруживаемой.
+
+	Также исследуем систему на наблюдаемость относительно виртуального (\textit{регулируемого}) выхода $z(t)$. Найдем матрицу $V_z$:
+	\[
+		V_z = \begin{bmatrix}
+			C_z \\
+			C_zA
+		\end{bmatrix} = \begin{bmatrix}
+			1 & 2 \\
+			4 & 0 \\
+			-2 & 3 \\
+			0 & 4
+		\end{bmatrix}
+	\]
+
+	Откуда:
+	\[
+		\text{rank}(V_z) = 2
+	\]
+	
+	В итоге ранг равен размерности системы, значит, она является полностью наблюдаемой относительно виртуального (\textit{регулируемого}) выхода $z(t)$, следовательно, и обнаруживаемой.
+
+	Проанализируем также на управляемость по выходам $y(t)$ и $z(t)$. Найдем матрицы управляемости:
+	\[
+		U_y = \begin{bmatrix}
+			C U & D
+		\end{bmatrix} = \begin{bmatrix}
+			C B & C A B & D
+		\end{bmatrix}
+		= \begin{bmatrix}
+			-1 &  2 & 1 & 4 & -3 & 0 \\
+			3 & 0 & 0 & -6 & 0 & 1
+		\end{bmatrix}
+	\]
+	\[
+		U_z = \begin{bmatrix}
+			C_z U & D_z
+		\end{bmatrix} = \begin{bmatrix}
+			C_z B & C_z A B & D_z
+		\end{bmatrix} = \begin{bmatrix}
+			3 & 2 & 1 & -4 & -3 & 0 \\
+			4 & 8 & 4 & 0 & 0 & 1
+		\end{bmatrix}
+	\]
+
+	Откуда:
+	\[
+		\text{rank}(U_y) = \text{rank}(U_z) = 2
+	\]
+	
+	Ранги оказались равны размерности вектора состояния, значит, система является полностью управляемой по выходам $y(t)$ и $z(t)$.
+	
+	Составим передаточные матрицы системы от управляющего воздействия $u(t)$ к выходам $y(t)$ и $z(t)$:
+	\[
+		W_y(s) = C(sI - A)^{-1}B + D = \frac{1}{s^2 - s + 1}\begin{bmatrix}
+			-3s^2 + 2s - 1 & 2(s + 1) \\
+			3(s - 1) & s^2 - s - 5
+		\end{bmatrix}
+	\]
+	\[
+		W_z(s) = C_z(sI - A)^{-1}B + D_z = \frac{1}{s^2 - s + 1}\begin{bmatrix}
+			-3s^2 + 6s - 5 & 2(s - 3) \\
+			4s & s^2 + 7s - 7
+		\end{bmatrix}
+	\]
+
+	Найдем определители найденных передаточных матриц:
+	\[
+		\det(W_y(s)) = \frac{-3s^2 + 2s + 11}{s^2 - s + 1} \neq 0
+	\]
+	\[
+		\det(W_z(s)) = \frac{-3s^2 - 18s + 35}{s^2 - s + 1} \neq 0
+	\]
+
+	Получается, определители передаточных функций тождественно не равны нулю, значит, $W_y(s)$ и $W_z(s)$ не вырождены.
+
+	Теперь зададим генератор внешних воздействий с начальными условиями $\omega(0)$:
+	\[
+		\begin{cases}
+			\dot{\omega} = \Gamma_\omega \omega \\
+			g = Y_g \omega \\
+			f_1 = Y_1 \omega \\
+			f_2 = Y_2 \omega
+		\end{cases}
+	\]
+	
+	Матрицу $\Gamma$ зададим так, чтобы она включала все необходимые гармоники, используемые в воздействиях:
+	\[
+		\Gamma = \begin{bmatrix}
+			0 & 1 & 0 & 0 & 0 & 0 & 0 & 0\\
+			-1 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+			0 & 0 & 0 & 2 & 0 & 0 & 0 & 0\\
+			0 & 0 & -2 & 0 & 0 & 0 & 0 & 0\\
+			0 & 0 & 0 & 0 & 0 & 3 & 0 & 0 \\
+			0 & 0 & 0 & 0 & -3 & 0 & 0 & 0 \\
+			0 & 0 & 0 & 0 & 0 & 0 & 0 & 7 \\
+			0 & 0 & 0 & 0 & 0 & 0 & -7 & 0
+		\end{bmatrix}
+	\]
+
+	Тогда:
+	\[
+		g = \begin{bmatrix}
+			2 \cos(2t) \\
+			3 \sin(2t)
+		\end{bmatrix} \Rightarrow
+		Y_g = \begin{bmatrix}
+			0 & 0 & 2 & 0 & 0 & 0 & 0 & 0 \\
+            0 & 0 & 0 & -3 & 0 & 0 & 0 & 0
+		\end{bmatrix}
+	\]
+	\[
+		f_1 = \begin{bmatrix}
+			7 \cos(7t) \\
+			3 \sin(t)
+		\end{bmatrix} \Rightarrow
+		Y_1 = \begin{bmatrix}
+			0 & 0 & 0 & 0 & 0 & 0 & 7 & 0 \\
+			0 & -3 & 0 & 0 & 0 & 0 & 0 & 0
+		\end{bmatrix}
+	\]
+	\[
+		f_2 = \begin{bmatrix}
+			5 \sin(3t) \\
+			3 \cos(7t)
+		\end{bmatrix} \Rightarrow
+		Y_2 = \begin{bmatrix}
+			0 & 0 & 0 & 0 & 0 & -5 & 0 & 0 \\
+			0 & 0 & 0 & 0 & 0 & 0 & 3 & 0
+		\end{bmatrix}
+	\]
+
+	А начальные условия для генератора:
+	\[
+		\omega(0) = \begin{bmatrix}
+			1 & 0 & 1 & 0 & 1 & 0 & 1 & 0
+		\end{bmatrix}^T
+	\]
+	
+	Итак, задали все необходимые параметры. Можно перейти к синтезу следящего регулятора.
+
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.56\textwidth]{images/model.png}
+		\caption{Схема моделирования многоканальной системы}
+		\label{fig:model}
+	\end{figure}
+	На рисунке \ref{fig:model} изображена схема моделирования многоканальной системы, замкнутой регулятором, состоящим из наблюдателей состояний и внешних воздействий, а также закона управления $u = K \hat{x} + K_\omega \hat{\omega}$, обеспечивающим выполнение целевого условия
+	\[
+		\lim_{t \to \infty} z(t) = 0
+	\]
+	
+	Отметим, что схема была построена по расширенной модели многоканальной системы:
+	\[
+	\begin{cases}
+		\dot{x}_\omega = \bar{A} x_\omega + \bar{B} u \\
+		y_\omega = y - g = \bar{C} x_\omega + D u
+	\end{cases} \quad x_\omega = \begin{bmatrix}
+		\omega \\
+		x
+	\end{bmatrix}
+	\]
+
+	Начальные условия при этом:
+	\[
+		x_\omega(0) = \begin{bmatrix}
+			\omega(0) \\
+			x(0)
+		\end{bmatrix}
+	\]
+
+	Матрицы $\bar{A}$, $\bar{B}$ и $\bar{C}$ же:
+	\[
+		\bar{A} = \begin{bmatrix}
+			\Gamma & 0 \\
+			B_f Y_1 & A
+		\end{bmatrix}, \quad
+		\bar{B} = \begin{bmatrix}
+			0 \\
+			B
+		\end{bmatrix}, \quad
+		\bar{C} = \begin{bmatrix}
+			D_f Y_2 - Y_g & C
+		\end{bmatrix}
+	\]
+
+	Наблюдатель также строится по расширенной модели (начальные условия состояния $\hat{x}_\omega$ при этом примем нулевыми):
+	\[
+		\begin{cases}
+			\dot{\hat{x}}_\omega = \bar{A} \hat{x}_\omega + \bar{B} u +  L (\hat{y}_\omega - y_\omega) \\
+			\hat{y}_\omega = \bar{C} \hat{x}_\omega + D u
+		\end{cases} \quad \hat{x}_\omega = \begin{bmatrix}
+			\hat{\omega} \\
+			\hat{x}
+		\end{bmatrix}
+	\]
+
+	Управление тогда:
+	\[
+		u = K \hat{x} + K_\omega \hat{\omega} = \bar{K} \hat{x}_\omega
+	\]
+
+	Где матрица $\bar{K}$:
+	\[
+		\bar{K} = \begin{bmatrix}
+			K_\omega & K
+		\end{bmatrix}
+	\]
+
+	Перейдем к синтезу $K$ - <<feedback>>-компоненты регулятора. Сначала зададимся эталонной моделью по варианту:
+	\[
+		1 < |\text{\textit{Re}}(\lambda_i^*)| < 3 \quad 0 \leq |\text{\textit{Im}}(\lambda_i^*)| < 3
+	\]
+
+	Тогда возьмем:
+	\[
+		\lambda_{1,2}^* = -2 \pm 2i
+	\]
+
+	Для синтеза будем использовать уравнение Сильвестра:
+	\[
+		A P - P G = B Y
+	\]
+
+	Пусть матрица $G$ такова, что имеет собственными числами $\lambda_i^*$, а матрица $Y$ такова, что пара $(Y, G)$ является наблюдаемой:
+	\[
+		G = \begin{bmatrix}
+			-2 & 2 \\
+			-2 & -2
+		\end{bmatrix}, \quad
+		Y = \begin{bmatrix}
+			1 & 1 \\
+			1 & 1
+		\end{bmatrix}
+	\]
+
+	Проверим взятую пару:
+	\[
+	V = \begin{bmatrix}
+		Y \\
+		YG
+	\end{bmatrix} = \begin{bmatrix}
+		1 & 1 \\
+		1 & 1 \\
+		-4 & 0 \\
+		-4 & 0
+	\end{bmatrix}
+	\]
+
+	Откуда:
+	\[
+		\text{rank}(V) = 2
+	\]
+	
+	Ранг равен размерности вектора состояния, значит, \textbf{пара $(Y, G)$ полностью наблюдаема}.
+
+	Также собственные матрицы $A$, найденные в пункте 1, равны:
+	\[
+		\lambda_{1,2} = \frac{1 \pm \sqrt{3}i}{2}
+	\]
+
+	А значит, \textbf{спектры матриц $A$ и $G$ не пересекаются}. 
+	
+	Отметим и то, что \textbf{пара $(A, B)$ является управляемой} (матрица управляемости $U$ имеет ранг, равный размерности вектора состояния $x$ системы).
+
+	Проверим теперь матрицу $BY$:
+	\[
+		BY = \begin{bmatrix}
+			3 & 3 \\
+			1 & 1
+		\end{bmatrix}
+	\]
+
+	Откуда:
+	\[
+		\text{rank}(BY) = 1
+	\]
+
+	В итоге, \textbf{произведение $BY$ имеет единичный ранг}, к тому же \textbf{раскладывается на произведение векторов $b$ и $h$}, так что $BY = bh$, где:
+	\[
+		b = \begin{bmatrix}
+			3 \\
+			1
+		\end{bmatrix}, \quad
+		h = \begin{bmatrix}
+			1 & 1
+		\end{bmatrix}
+	\]
+
+	Для них выполнено условие, что пара $(A, b)$ является полностью управляемой:
+	\[
+		U_{Ab} = \begin{bmatrix}
+			b & Ab
+		\end{bmatrix} =
+		\begin{bmatrix}
+			3 & 1 \\
+			1 & -2
+		\end{bmatrix}
+	\]
+
+	Откуда:
+	\[
+		\text{rank}(U_{Ab}) = 2
+	\]
+
+	Ранг равен размерности вектора состояния, значит, \textbf{пара $(A, b)$ является управляемой}.
+
+	Аналогично, для пары $(h, G)$ выполнено, что пара $(h, G)$ является полностью наблюдаемой:
+	\[
+		V_{hG} = \begin{bmatrix}
+			h \\ hG
+		\end{bmatrix} = \begin{bmatrix}
+			1 & 1 \\
+			-4 & 0
+		\end{bmatrix}
+	\]
+
+	Откуда:
+	\[
+		\text{rank}(V_{hG}) = 2
+	\]
+	
+	Ранг равен размерности вектора состояния, значит, \textbf{пара $(h, G)$ является наблюдаемой}.
+	
+	Таким образом, все условия (выделенные жирным шрифтом) существования единственного обратимого решения рассматриваемого уравнения Сильвестра выполнены. Можем найти матрицу $P$:
+	\[
+		P = \begin{bmatrix}
+			0.2018 & 1.3394 \\
+			-0.0826 & 0.7248
+		\end{bmatrix}
+	\]
+
+	Теперь можно найти <<feedback>>-компоненту регулятора:
+	\[
+		K = -Y P^{-1} = \begin{bmatrix}
+			-3.1429 & 4.4286 \\
+			-3.1429 & 4.4286
+		\end{bmatrix}
+	\]
+
+	Перейдем к синтезу $K_\omega$ - <<feedforward>>-компоненты регулятора. Составим систему матричных уравнений Франкиса-Дэвисона:
+	\[
+		\begin{cases}
+			P \Gamma - (A + BK) P - B_f Y_1 = B K_\omega \\
+			(C_z + D_z K) P + D_z K_\omega = Y_g
+		\end{cases}
+	\]
+
+	Проверим условия существования решения этой системы:
+	\[
+		\text{rank}\left(\begin{bmatrix}
+			A + B K - I \lambda_{i \Gamma} & B \\
+			C_z + D_z K & D_z
+		\end{bmatrix}\right) = \text{rank}(E_{\lambda_{i \Gamma}}) = \text{число строк}
+	\]
+	\[
+		\lambda_{i \Gamma} \text{ - собственные числа матрицы } \Gamma
+	\]
+	\[
+		\lambda_{1,2\Gamma} = \pm i, \quad \lambda_{3,4\Gamma} = \pm 2i, \quad \lambda_{5,6\Gamma} = \pm 3i, \quad \lambda_{7,8\Gamma} = \pm 7i
+	\]
+
+	Откуда:
+	\[
+		\text{rank}(E_{\lambda_{1,2\Gamma}}) = \text{rank}\left(\begin{bmatrix}
+			-9.4286 \pm i & 14.2857 & 1 & 2 \\
+			-4.1429  & 5.4286 \pm i & 1 & 0 \\
+		   -11.5714 & 19.7143 & 4 & 0 \\
+			0.8571 & 4.4286 & 0 & 1
+		\end{bmatrix}\right) = 4
+	\]
+	\[
+		\text{rank}(E_{\lambda_{3,4\Gamma}}) = \text{rank}\left(\begin{bmatrix}
+			-9.4286 \pm 2i & 14.2857 & 1 & 2 \\
+			-4.1429  & 5.4286 \pm 2i & 1 & 0 \\
+		   -11.5714 & 19.7143 & 4 & 0 \\
+			0.8571 & 4.4286 & 0 & 1
+		\end{bmatrix}\right) = 4
+	\]
+	\[
+		\text{rank}(E_{\lambda_{5,6\Gamma}}) = \text{rank}\left(\begin{bmatrix}
+			-9.4286 \pm 3i & 14.2857 & 1 & 2 \\
+			-4.1429  & 5.4286 \pm 3i & 1 & 0 \\
+		   -11.5714 & 19.7143 & 4 & 0 \\
+			0.8571 & 4.4286 & 0 & 1
+		\end{bmatrix}\right) = 4
+	\]
+	\[
+		\text{rank}(E_{\lambda_{7,8\Gamma}}) = \text{rank}\left(\begin{bmatrix}
+			-9.4286 \pm 7i & 14.2857 & 1 & 2 \\
+			-4.1429  & 5.4286 \pm 7i & 1 & 0 \\
+		   -11.5714 & 19.7143 & 4 & 0 \\
+			0.8571 & 4.4286 & 0 & 1
+		\end{bmatrix}\right) = 4
+	\]
+
+	Таким образом, условия существования решения системы матричных уравнений Франкиса-Дэвисона выполнены. Можем найти матрицу $P$ и $K_\omega$:
+	\[
+		P = \begin{bmatrix}
+			-0.4809   & -0.4949  & -0.0944 &  -0.7285   & 0   & 0 & 0.4664 &   -0.4514 \\
+			-6.9455   & 2.8716  & 0.3558 &  -0.3980      &   0   & 0 & 0.0150 &  -0.9178
+		\end{bmatrix}
+	\]
+	\[
+		K_\omega = \resizebox{0.9\textwidth}{!}{$\displaystyle
+		\begin{bmatrix}
+				32.8402 & -15.5847 &  -1.5269 & -0.1460 & 0 & 0 & 1.2751 & 3.2176 \\
+				31.1710 & -12.2928 & -1.4948 & -0.6131 & 0 & 0 & -0.4664 & 4.4514
+		\end{bmatrix}
+		$}
+	\]
+
+	Наконец, синтезируем наблюдатель расширенной системы. Для этого сначала проверим, обнаруживаема ли пара $(\bar{C}, \bar{A})$. Используем критерий Калмана:
+	\[
+		\text{rank}\left(\begin{bmatrix}
+			\bar{C} \\
+			\bar{C} \bar{A} \\
+			\bar{C} \bar{A}^2 \\
+			\vdots \\
+			\bar{C} \bar{A}^{9}
+		\end{bmatrix}\right) = 10
+	\]
+
+	Ранг оказался равен размерности вектора состояния $x_\omega$, значит, пара $(\bar{C}, \bar{A})$ является обнаруживаемой, поэтому возможно создать наблюдатель расширенной системы.
+
+	Для этого воспользуемся методом уравнений Риккати для обеспечения заданной экспоненциальной сходимости:
+	\[
+		A P + P A^T - \nu P C^T R^{-1} C P + \alpha P + Q= 0
+	\]
+
+	Будем решать уравнение с матрицами $Q = 0$ и $R = 1$, коэффициентом $\alpha = 2$, обозначающего желаемую степень сходимости, и $\nu = 2$ относительно положительно определенной $P_L \succ 0$, получаем:
+	\[
+		\bar{A} P_L + P_L \bar{A}^T - 2 P_L \bar{C}^T R^{-1} \bar{C} P_L + 4 P_L + Q = 0
+	\]
+
+	Откуда:
+	\[
+		P_L = \resizebox{0.9\textwidth}{!}{$\displaystyle
+		\begin{bmatrix}
+		  7.98 &  1.83 & 10.93 & 25.28 &  7.88 & -6.46 & -0.08 & -0.15 & -65.33 & -25.35 \\
+		  1.83 &  9.61 & -10.36 & 27.89 &  7.05 &  2.42 &  1.28 & -1.11 & -70.30 & -30.54 \\
+		 10.93 & -10.36 & 45.29 &  6.65 &  3.65 & -20.03 & -1.49 &  0.11 & -29.29 &  -4.80 \\
+		 25.28 & 27.89 &  6.65 & 136.53 & 39.14 & -11.85 &  3.19 & -3.18 & -344.45 & -143.48 \\
+		  7.88 &  7.05 &  3.65 & 39.14 & 12.17 & -3.74 &  0.81 & -0.97 & -95.29 & -40.97 \\
+		 -6.46 &  2.42 & -20.03 & -11.85 & -3.74 & 10.31 &  0.57 & -0.04 &  39.53 &  11.20 \\
+		 -0.08 &  1.28 & -1.49 &  3.19 &  0.81 &  0.57 &  0.56 & -0.15 &  -7.43 &  -3.65 \\
+		 -0.15 & -1.11 &  0.11 & -3.18 & -0.97 & -0.04 & -0.15 &  0.79 &   7.69 &   3.87 \\
+		 -65.33 & -70.30 & -29.29 & -344.45 & -95.29 & 39.53 & -7.43 &  7.69 & 903.33 & 361.81 \\
+		 -25.35 & -30.54 & -4.80 & -143.48 & -40.97 & 11.20 & -3.65 &  3.87 & 361.81 & 152.01
+		\end{bmatrix} \succ 0
+		$}
+	\]
+
+	Теперь можно найти матрицу коррекции наблюдателя $L$:
+	\[
+		L = -P_L \bar{C}^T R^{-1} = \begin{bmatrix}
+			4.1909  &  0.4711 \\
+			0.6064  &  4.1241 \\
+		   10.1350  & -1.0783 \\
+		   11.5144  & 11.2776 \\
+			1.9433  &  3.0578 \\
+		   -5.6377  &  0.2235 \\
+			0.0253  & -0.3153 \\
+			0.0486 &  -1.6143 \\
+		  -40.6213 & -29.8023 \\
+		  -11.3676 & -14.6398
+		\end{bmatrix}
+	\]
+
+	Всё синтезировано! Проверим, выполняется ли поставленное целевое условие и решается ли задача слежения для многокальной системы с возмущениями - проведем моделирование c нулевыми начальными условиями наблюдателя.
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/u.png}
+		\caption{Формируемое регулятором управление u(t)}
+		\label{fig:u}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/f1.png}
+		\caption{Внешнее воздействие $f_1(t)$}
+		\label{fig:f1}
+	\end{figure}	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/f2.png}
+		\caption{Внешнее воздействие $f_2(t)$}
+		\label{fig:f2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/g.png}
+		\caption{Внешнее воздействие $g(t)$}
+		\label{fig:g}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/x.png}
+		\caption{Сравнительный график состояния системы $x(t)$ и его оценки $\hat{x}(t)$}
+		\label{fig:x}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/w12.png}
+		\caption{Компоненты генератора $w_1(t)$ и $w_2(t)$ и оценки $\hat{w}_1(t)$ и $\hat{w}_2(t)$}
+		\label{fig:w12}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/w34.png}
+		\caption{Компоненты генератора $w_3(t)$ и $w_4(t)$ и оценки $\hat{w}_3(t)$ и $\hat{w}_4(t)$}
+		\label{fig:w34}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/w56.png}
+		\caption{Компоненты генератора $w_5(t)$ и $w_6(t)$ и оценки $\hat{w}_5(t)$ и $\hat{w}_6(t)$}
+		\label{fig:w56}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/w78.png}
+		\caption{Компоненты генератора $w_7(t)$ и $w_8(t)$ и оценки $\hat{w}_7(t)$ и $\hat{w}_8(t)$}
+		\label{fig:w78}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/ex.png}
+		\caption{Ошибка наблюдателя $e_x(t) = x(t) - \hat{x}(t)$}
+		\label{fig:ex}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/ew14.png}
+		\caption{Ошибка наблюдателя для воздействий $w_1(t)$ и $w_2(t)$ и $w_3(t)$ и $w_4(t)$}
+		\label{fig:ew14}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/ew58.png}
+		\caption{Ошибка наблюдателя для воздействий $w_5(t)$ и $w_6(t)$ и $w_7(t)$ и $w_8(t)$}
+		\label{fig:ew58}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/y.png}
+		\caption{Выход $y(t)$ системы}
+		\label{fig:y}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/z.png}
+		\caption{Виртуальный (регулируемый) выход $z(t)$ системы}
+		\label{fig:z}
+	\end{figure}
+
+	Итак, на рисунке \ref{fig:u} изображено формируемое управление $u(t)$, на \ref{fig:f1} - внешнее воздействие $f_1(t)$, на \ref{fig:f2} - внешнее воздействие $f_2(t)$, на \ref{fig:g} - воздействие $g(t)$, на \ref{fig:x} - состояние системы $x(t)$ и его оценка $\hat{x}(t)$, на \ref{fig:w12} - компоненты генератора $w_1(t)$ и $w_2(t)$ и их оценки $\hat{w}_1(t)$ и $\hat{w}_2(t)$, на рисунке \ref{fig:w34} - компоненты генератора $w_3(t)$ и $w_4(t)$ и их оценки $\hat{w}_3(t)$ и $\hat{w}_4(t)$. На рисунке \ref{fig:w56} представлены компоненты генератора $w_5(t)$ и $w_6(t)$ и оценки $\hat{w}_5(t)$ и $\hat{w}_6(t)$, а на \ref{fig:w78} - компоненты генератора $w_7(t)$ и $w_8(t)$ и оценки $\hat{w}_7(t)$ и $\hat{w}_8(t)$, на рисунке \ref{fig:ex} же - ошибка наблюдателя $e_x(t) = x(t) - \hat{x}(t)$, на рисунке \ref{fig:ew14} изображена ошибка наблюдателя для воздействий $w_1(t)$ и $w_2(t)$ и $w_3(t)$ и $w_4(t)$, на рисунке \ref{fig:ew58} - ошибка наблюдателя для воздействий $w_5(t)$ и $w_6(t)$ и $w_7(t)$ и $w_8(t)$. Наконец, на рисунках \ref{fig:y} и \ref{fig:z} изображены фактический и виртуальный выходы $y(t)$ и $z(t)$ системы.
+
+	Можем видеть, что целевое условие $\lim_{t \to \infty} z(t) = 0$ выполняется, а значит, задача слежения для многоканальной системы с возмущениями решена. Наблюдатель успешно отслеживает состояние системы и воздействия - уже после 3 секунды все ошибки визуально равны 0. Также отметим, что фактический выход $y(t)$ не стремится к 0, но он и не должен - всё же целевое условие формулировалось не для него. В управлении $u(t)$ же после некоторого времени наблюдаются стабильные колебания, связанные с тем, что система уже отследила воздействие $g(t)$, а дальше только его поддерживает.
+
+	\section{Общие выводы}
+	В данной работе была рассмотрена многоканальная система. В первом пункте были исследованы её временные и частотные характеристики, построена передаточная матрица от состояния к выходу, исследована управляемость и наблюдаемость - оказалось, что система со всех сторон управляема и наблюдаема. Также были вычислены полюса и нули передаточной матрицы, они оказались равны собственным числам матрицы $A$ системы.
+
+	Во втором пункте была успешно выполнен синтез следящего регулятора, который успешно решал задачу слежения для многоканальной системы с возмущениями. Были получены и передаточные матрицы от состояний к фактическому и виртуальному выходам, выполнено необходимое условие невырожденности этих матриц для решения системы матричных уравнений Франкиса-Дэвисона.
+
+	
+
+
+	
+
+
+
+
+
+	
+
+
+
+	
+
+
+
+
+
+	
+	
+
+
+
+	
+	
+	
+	
+	
+	
+\end{document}

@@ -1,0 +1,428 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+
+\usepackage{minted, xcolor} 
+\usemintedstyle{monokai}
+\definecolor{bg}{HTML}{282828}
+\setminted{bgcolor=bg}
+\setminted{fontsize=\scriptsize}
+\setminted{}
+
+\fancyhead[R]{\textit{Канонические формы}}
+\fancyhead[L]{Лабораторная работа №2}
+\fancyfoot[C]{Страница \thepage\space из \pageref{LastPage}}
+\fancyfoot[R]{}
+\fancyfoot[L]{}
+\pagestyle{fancy}
+\setlength{\headheight}{17.0pt}
+
+\newcommand{\anonsection}[1]{\section*{#1}\addcontentsline{toc}{section}{#1}}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+				Научно исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №2 \\
+			Канонические формы представления динамических систем
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{minipage}{.48\linewidth}
+			Выполнил студент группы R3380
+			
+			Преподаватели
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.5\linewidth}
+			\begin{flushright}
+				Мовчан И.Е.
+				\\
+				Лопарев А.В., Золотаревич В.П.
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2024
+		\end{center}
+		
+	\end{titlepage}
+	
+	\section{Цель работы}
+	Ознакомление с методами взаимного перехода между моделями
+	вход-выход и вход-состояние-выход, а также с каноническими формами представления
+	моделей вход-состояние-выход.	
+	\section{От вход-выход к вход-состояние-выход}
+	Модель задаётся (согласно варианту 11) уравнением
+	$$
+	y'' + 0.8y' + 30y = 3u' + 30u,
+	$$
+
+	откуда получаем канонические представления.
+
+	Математическая модель вход-состояние-выход в канонической управляемой форме ($a_0 = 30,\hspace{1mm} a_1 = 0.8,\hspace{1mm} b_0 = 30,\hspace{1mm} b_1 = 3$):
+	$$
+	A = 
+	\begin{bmatrix}
+		0 & 1 \\
+		-a_0 & -a_1
+	\end{bmatrix} =
+	\begin{bmatrix}
+		0 & 1 \\
+		-30 & -0.8
+	\end{bmatrix},\hspace{1mm}
+	B = \begin{bmatrix}
+		0 \\
+		1
+	\end{bmatrix},
+	\hspace{1mm}
+	C^{\text{T}} = \begin{bmatrix}
+		b_0 \\
+		b_1
+	\end{bmatrix} =
+	\begin{bmatrix}
+		30 \\
+		3
+	\end{bmatrix}
+	$$
+	Математическая модель вход-состояние-выход в канонической наблюдаемой форме:
+	$$
+	A = \begin{bmatrix}
+		0 & -a_0 \\
+		1 & -a_1
+	\end{bmatrix} = 
+	\begin{bmatrix}
+		0 & -30 \\
+		1 & -0.8
+	\end{bmatrix},\hspace{1mm}
+	B = \begin{bmatrix}
+		b_0 \\
+		b_1
+	\end{bmatrix} = 
+	\begin{bmatrix}
+		30 \\
+		3
+	\end{bmatrix},
+	\hspace{1mm}
+	C^{\text{T}} = \begin{bmatrix}
+		0 \\
+		1
+	\end{bmatrix}
+	$$
+
+	Передаточная функция системы имеет следующий вид:
+	$$
+	W(s) = \frac{3s + 30}{s^2 + 0.8s + 30}.
+	$$
+
+	При моделировании систем в системе SIMULINK ожидаем получить одни и те же графики, посмотрим, действительно ли это так.
+	
+	Моделирование при нулевых начальных условиях представлено на рисунке \ref{1}, графики на рисунке \ref{2}.
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.75]{./images/2.png}
+		\caption{Моделирование системы}
+		\label{1}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.45]{./images/1.png}
+		\caption{Графики при ступенчатом воздействии}
+		\label{2}
+	\end{figure}
+
+	\newpage
+
+	\section{От вход-состояние-выход к вход-выход}
+	Согласно варианту 11 модель вход-состояние-выход задаётся:
+	$$
+	A = \begin{bmatrix}
+		-1 & 2 \\
+		-10 & -3
+	\end{bmatrix},\hspace{1mm}
+	B = \begin{bmatrix}
+		0.5 \\
+		1
+	\end{bmatrix},\hspace{1mm}
+	C^{\text{T}} = 
+	\begin{bmatrix}
+		6 \\
+		1.5
+	\end{bmatrix}
+	$$
+
+	Выведем передаточную функцию системы:
+	$$
+	W(s) = C (sI - A)^{-1}B = 
+	\begin{bmatrix}
+		6.5 & 1.5
+	\end{bmatrix} \cdot
+	\begin{bmatrix}
+		s+1 & -2 \\
+		10 & s+3
+	\end{bmatrix}^{-1} \cdot
+	\begin{bmatrix}
+		0.5 \\
+		1
+	\end{bmatrix} =
+	$$
+	$$
+	=
+	\frac{1}{s^2 + 4s + 23}\cdot
+	\begin{bmatrix}
+		6 & 1.5
+	\end{bmatrix}\cdot
+	\begin{bmatrix}
+		s+3 & 2 \\
+		-10 & s+1
+	\end{bmatrix}\cdot
+	\begin{bmatrix}
+		0.5 \\
+		1
+	\end{bmatrix} =
+	$$
+	$$
+	=
+	\frac{1}{s^2 + 4s + 23}\cdot
+	\begin{bmatrix}
+		6 & 1.5
+	\end{bmatrix}\cdot
+	\begin{bmatrix}
+		\frac{s+3}{2} + 2 \\
+		-4 + s
+	\end{bmatrix} =
+	\frac{4.5s + 15}{s^2 + 4s + 23}
+	$$
+
+	Отсюда можем получить канонические формы.
+
+	Математическая модель вход-состояние-выход в канонической управляемой форме:
+	$$
+	A = 
+	\begin{bmatrix}
+		0 & 1 \\
+		-23 & -4
+	\end{bmatrix},\hspace{1mm}
+	B = \begin{bmatrix}
+		0 \\
+		1
+	\end{bmatrix},
+	\hspace{1mm}
+	C^{\text{T}} =
+	\begin{bmatrix}
+		15 \\
+		4.5
+	\end{bmatrix}
+	$$
+
+	Математическая модель вход-состояние-выход в канонической наблюдаемой форме:
+	$$
+	A =
+	\begin{bmatrix}
+		0 & -23 \\
+		1 & -4
+	\end{bmatrix},\hspace{1mm}
+	B =
+	\begin{bmatrix}
+		15 \\
+		4.5
+	\end{bmatrix},
+	\hspace{1mm}
+	C^{\text{T}} = \begin{bmatrix}
+		0 \\
+		1
+	\end{bmatrix}
+	$$
+
+	Матрица преобразования исходной модели к канонической наблюдаемой форме вычисляется следующим образом:
+	$$
+	M = N_y \hat{N}_y^{-1},
+	$$
+	где $N_y = [b\hspace{2mm}Ab]$, $\hat{N}_y = [\hat{b}\hspace{2mm} \hat{A}\hat{b}]$ - матрицы управляемости исходной и преобразованной модели соответственно.
+	
+	Отсюда:
+	$$
+	M = \begin{bmatrix}
+		0.5 & 1.5 
+		1 & -8
+	\end{bmatrix}
+	\cdot
+	\begin{bmatrix}
+		0 & 1 \\
+		1 & -4
+	\end{bmatrix}^{-1} = 
+	\begin{bmatrix}
+		0.5 & 1.5 
+		1 & -8
+	\end{bmatrix}
+	\cdot
+	\begin{bmatrix}
+		4 & 1 \\
+		1 & 0
+	\end{bmatrix} =
+	\begin{bmatrix}
+		3.5 & 0.5 \\
+		-4 & 1
+	\end{bmatrix}
+	$$
+
+	Матрица преобразования исходной модели к канонической управляемой форме вычисляется аналогично и имеет вид:
+	$$
+	M = \begin{bmatrix}
+		0.5 & 1.5 \\
+		1 & -8
+	\end{bmatrix}\cdot
+	\begin{bmatrix}
+		1.5 & -103.5 \\
+		4.5 & -3
+	\end{bmatrix}^{-1}
+	=
+	\begin{bmatrix}
+		\frac{1}{51} & & -\frac{3}{17} \\
+		\\
+		\frac{4}{51} & &-\frac{2}{51}
+	\end{bmatrix}
+	$$
+
+	Моделирование и соответствующие графики (нулевые начальные условия):
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.75]{./images/3.png}
+		\caption{Моделирование систем}
+		\label{3}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.45]{./images/4.png}
+		\caption{Графики при ступенчатом воздействии}
+		\label{4}
+	\end{figure}
+
+	\section{Замена базиса}
+	Матрицы преобразования координат $M$ из варианта 11 имеет следующий вид:
+	$$
+	M = \begin{bmatrix}
+		1 & 2 \\
+		0 & 2
+	\end{bmatrix}
+	$$
+
+	Сделаем преобразование изначальной системы:
+	$$
+	A = \begin{bmatrix}
+		-1 & 2 \\
+		-10 & -3
+	\end{bmatrix},\hspace{1mm}
+	B = \begin{bmatrix}
+		0.5 \\
+		1
+	\end{bmatrix}, \hspace{1mm}
+	C^{\text{T}} = \begin{bmatrix}
+		6.5 \\
+		1.5
+	\end{bmatrix}
+	$$
+	$$
+	\hat{A} = M^{-1}A M = \begin{bmatrix}
+		1 & -1 \\
+		0 & 0.5
+	\end{bmatrix} \cdot
+	\begin{bmatrix}
+		-1 & 2 \\
+		-10 & -3
+	\end{bmatrix} \cdot
+	\begin{bmatrix}
+		1 & 2 \\
+		0 & 2
+	\end{bmatrix} =
+	$$
+	$$
+	= \begin{bmatrix}
+		9 & 5 \\
+		-5 & -1.5
+	\end{bmatrix} \cdot
+	\begin{bmatrix}
+		1 & 2 \\
+		0 & 2
+	\end{bmatrix} =
+	\begin{bmatrix}
+		9 & 28 \\
+		-5 & -13
+	\end{bmatrix}
+	$$
+	$$
+	\hat{B} = M^{-1}B = \begin{bmatrix}
+		1 & -1 \\
+		0 & 0.5
+	\end{bmatrix} = 
+	\begin{bmatrix}
+		-0.5 \\
+		0.5
+	\end{bmatrix}
+	$$
+	$$
+	\hat{C} = C M = \begin{bmatrix}
+		6.5 & 1.5
+	\end{bmatrix} \cdot
+	\begin{bmatrix}
+		1 & 2\\
+		0 & 2
+	\end{bmatrix} =
+	\begin{bmatrix}
+		6.5 & 16
+	\end{bmatrix}
+	$$
+
+	Осуществим моделирование:
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.75]{./images/5.png}
+		\caption{Моделирование систем}
+		\label{5}
+	\end{figure}
+
+	\begin{figure}[h]
+		\centering
+		\includegraphics[scale=0.44]{./images/6.png}
+		\caption{Графики при ступенчатом воздействии}
+		\label{6}
+	\end{figure}
+	\section{Выводы}
+	В ходе выполнения лабораторной работы были изучены методы перехода между разными представлениями модели, а также их каноническими формами в среде SIMULINK.
+\end{document}

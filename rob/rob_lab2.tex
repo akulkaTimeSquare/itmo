@@ -1,0 +1,222 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage{listings}
+\usepackage[usenames,dvipsnames]{color}	
+\usepackage[font={small,it}]{caption}
+\usepackage{gensymb}
+\usepackage{hyperref}
+\usepackage[framed,autolinebreaks,numbered,useliterate]{mcode}
+\newcommand{\Span}{\text{Span}}
+\newcommand{\Img}{\text{Im}}
+\newcommand{\Ker}{\text{Ker}}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=black,
+	filecolor=magenta,      
+	urlcolor=cyan,
+}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+
+\usepackage{minted, xcolor}
+\usemintedstyle{monokai} 
+\definecolor{bg}{HTML}{282828}
+\setminted{bgcolor=bg}
+\setminted{fontsize=\scriptsize}
+\setminted{}
+
+\fancyhead[R]{\textit{Отчет по лабораторной}}
+\fancyfoot[L]{}
+\fancyfoot[C]{Страница \thepage\space из \pageref{LastPage}}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\setlength{\headheight}{17.0pt}
+
+\usepackage{tikz,graphics,color,fullpage,float,epsf,caption,subcaption}
+\usepackage{tocloft}
+
+\cftsetindents{section}{0em}{2em}
+\cftsetindents{subsection}{0em}{2em}
+
+\renewcommand\cfttoctitlefont{\hfill\Large\bfseries}
+\renewcommand\cftaftertoctitle{\hfill\mbox{}}
+
+\begin{document}
+	\begin{titlepage}
+		
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+				Научно исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{center}
+			\textbf{Отчет по лабораторной работе №2 \\
+			Порты ввода-вывода и условия}
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{minipage}{.45\linewidth}
+			Выполнили:
+			
+			\smallskip
+			
+			Преподаватель:
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.5\linewidth}
+			\begin{flushright}
+				Бухарев С. А. и
+				Мовчан И. Е.
+				\\
+				Громов В. С.
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2024
+		\end{center}
+
+	\end{titlepage}
+
+	\section{Цель работы}
+
+	Изучить работу портов ввода-вывода и условий применительно к программированию промышленных роботов. Написать программу с бесконечным циклом проверки наличий деталей в ряду из трёх единиц, используя манипулятор с установленным на захватном устройстве датчиком обнаружения.
+	\newpage
+
+	\section{Описание команд и конечный код}
+	Используя следующие команды:
+	\begin{itemize}
+		\item \textbf{SERVO ON (OFF)} - включение (выключение) двигателей;
+		\item \textbf{JOVRD 100} - задание скорости движения в процентах;
+		\item \textbf{WAIT M\_IN(3)=1} - ожидание сигнала 1 на 3 порте;
+		\item \textbf{DEF ACT 1, M\_IN(1)=0 GOSUB *SUBSTOP} - объявление прерывания №1 при условии наличия 0 на 1 порте с вызовом процедуры \textbf{*SUBSTOP};
+		\item \textbf{ACT 1 = 1} - активация прерывания №1;
+		\item \textbf{PHELPX=(75, 2, 0, 0, 0, 0)} - объявление вспомогательного массива для смещений;
+		\item \textbf{WHILE 1 ... WEND} - бесконечный цикл;
+		\item \textbf{FOR IX=0 TO 2 ... NEXT IX} - цикл for, менящий значение переменной IX в цикле от 0 до 2;
+		\item \textbf{IF M\_IN(900)=1 THEN .. ENDIF} - проверка сигнала 1 на 900 порте, если есть - заходим в тело цикла;
+		\item \textbf{MOV} \textit{точка} - перемещение в указанную в виде массива \textit{точку};
+		\item \textbf{MOV} \textit{точка}, \textbf{-100} - перемещение в \textit{точку} с поднятием по OZ на 100 мм;
+		\item \textbf{DLY 0.1} - ожидать 0.1 секунду (используется после перемещения для ожидания прекращения инерционного движения);
+		\item \textbf{*SUBSTOP} - объявление процедуры;
+		\item \textbf{END} - завершение программы.
+	\end{itemize}
+
+	Напишем программу, реализующую бесконечную проверку присутствия элементов в ряде из 3 позиций, начинающую свою работу с нажатия кнопки \textit{Reset} (сигнала 1 на 3 порте, изначально - 0) на панели управления и заканчивающейся при нажатии \textit{Stop} (сигнале 0 на 1 порте, изначально - 1), ведущей к вызову процедуры \textit{\textbf{substop}} (в бесконечном цикле проходимся, используя \textit{\textbf{for}}, по ячейкам; в случае присутствия i-ой детали (сигнала 1 на 900 порте, соединённом с датчиком; изначально - 0) - поднимаемся c помощью \textit{\textbf{mov} точка, \textbf{-100}} на 100 мм, а после с помощью \textit{\textbf{mov} точка} опускаемся вниз и двигаемся дальше):
+	\begin{lstlisting}
+SERVO ON
+JOVRD 100
+
+WAIT M_IN(3)=1
+DEF ACT 1, M_IN(1)=0 GOSUB *SUBSTOP
+ACT 1 = 1
+
+PHELPX=(75, 2, 0, 0, 0, 0)
+WHILE 1
+	FOR IX=0 TO 2
+		MOV P1-PHELPX*IX
+		DLY 0.1
+		IF M_IN(900)=1 THEN
+			MOV P1-PHELPX*IX, -100
+			MOV P1-PHELPX*IX
+		ENDIF
+	NEXT IX
+WEND
+
+END
+
+*SUBSTOP
+	SERVO OFF
+	END
+	\end{lstlisting}
+	
+	Таблица сохранённых точек:
+	\begin{center}
+		\begin{tabular}{|c|c|c|}
+			\hline
+			\textbf{No} & \textbf{Position} & \textbf{Orientation} \\
+			\hline
+			$P_1$ & $219.5, -327.3, 101.6$ & $179, -2, 59, \text{R}, \text{A}, \text{N}$ \\
+			\hline
+		\end{tabular}
+	\end{center}
+	\newpage
+
+	\section{Фотографии}
+	Необходимые элементы:
+	\begin{figure}[h]
+		\centering
+		\begin{subcaptiongroup}
+		  \centering
+		  \parbox[b]{.4\textwidth}{
+		  \centering
+		  \includegraphics[scale=0.18]{./images/dat.jpg}
+		  \caption{Датчик обнаружения}}
+		  \parbox[b]{.4\textwidth}{
+		  \centering
+		  \includegraphics[scale=0.18]{./images/knop.jpg}
+		  \caption{Панель управления}}
+		\end{subcaptiongroup}
+	\end{figure}
+
+	Этапы выполнения 1-2:
+	\begin{figure}[h]
+		\centering
+		\begin{subcaptiongroup}
+		  \centering
+		  \parbox[b]{.4\textwidth}{
+		  \centering
+		  \includegraphics[scale=0.5]{./images/step1.png}
+		  \caption{Нажатие \textit{Reset}, начало работы}}
+		  \parbox[b]{.4\textwidth}{
+		  \centering
+		  \includegraphics[scale=0.5]{./images/step2.png}
+		  \caption{Проверка наличия}}
+		\end{subcaptiongroup}
+	\end{figure}
+	\newpage
+	Этапы выполнения 3-4:
+	\begin{figure}[h]
+		\centering
+		\begin{subcaptiongroup}
+		  \centering
+		  \parbox[b]{.4\textwidth}{
+		  \centering
+		  \includegraphics[scale=0.5]{./images/step3.png}
+		  \caption{Реакция на наличие}}
+		  \parbox[b]{.4\textwidth}{
+		  \centering
+		  \includegraphics[scale=0.5]{./images/step4.png}
+		  \caption{Нажатие \textit{Stop}, конец работы}}
+		\end{subcaptiongroup}
+	\end{figure}
+	\section{Выводы}
+	В результате выполнения лабораторной была изучена работа с портами ввода-вывода в программировании промышленных роботов, реализована через бесконечный цикл программа для проверки наличия деталей в ряду из трёх единиц с использованием датчика обнаружения.
+\end{document} 

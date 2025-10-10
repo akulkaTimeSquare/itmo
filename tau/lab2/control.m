@@ -1,0 +1,30 @@
+t1 = out.x1.Time;
+x1 = out.x1.Data;
+t2 = out.x2.Time;
+x2 = out.x2.Data;
+t3 = out.x3.Time;
+x3 = out.x3.Data;    
+
+figure;
+plot(t1, K1_full_standard*x1', 'LineWidth', 1.5, 'DisplayName', '\sigma_2'); hold on;
+plot(t2, K2_full_standard*x2', 'LineWidth', 1.5, 'DisplayName', '\sigma_4');
+plot(t3, K3_full_standard*x3', 'LineWidth', 1.5, 'DisplayName', '\sigma_6');
+legend('show', 'Location', 'best');
+grid on;
+xlabel('t');
+xlim([0 4]);
+ylabel('u(t)');
+title('Управление системой при различных спектрах');
+saveas(gcf, 'images/u_all.png');
+
+figure;
+plot(t1, K1_full_standard*x1', 'LineWidth', 1.5, 'DisplayName', '\sigma_2'); hold on;
+plot(t2, K2_full_standard*x2', 'LineWidth', 1.5, 'DisplayName', '\sigma_4');
+plot(t3, K3_full_standard*x3', 'LineWidth', 1.5, 'DisplayName', '\sigma_6');
+legend('show');
+grid on;
+xlabel('t');
+xlim([0.01 4]);
+ylabel('u(t)');
+title('Управление системой при различных спектрах (усечение)');
+saveas(gcf, 'images/u_all1.png');
