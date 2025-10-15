@@ -15,25 +15,34 @@ fprintf('Система:\n');
 fprintf('  z_1 + z_2 = 2 - k_1*T^2/2 - k_2*T\n');
 fprintf('  z_1*z_2 = 1 - k_1*T^2/2 - k_2*T + k_1*T^3/2\n\n');
 
+A = [1 T; 0 1];
+B = [T^2/2; T];
+x0 = [0; 1];
+
 % Решаем для каждого случая
 for i = 1:length(cases)
     z1 = cases{i}(1);
     z2 = cases{i}(2);
     
-    % Вычисляем сумму и произведение корней
     s = z1 + z2;  % сумма
     p = z1 * z2;  % произведение
     
-    % Решаем систему аналитически:
-    % Из уравнений получаем:
-    % k_1 = 2*(1 - s + p) / T^3
-    % k_2 = (2 - s - k_1*T^2/2) / T
+    k1 = (1 - s + p)/T^2;
+    k2 = (3 - s - p)/(2*T);
     
-    k1 = (1 - s + p) * 2 / T^3;
-    k2 = (2-s) / T - (1 - s + p)/T^2;
-    
+    K = [k1 k2];
     % Формируем вектор K
-    K = [k1; k2];
+    if i == 1
+        K1 = K;
+    elseif i == 2
+        K2 = K;
+    elseif i == 3
+        K3 = K;
+    elseif i == 4
+        K4 = K;
+    elseif i == 5
+        K5 = K;
+    end
     
     % Вывод результатов
     fprintf('Случай %d:\n', i);
@@ -48,14 +57,5 @@ for i = 1:length(cases)
     else
         fprintf('  K_%d = [%s; %s]\n', i, num2str(K(1)), num2str(K(2)));
     end
-    
-    % Проверка: подставляем обратно в систему
-    check1 = 2 - k1*T^2/2 - k2*T;
-    check2 = 1 - k1*T^2/2 - k2*T + k1*T^3/2;
-    
-    fprintf('  Проверка:\n');
-    fprintf('    z_1 + z_2 = %s (должно быть %s)\n', num2str(s), num2str(check1));
-    fprintf('    z_1*z_2 = %s (должно быть %s)\n', num2str(p), num2str(check2));
-    fprintf('    Погрешность: %.2e, %.2e\n\n', abs(s - check1), abs(p - check2));
 end
 
