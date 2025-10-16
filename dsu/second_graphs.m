@@ -31,7 +31,7 @@ grid on;
 xlabel('t');
 ylabel('x(t)');
 title('Случай 2: z_1 = -1.2, z_2 = -0.4');
-legend('x_1', 'x_2');
+legend('x_1', 'x_2', 'Location', 'northwest');
 saveas(gcf, 'images/second_case.png');
 
 % График координаты x3 (Случай 3)
@@ -55,7 +55,7 @@ grid on;
 xlabel('t');
 ylabel('x(t)');
 title('Случай 4: z_{12} = ± 1.2j');
-legend('x_1', 'x_2');
+legend('x_1', 'x_2', 'Location', 'northwest');
 saveas(gcf, 'images/fourth_case.png');
 
 % График координаты x5 (Случай 5)
@@ -67,50 +67,5 @@ grid on;
 xlabel('t');
 ylabel('x(t)');
 title('Случай 5: z_{12} = -0.8 ± 0.7j');
-legend('x_1', 'x_2');
+legend('x_1', 'x_2', 'Location', 'northwest');
 saveas(gcf, 'images/fifth_case.png');
-
-% График управления u1 (Случай 1)
-figure;
-plot(t, u1, 'LineWidth', 1.5);
-grid on;
-xlabel('t');
-ylabel('u(t)');
-title('Управление - Случай 1: z_1 = 0.1, z_2 = 0.7');
-saveas(gcf, 'images/first_case_u.png');
-
-% График управления u2 (Случай 2)
-figure;
-plot(t, u2, 'LineWidth', 1.5);
-grid on;
-xlabel('t');
-ylabel('u(t)');
-title('Управление - Случай 2: z_1 = -1.2, z_2 = -0.4');
-saveas(gcf, 'images/second_case_u.png');
-
-% График управления u3 (Случай 3)
-figure;
-plot(t, u3, 'LineWidth', 1.5);
-grid on;
-xlabel('t');
-ylabel('u(t)');
-title('Управление - Случай 3: z_1 = 0.1, z_2 = 0.5');
-saveas(gcf, 'images/third_case_u.png');
-
-% График управления u4 (Случай 4)
-figure;
-plot(t, u4, 'LineWidth', 1.5);
-grid on;
-xlabel('t');
-ylabel('u(t)');
-title('Управление - Случай 4: z_{12} = ± 1.2j');
-saveas(gcf, 'images/fourth_case_u.png');
-
-% График управления u5 (Случай 5)
-figure;
-plot(t, u5, 'LineWidth', 1.5);
-grid on;
-xlabel('t');
-ylabel('u(t)');
-title('Управление - Случай 5: z_{12} = -0.8 ± 0.7j');
-saveas(gcf, 'images/fifth_case_u.png');

@@ -12,9 +12,13 @@ time = out.ksi.Time;
 data = out.ksi.Data;
 
 figure;
-stairs(time, data, 'LineWidth', 1.5);
-title("Переходный процесс для g(t)=A*sin(omega*t)");
+plot(time, A1*sin(omega1*time), 'LineWidth', 1.5);
+hold on;
+stairs(time, data(:, 1), 'LineWidth', 1.5);
+hold off;
+title("Переходный процесс для g(k) = Asin(kT\omega)", 'Interpreter', 'tex');
 xlabel("t");
-ylabel("g(t)");
+ylabel("f(t)");
+legend("Asin(t\omega)", "g(k)=\xi_1(k)", 'Location', 'northwest');
 grid on;
 saveas(gcf, 'images/ex_signal_sin.png');
