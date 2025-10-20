@@ -1,86 +1,65 @@
-% --- C1-сопряжённая траектория по формуле из изображения ---
-clear; clc;
+%% Пример: использование Q_i для выбора сегмента и симуляция движения
+clear; clc; close all;
 
-% --- входные данные ---
-x = [0 2 4 6 8];    % координаты точек
-y = [0 1 0 -1 0];
-R = 1.0;            % радиус поворота
+% Узловые точки (пример)
+P = [0 0;
+     2 1;
+     4 1.5;
+     6 0];
 
-n = length(x);
+n = size(P,1);
 
-% --- предварительные вычисления ---
-psi = zeros(1, n-1);
-r   = zeros(1, n-1);
+% Предвычисляем psi_i и r_i для всех сегментов i=1..n-1
+psi = zeros(n-1,1);
+r   = zeros(n-1,1);
 for i = 1:n-1
-    psi(i) = atan2(y(i+1) - y(i), x(i+1) - x(i));
-    r(i) = sqrt((x(i+1) - x(i))^2 + (y(i+1) - y(i))^2);
+    dx = P(i+1,1) - P(i,1);
+    dy = P(i+1,2) - P(i,2);
+    psi(i) = atan2(dy, dx);
+    r(i)   = sqrt(dx^2 + dy^2);
 end
 
-% --- параметры дуг ---
-sigma = zeros(1, n-2);
-d_i   = zeros(1, n-2);
-d_ci  = zeros(1, n-2);
-delta = zeros(1, n-2);
-xc    = zeros(1, n-2);
-yc    = zeros(1, n-2);
+dt = 0.05;
+v  = 0.25;
+step = v*dt;
+seg = 1;
+pos = P(1,:);
+traj = pos;
 
-for i = 1:n-2
-    % угол между сегментами
-    dpsi = psi(i+1) - psi(i);
-    if dpsi > 0
-        sigma(i) = pi - dpsi;
-    else
-        sigma(i) = -pi - dpsi;
+max_steps = 10000;
+for k = 1:max_steps
+    % двигаемся вдоль направления psi(seg)
+    pos = pos + step * [cos(psi(seg)), sin(psi(seg))]; 
+
+    % проверяем Q для текущего сегмента:
+    Qcur = cos(psi(seg))*(pos(1)-P(seg,1)) + sin(psi(seg))*(pos(2)-P(seg,2)) - r(seg);
+
+    if Qcur > 0
+        % пересекли границу сегмента -> переключаемся на следующий
+        if seg < n-1
+            seg = seg + 1;
+            % Опционально: корректируем pos, чтобы не "залипать" за границей
+            % (сдвигаем немного назад вдоль нового сегмента)
+            % pos = P(seg,:) + 0.001 * [cos(psi(seg)), sin(psi(seg))];
+        else
+            % дошли до последнего сегмента и вышли за него
+            traj = [traj; pos];
+            break;
+        end
     end
 
-    % смещения и геометрия дуги
-    d_i(i)  = abs(R / tan(sigma(i)/2));
-    d_ci(i) = abs(R / sin(sigma(i)/2));
-    delta(i) = pi - sigma(i)/2;
+    traj = [traj; pos];
 
-    % центр дуги
-    Rlp = [cos(psi(i)) -sin(psi(i)); sin(psi(i)) cos(psi(i))];
-    Rp  = [cos(delta(i)) -sin(delta(i)); sin(delta(i)) cos(delta(i))];
-    center = [x(i+1); y(i+1)] + Rlp * Rp * [0; d_ci(i)];
-
-    xc(i) = center(1);
-    yc(i) = center(2);
+    % стоп — если прошли последний узел (по расстоянию)
+    if norm(pos - P(end,:)) < 1e-3
+        break;
+    end
 end
 
-% --- построение траектории через дуги ---
-Sx = [];
-Sy = [];
-
-for i = 1:n-2
-    theta_start = psi(i) - sigma(i)/2;
-    theta_end   = psi(i) + sigma(i)/2;
-    theta = linspace(theta_start, theta_end, 100);
-    x_arc = xc(i) + R * cos(theta);
-    y_arc = yc(i) + R * sin(theta);
-    Sx = [Sx, x_arc];
-    Sy = [Sy, y_arc];
-end
-
-% --- вывод ---
-fprintf('C1 trajectory computed.\n');
-disp('Arc centers [xc, yc]:');
-disp([xc(:), yc(:)]);
-
-% Результирующая траектория: Sx, Sy
-% --- Визуализация C1-траектории ---
+% --- Визуализация ---
 figure; hold on; axis equal; grid on;
-title('C^1 Trajectory');
+plot(P(:,1), P(:,2), 'k--o', 'LineWidth', 1.2, 'MarkerFaceColor','k');
+plot(traj(:,1), traj(:,2), 'b-', 'LineWidth', 1.5);
 xlabel('x'); ylabel('y');
-
-% исходные точки
-plot(x, y, 'ro', 'MarkerFaceColor', 'r', 'DisplayName', 'Исходные точки');
-
-% полученная траектория
-plot(Sx, Sy, 'b-', 'LineWidth', 1.5, 'DisplayName', 'Построенная траектория');
-
-% центры дуг (если нужны для контроля)
-if exist('xc','var')
-    plot(xc, yc, 'ks', 'MarkerFaceColor','y', 'DisplayName', 'Центры дуг');
-end
-
-legend('Location','best');
+title('Симуляция движения с переключением сегмента по Q_i');
+legend('Узлы','Траектория агента','Тестовые точки','Location','best');
