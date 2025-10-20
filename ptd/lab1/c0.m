@@ -1,7 +1,3 @@
-clc; clear; close all
-
-% --- 1. Фиксированная бинарная карта 10×10 ---
-% 1 = проходимая клетка, 0 = стена
 map = logical([
     1 1 1 1 0 1 1 1 1 1;
     1 0 0 1 0 1 0 0 0 1;
@@ -28,23 +24,6 @@ if isempty(path)
     error('Путь не найден!');
 end
 
-% --- 4. Подсчёт длины и числа поворотов ---
-[r, c] = ind2sub(size(map), path);
-len = numel(path);
-dr = diff(r);
-dc = diff(c);
-dirs = atan2(dr, dc);
-turns = sum(abs(diff(dirs)) > 1e-3);
-
-fprintf('Длина пути: %d клеток, поворотов: %d\n', len, turns);
-
-% --- 5. Визуализация ---
-a_star_plot(map, costs, path);
-title(sprintf('Фиксированная карта. Путь длиной %d и %d поворотов', len, turns));
-print('-djpeg', '-r600', 'images/track.jpg');
-
-
-%% c0
 wallColor  = [0.25 0.25 0.25];
 freeColor  = [0.92 0.92 0.92];
 pathColor  = [0.65 0.3 0.7];
