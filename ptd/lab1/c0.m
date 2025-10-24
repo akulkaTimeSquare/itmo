@@ -1,3 +1,4 @@
+%% Нахождение траектории
 map = logical([
     1 1 1 1 0 1 1 1 1 1;
     1 0 0 1 0 1 0 0 0 1;
@@ -6,94 +7,79 @@ map = logical([
     0 1 1 1 0 1 0 1 1 1;
     0 0 0 1 0 1 0 0 0 1;
     1 1 1 1 1 1 0 1 1 1;
-    1 0 0 0 0 0 0 1 0 0;
+    0 1 0 0 0 0 0 1 0 0;
     1 1 1 1 1 1 1 1 0 1;
     1 0 0 0 0 0 0 1 1 1;
 ]);
 
 costs = ones(size(map));
 
-% --- 2. Задаём старт и финиш ---
+% --- Задаём старт и финиш ---
 start = sub2ind(size(map), 1, 1);   % верхний левый угол
 goal  = sub2ind(size(map), 10, 10); % нижний правый угол
 
-% --- 3. Поиск пути с помощью A* ---
+% --- Поиск пути с помощью A* ---
 path = a_star(map, costs, start, goal);
-
 if isempty(path)
     error('Путь не найден!');
 end
-
-wallColor  = [0.25 0.25 0.25];
-freeColor  = [0.92 0.92 0.92];
-pathColor  = [0.65 0.3 0.7];
-startColor = [0.35 0.8 0.35];
-goalColor  = [0.9 0.3 0.3]; % красный для цели
-
-hf = figure('Color', [1 1 1]);
-ha = axes('Parent', hf, ...
-    'YDir', 'reverse', ...
-    'XDir', 'normal', ...
-    'FontName', 'Segoe UI', ...
-    'FontSize', 10, ...
-    'Box', 'on', ...
-    'Position', [0.02 0.08 0.96 0.92]);
-grid(ha, 'on');
-axis equal
-hold(ha, 'on');
-
 mapSize = size(map);
+
 [x, y] = ind2sub(mapSize, path);
+x = flip(x);
+y = flip(y);
+P = [x', y'];
 
-% --- Рисуем все клетки карты ---
-for r = 1:mapSize(1)
-    for c = 1:mapSize(2)
-        if map(r, c)
-            face = freeColor;
-        else
-            face = wallColor;
-        end
-        patch('Parent', ha, ...
-            'XData', [c-0.5 c-0.5 c+0.5 c+0.5], ...
-            'YData', [r-0.5 r+0.5 r+0.5 r-0.5], ...
-            'FaceColor', face, ...
-            'EdgeColor', [0.7 0.7 0.7], ...
-            'LineWidth', 0.5);
-    end
+% --- Построение траектории ---
+n = size(P,1);
+
+params.resolution = 0.01;
+
+% Предвычисления
+pts_c0 = interpolate_c0(P, params);
+
+
+%% Визуализация
+a_star_plot(map, path, start, goal);
+hold on;
+plot(pts_c0(:,2), pts_c0(:,1), 'b-', 'LineWidth', 2);
+hold off;
+print('-djpeg', '-r600', 'images/c0.jpg');
+%%
+% pts_c0 = [x1 y1; x2 y2; ... ; xN yN];
+
+x = pts_c0(:,1);
+y = pts_c0(:,2);
+N = length(x);
+
+kappa = zeros(N,1);
+
+% вычисляем локальные dt (расстояния между соседними точками)
+dt_forward  = sqrt(diff(x).^2 + diff(y).^2);        % dt[i] = |P[i+1]-P[i]|
+dt_backward = [dt_forward(1); dt_forward];         % для центральной разности
+
+for i = 2:N-1
+    dt_i = (dt_forward(i) + dt_backward(i))/2;  % усредненный шаг
+    % первая производная
+    dx = (x(i+1) - x(i-1)) / (2*dt_i);
+    dy = (y(i+1) - y(i-1)) / (2*dt_i);
+    % вторая производная
+    ddx = (x(i+1) - 2*x(i) + x(i-1)) / (dt_i^2);
+    ddy = (y(i+1) - 2*y(i) + y(i-1)) / (dt_i^2);
+    % кривизна
+    kappa(i) = abs(dx*ddy - dy*ddx) / (dx^2 + dy^2)^(3/2);
 end
 
-% --- Отрисовка траектории ---
-n = length(x);
-for i = 1:n-1
-    % Параметрическая форма отрезка
-    t = linspace(0, 1, 100);
-    x_seg = x(i) + t * (x(i+1) - x(i));
-    y_seg = y(i) + t * (y(i+1) - y(i));
-    plot(y_seg, x_seg, 'b', 'LineWidth', 2);
-end
+% концы
+kappa(1) = kappa(2);
+kappa(N) = kappa(N-1);
 
-% --- Кружок старта ---
-[rs, cs] = ind2sub(mapSize, start);
-plot(cs, rs, 'o', ...
-    'MarkerSize', 12, ...
-    'MarkerFaceColor', startColor, ...
-    'MarkerEdgeColor', 'k', ...
-    'LineWidth', 1.5);
-
-% --- Кружок цели ---
-[rg, cg] = ind2sub(mapSize, goal);
-plot(cg, rg, 'o', ...
-    'MarkerSize', 12, ...
-    'MarkerFaceColor', goalColor, ...
-    'MarkerEdgeColor', 'k', ...
-    'LineWidth', 1.5);
-
-xlim([0.5, mapSize(2)+0.5]);
-ylim([0.5, mapSize(1)+0.5]);
-xticks(1:mapSize(2));
-yticks(1:mapSize(1));
-
-ha.XTickLabel = string(1:mapSize(2));
-ha.YTickLabel = string(1:mapSize(1));
-
-hold(ha, 'off');
+% визуализация
+figure; 
+plot(round(kappa, 2));
+title('Кривизна вдоль траектории'); 
+xlabel('Точки'); 
+ylabel('Кривизна');
+grid on;
+xlim([0 1750]);
+print('-djpeg', '-r600', 'images/c0_k.jpg');
