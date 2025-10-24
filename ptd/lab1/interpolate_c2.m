@@ -61,7 +61,7 @@ function pts = interpolate_c2(waypoints, r, k, step)
     pts = [pts; interpolate_c0([p_exit_last; waypoints(end, :)], step)];
 end
 
-function pts = interpolate_cubic_parabola(p_exit, k, resolution, rotation)
+function pts = interpolate_cubic_parabola(p_exit, k, step, rotation)
     if nargin < 4
         rotation = 0;
     end
@@ -69,7 +69,7 @@ function pts = interpolate_cubic_parabola(p_exit, k, resolution, rotation)
     R = rot_mat(rotation);
     tmp = R' * p_exit(:);
     xL_end = abs(tmp(1));
-    xL = 0:resolution:xL_end;
+    xL = 0:step:xL_end;
 
     yL = k * (xL.^3);
 
