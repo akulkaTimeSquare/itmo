@@ -1,11 +1,11 @@
-function pts = interpolate_bsplines(waypoints, params)
-    n = size(waypoints, 1);
+function pts = interpolate_bsplines(points, degree, step)
+    n = size(points, 1);
     if n < 2
-        pts = waypoints;
+        pts = points;
         return;
     end
 
-    k = params.bspline_degree;      % степень
+    k = degree;      % степень
     order = k + 1;                  % порядок
 
     if n <= order
@@ -17,16 +17,16 @@ function pts = interpolate_bsplines(waypoints, params)
     knots = [zeros(1, order), 1:1:n - k, (n-k)*ones(1, order)];
 
     % --- Параметризация по t ---
-    t = 0:params.resolution:n-k;
-    pts = zeros(length(t), size(waypoints, 2));
+    t = 0:step:n-k;
+    pts = zeros(length(t), size(points, 2));
 
     for i = 1:n
         Ni = bspline_basis_vectorized(t, i, k, knots)';
-        pts = pts + Ni .* waypoints(i, :);
+        pts = pts + Ni .* points(i, :);
     end
 
     % Гарантируем попадание в последнюю точку
-    pts(end, :) = waypoints(end, :);
+    pts(end, :) = points(end, :);
 end
 
 

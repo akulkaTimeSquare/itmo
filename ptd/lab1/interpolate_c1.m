@@ -1,23 +1,23 @@
-function pts = interpolate_c1(waypoints, r, step)
+function pts = interpolate_c1(points, r, step)
     % C1 непрерывность через сглаживание дугами окружностей в углах
     pts = [];
-    p_exit_last = waypoints(1, :);
+    p_exit_last = points(1, :);
 
-    for i = 2:(size(waypoints, 1) - 1)
-        a = waypoints(i - 1, :);
-        b = waypoints(i, :);
-        c = waypoints(i + 1, :);
+    for i = 2:(size(points, 1) - 1)
+        p1 = points(i - 1, :);
+        p2 = points(i, :);
+        p3 = points(i + 1, :);
 
-        corner_angle = compute_angle(a, b, c);
+        corner_angle = compute_angle(p1, p2, p3);
 
         if abs(corner_angle - pi) < 1e-6
-            pts = [pts; interpolate_c0([p_exit_last; b], step)];
-            p_exit_last = b;
+            pts = [pts; interpolate_c0([p_exit_last; p2], step)];
+            p_exit_last = p2;
             continue;
         end
 
-        dir1 = b - a; dir1 = dir1 / norm(dir1);
-        dir2 = c - b; dir2 = dir2 / norm(dir2);
+        dir1 = p2 - p1; dir1 = dir1 / norm(dir1);
+        dir2 = p3 - p2; dir2 = dir2 / norm(dir2);
 
         sign_dir = sign(det([dir1; dir2]));  % аналог np.cross для 2D
         half_corner = corner_angle / 2;
@@ -26,10 +26,10 @@ function pts = interpolate_c1(waypoints, r, step)
         dc = r / abs(sin(half_corner));
         phi1 = atan2(dir1(2), dir1(1));
 
-        cc = rot_mat(pi - sign_dir * half_corner + phi1) * [dc; 0] + b(:);
+        cc = rot_mat(pi - sign_dir * half_corner + phi1) * [dc; 0] + p2(:);
 
-        p_entry = b - dir1 * d;
-        p_exit  = b + dir2 * d;
+        p_entry = p2 - dir1 * d;
+        p_exit  = p2 + dir2 * d;
 
         n_points = max(8, floor(corner_angle / step * r / 2));
 
@@ -41,5 +41,5 @@ function pts = interpolate_c1(waypoints, r, step)
         p_exit_last = p_exit;
     end
 
-    pts = [pts; interpolate_c0([p_exit_last; waypoints(end, :)], step)];
+    pts = [pts; interpolate_c0([p_exit_last; points(end, :)], step)];
 end

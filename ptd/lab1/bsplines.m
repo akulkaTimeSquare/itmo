@@ -33,12 +33,12 @@ y = flip(y);
 P = [x', y'];
 
 % ===== Параметры =====
-params.resolution = 0.01;
-params.bspline_degree = 3;
+step = 0.01;
+degree = 3;
 
 % ===== Построение B-spline =====
-pts_c0 = interpolate_c0(P, params);
-pts_bspline = interpolate_bsplines(P, params);
+pts_c0 = interpolate_c0(P, step);
+pts_bspline = interpolate_bsplines(P, degree, step);
 
 
 %% Визуализация
