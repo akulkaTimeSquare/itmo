@@ -161,7 +161,7 @@
 
 	Следовательно, тип состояния равновесия - \textbf{устойчивый фокус}.
 	
-	\textbf{Далее, возьмём $x^*_2$ и $x_3$.}
+	\textbf{Далее, возьмём $x^*_2$ и $x^*_3$.}
 	Их матрица Якоби:
 	\[
 	J(x^*_2) = J(x^*_3) = \begin{bmatrix} 5 & 1 \\ -1 & -1 \end{bmatrix}
@@ -578,7 +578,7 @@
 
 	Вещественные части принимают как отрицательные, так и положительные значения, поэтому тип неизолированной точки равновесия - \textbf{седло}.
 
-	\textbf{Далее, рассмотрим $x_1*$.} Матрица Якоби в этой точке:
+	\textbf{Далее, рассмотрим $x_1^*$.} Матрица Якоби в этой точке:
 	\[
 		J(x) = \begin{bmatrix}
 			0 & 0 \\
@@ -595,16 +595,13 @@
 	\[
 	\dot{V} = \frac{\partial V}{\partial x_1}\dot{x}_1 + \frac{\partial V}{\partial x_2}\dot{x}_2 = x_1^3(-x_1^3 + x_2^3) + x_2^3(x_1x_2^3 - x_2^3)
 	\]
-	\[
-	\dot{V} = -x_1^6 + x_1^3x_2^3 + x_1x_2^6 - x_2^6
-	\]
 
-	Сгруппируем члены:
+	Раскроем скобки:
 	\[
 	\dot{V} = -x_1^6 - x_2^6 + x_1^3x_2^3 + x_1x_2^6
 	\]
 
-	Оценим знак в малой окрестности начала координат. Используем неравенство Юнга при $ = q = 2$:
+	Оценим знак в малой окрестности начала координат. Используем неравенство Юнга при $p = q = 2$:
 	\[
 	|x_1^3x_2^3| \leq \frac{1}{2}x_1^6 + \frac{1}{2}x_2^6
 	\]
@@ -631,7 +628,486 @@
 	\end{cases}
 	\]
 
+	Найдём точки равновесия через решение системы на $\dot{x} = 0$:
+	\[
+		\begin{cases}
+			-x_1^3 + x_2^3 = 0\\
+			x_1 + 3x_3 - x_2^3 =0\\
+			x_1x_3 - x_2^3 - \sin x_1 = 0
+		\end{cases}
+		\Rightarrow
+		\begin{cases}
+			x_1 = x_2 \\
+			x_3 = (x_1^3 - x_1)/3 \\
+			x_1x_3 - x_2^3 - \sin x_1 = 0
+		\end{cases}
+	\]
+
+	Подставляем в третье:
+	\[
+	\frac{x_1^4 - x_1^2}{3} - x_1^3 - \sin x_1 = 0
+	\]
+	\[
+	x_1^4 - 3x_1^3 - x_1^2 - 3\sin x_1 = 0
+	\]
+
+	Откуда точки равновесия:
+	\[
+	x_1^* = (0, 0, 0), \quad x_2^*\approx(3.2913, 3.2913, 10.7872)
+	\]
+
+	Линеаризуем систему через матрицу Якоби:
+	\[
+		J(x) = \frac{\partial f}{\partial x} =
+		\begin{bmatrix}
+			-3x_1^2 & 3x_2^2 & 0 \\
+			1 & -3x_2^2 & 3 \\
+			x_3 - \cos x_1 & -3x_2^2 & x_1
+		\end{bmatrix}
+	\]
+
+	Рассмотрим каждую точку в отдельности.
+
+	\textbf{Начнём с $x_2^*$.} Матрица Якоби:
+	\[
+		J(x_2^*) \approx \begin{bmatrix}
+			-32.5 & 32.5 & 0 \\
+			1 & -32.5 & 3 \\
+			11.78 & -32.5 & 3.29
+		\end{bmatrix}
+	\]
+
+	Численно найдем собственные числа:
+	\[
+		\lambda_1 \approx -32.7, \quad \lambda_{2} \approx -30.36, \quad \lambda_3 = 1.36
+	\]
+
+	Вещественные части принимают как положительные, так и отрицательные значения, поэтому изолированная точка равновесия $x_2^*$ является \textbf{седловой}.
+
+	\textbf{Исследуем также $x_1^*$.} Матрица Якоби:
+	\[
+		J(x_1^*) \approx \begin{bmatrix}
+			0 & 0 & 0 \\
+			1 & 0 & 3 \\
+			-1 & 0 & 0
+		\end{bmatrix}
+	\]
+
+	Вычислим её собственные числа:
+	\[
+	\det(\lambda I - J(x_1^*)) = \lambda^3 = 0 \Rightarrow \lambda_1 = \lambda_2 = \lambda_3 = 0
+	\]
+
+	Все значения оказались равны 0, поэтому тип точки равновесия $x_2^*$ не может быть корректно определён с помощью линеаризации.
+
+	\section{Фазовые портреты}
+	Проверим полученные результаты с помощью визуализации. Для этого построим фазовые потреты для каждой двумерной системы.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.61\textwidth]{images/system1_eq.png}
+		\caption{Первая система: $(0, 0)$ - устойчивый фокус, $(1, -1)$ и $(-1, 1)$ - седло}
+		\label{system1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.6\textwidth]{images/system2_eq.png}
+		\caption{\centering Вторая система: $(0, 0)$ - седло, $(0, 1)$ - неустойчивый узел и $(1, -1)$ - устойчивый фокус}
+		\label{system2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.6\textwidth]{images/system3_eq.png}
+		\caption{Третья система: $(0, 0)$ - неустойчивый фокус}
+		\label{system3}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.6\textwidth]{images/system4_eq.png}
+		\caption{\centering Четвертая система: $(0, 0)$ - неустойчивый фокус и устойчивые точки на окружности}
+		\label{system4}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.6\textwidth]{images/system5_eq.png}
+		\caption{Пятая система: $(0, 0)$ - седло, $(1, 1)$ и $(-1, -1)$ - устойчивый фокус}
+		\label{system5}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.61\textwidth]{images/system6_eq.png}
+		\caption{Шестая система: $(0, 0)$ - седло и $(1, 1)$ - устойчивая точка}
+		\label{system6}
+	\end{figure}
+
+	Можем видеть, что результаты визуализации, представленной на рисунках \ref{system1}-\ref{system6} полностью сходятся с аналитикой - успех!
+
+	\section{Локально стабилизирующие регуляторы}
+	\subsection{Первая система}
+	Возьмём систему:
+	\[
+		\begin{cases}
+			\dot{x_1} = -x_1 + 2x_1^3 + x_2 + \sin u_1\\
+			\dot{x_2} = -x_1 - x_2 + 3 \sin u_2
+		\end{cases}
+	\]
+
+	При $u = u_{ss} \equiv 0$ она приобретает вид системы, рассматриваемой в первом разделе, поэтому множество точек равновесия уже знаем:
+	\[
+		x^*_1 = (0,0), \quad x^*_2 = (1,-1), \quad x^*_3 = (-1,1)
+	\]
+
+	Напомним, что тип состояния точки равновесия $x_1^*$ - устойчивый фокус, поэтому задача синтеза локально стабилизирующего регулятора для него кажется неактуальной. Однако это всё же может дать более быструю сходимость и большую окрестность устойчивости.
 	
+	Остальные точки являются седловыми, то есть по какому-то из направлений наблюдается неустойчивость - необходим регулятор, который мы будем строить по линеаризации модели:
+	\[
+	\dot{x} = Ax + Bu, \quad A = \dfrac{\partial f}{\partial x} \Big|_{x=0,\hspace{1mm} u=0}, \quad B = \dfrac{\partial f}{\partial u} \Big|_{x=0,\hspace{1mm} u=0}
+	\]
+
+	Можем видеть, что система линеаризуется возле нуля. Именно поэтому для решения задачи синтеза стабилизирующего регулятора возле \textit{любой} точки равновесия будут вводиться новые координаты $x_\delta = x - x_{ss}$ и $u_\delta = u - u_{ss}$, где $x_{ss}$ соответствует точкам равновесия.
+
+	\textbf{Итак, как и прежде, начнём с $x_1^*=(0, 0)$.}
+
+	Линеаризация даёт следующие результаты:
+	\[
+		A = \dfrac{\partial f}{\partial x} \Big|_{x=x_1^*,\hspace{1mm} u=0} = 
+		\begin{bmatrix}
+			-1 & 1 \\
+			-1 & -1
+		\end{bmatrix}
+	\]
+	\[
+		B = \dfrac{\partial f}{\partial u} \Big|_{x=x_1^*,\hspace{1mm} u=0} = \begin{bmatrix}
+			1 & 0 \\
+			0 & 3
+		\end{bmatrix}
+	\]
+
+	Синтезируем регулятор, минимизируя функционал качества при заданных параметрах $Q = R = I$:
+	\[
+		J = \int_0^{+ \infty} (x^T Q x + u^T R u) dx
+	\]
+
+	То есть будем использовать LQR. В итоге получим матрицу обратных связей для линеаризованной системы:
+	\[
+		K_{x_1^*} = \begin{bmatrix}
+			0.3897 & 0.0302 \\
+ 			0.0907 & 0.7486
+		\end{bmatrix} \Rightarrow u = -K_{x_1^*} x_\delta
+	\]
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_1_u_[-0.2, -0.3].png}
+		\caption{График управления системы при $x(0) = [-0.2, -0.3]$}
+		\label{part3_1_u1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_1_[-0.2, -0.3].png}
+		\caption{График движения системы при $x(0) = [-0.2, -0.3]$}
+		\label{part3_1_x1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_1_u_[0.5, 0.4].png}
+		\caption{График управления системы при $x(0) = [0.5, 0.4]$}
+		\label{part3_1_u2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_1_[0.5, 0.4].png}
+		\caption{График движения системы при $x(0) = [0.5, 0.4]$}
+		\label{part3_1_x2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_1_phase.png}
+		\caption{Фазовый портрет системы при обратной связе $-K_{x_1^*}$}
+		\label{part3_1_phase}
+	\end{figure}
+
+	Замоделируем систему при различных начальных условиях системы $x(0) = [-0.2, -0.3]$ и $x(0) = [0.5, 0.4]$ и найденном регуляторе. Все графики приведены на рисунках \ref{part3_1_u1}-\ref{part3_1_phase}.
+
+	Можем видеть, что замкнутая система является устойчивой.
+	
+	\textbf{Проделаем аналогичные вычисления для $x_2^*=(1, -1)$.}
+	
+	Но для начала переместим $x_2^*$ в начало координат через сдвиг на этот вектор, получим:
+	\[
+		x_\delta = x - x_2^*, \quad u_\delta = u - u_{ss} = u
+	\]
+
+	Последнее верно, так как все точки равновесия были получены при нулевом входе. Откуда система:
+	\[
+	\begin{cases} 
+		\dot{x}_{\delta 1} = -(x_{\delta 1} + 1) + 2(x_{\delta 1} + 1)^3 + (x_{\delta 2} - 1) + \sin (u_1) \\ 
+		\dot{x}_{\delta 2} = -(x_{\delta 1} + 1) - (x_{\delta 2} - 1) + 3 \sin (u_2)
+	\end{cases}
+	\]
+	
+	В линейном виде:	
+	\[
+		x_{\delta} = Ax_{\delta} + Bu
+	\]
+	
+	Где матрицы
+	\[
+		A = \left. \frac{\partial f}{\partial x_{\delta}} \right|_{x_{\delta} = 0,\hspace{1mm} u = 0} = \left. \frac{\partial f}{\partial x} \right|_{x = x_2^*,\hspace{1mm} u = 0} = 
+		\begin{bmatrix}
+		5 & 1 \\
+		-1 & -1
+		\end{bmatrix}
+	\]
+	\[
+	B = \left. \frac{\partial f}{\partial u} \right|_{x_{\delta} = 0,\hspace{1mm} u = 0} = \left. \frac{\partial f}{\partial u} \right|_{x = x_2^*,\hspace{1mm} u = 0} = \begin{bmatrix}
+		1 & 0 \\
+		0 & 3
+	\end{bmatrix}
+	\]
+
+	Итак, можем синтезировать локально стабилизирующий регулятор, минимизирующий функционал качества при $Q = R = I$:
+	\[
+		J = \int_0^{+ \infty} (x^T Q x + u^T R u) dx
+	\]
+
+	Получаем матрицу обратной связи:
+	\[
+		K_{x_2^*} = \begin{bmatrix}
+			8.7854 & 1.0331 \\
+ 			3.0992 & 1.1193
+		\end{bmatrix} \Rightarrow u = - K_{x_2^*} x_\delta
+	\]
+
+	Теперь можем промоделирать систему при начальных условиях $x_\delta(0) = (0.15, 0.15)$ и $x_\delta(0) = (-0.1, -0.1)$ и найденном регуляторе. Все графики приведены на рисунках \ref{part3_2_u1}-\ref{part3_2_phase} - траектории сходятся к $x_2^*$, являющейся неустойчивой. Регулятор успешно стабилизирует!
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_2_u_[0.15, 0.15].png}
+		\caption{График управления системы при $x_\delta(0) = [0.15, 0.15]$}
+		\label{part3_2_u1}
+	\end{figure}
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_2_[0.15, 0.15].png}
+		\caption{График движения системы при $x_\delta(0) = [0.15, 0.15]$}
+		\label{part3_2_x1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_2_u_[-0.1, -0.1].png}
+		\caption{График управления системы при $x_\delta(0) = [-0.1, -0.1]$}
+		\label{part3_2_u2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_2_[-0.1, -0.1].png}
+		\caption{График движения системы при $x_\delta(0) = [-0.1, -0.1]$}
+		\label{part3_2_x2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_2_phase.png}
+		\caption{Фазовый портрет системы при обратной связе $-K_{x_2^*}$}
+		\label{part3_2_phase}
+	\end{figure}
+
+	\textbf{Наконец, исследуем точку $x_3^* = (-1, 1)$.}
+
+	Запишем систему в координатах $x_\delta = x - x_3^*$:
+	\[
+	\begin{cases} 
+		\dot{x}_{\delta 1} = -(x_{\delta 1} - 1) + 2(x_{\delta 1} - 1)^3 + (x_{\delta 2} + 1) + \sin u_1 \\ 
+		\dot{x}_{\delta 2} = -(x_{\delta 1} - 1) - (x_{\delta 2} + 1) + 3 \sin u_2
+	\end{cases}
+	\]
+		
+	В линейном виде:
+	\[
+		x_{\delta} = Ax_{\delta} + Bu
+	\]
+	
+	Где матрицы
+	\[
+		A = \left. \frac{\partial f}{\partial x} \right|_{x = x_3^*,\hspace{1mm} u = 0} = 
+		\begin{bmatrix}
+		5 & 1 \\
+		-1 & -1
+		\end{bmatrix}
+	\]
+	\[
+	B = \left. \frac{\partial f}{\partial u} \right|_{x = x_3^*,\hspace{1mm} u = 0} = \begin{bmatrix}
+		1 & 0 \\
+		0 & 3
+	\end{bmatrix}
+	\]
+
+	Итак, можем синтезировать локально стабилизирующий регулятор, минимизирующий функционал качества при $Q = 10 I$ и $R = I$:
+	\[
+		J = \int_0^{+ \infty} (x^T Q x + u^T R u) dx
+	\]
+
+	Получаем матрицу обратной связи:
+	\[
+		K_{x_3^*} = \begin{bmatrix}
+			8.7854 & 1.0331 \\
+ 			3.0992 & 1.1193
+		\end{bmatrix} \Rightarrow u = -K_{x_3^*} x_\delta
+	\]
+
+	Итак, можно промоделировать нелинейную систему при начальных условиях $x_\delta(0) = (0.1, 0.1)$ и $x_\delta(0) = (-0.1, -0.15)$ и синтезированном регуляторе c отрицательной обратной связью $K_{x_3^*}$. Все графики представлены на рисунках \ref{part3_3_u1} - \ref{part3_3_phase}.
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_3_u_[0.1, 0.1].png}
+		\caption{График управления системы при $x_\delta(0) = [0.1, 0.1]$}
+		\label{part3_3_u1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_3_[0.1, 0.1].png}
+		\caption{График движения системы при $x_\delta(0) = [0.1, 0.1]$}
+		\label{part3_3_x1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_3_u_[-0.1, -0.15].png}
+		\caption{График управления системы при $x_\delta(0) = [-0.1, -0.15]$}
+		\label{part3_3_u2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_3_[-0.1, -0.15].png}
+		\caption{График движения системы при $x_\delta(0) = [-0.1, -0.15]$}
+		\label{part3_3_x2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_3_phase.png}
+		\caption{Фазовый ортрет системы при обратной связе $-K_{x_3^*}$}
+		\label{part3_3_phase}
+	\end{figure}
+	
+	По рисункам видим, что система успешно стабилизируется вблизи точки неустойчивой точки равновесия $x_3^*$, а значит, найденный регулятор успешно справляется со своей задачей.
+
+	\subsection{Вторая система}
+	Итак, возьмем заключительную нелинейную систему:
+	\[
+		\begin{cases}
+			\dot{x}_1 = x_2 + x_1x_2 + u^3\\
+			\dot{x}_2 = -x_2 + x_2^2 - x_1^3 + \sin u
+		\end{cases}
+	\]
+
+	Примем нулевое воздействие и найдем изолированные точки равновесия системы. Для этого приравняем производные к нулю:
+	\[
+		\begin{cases}
+			x_2 + x_1x_2 = 0\\
+			-x_2 + x_2^2 - x_1^3 = 0
+		\end{cases}
+	\]
+
+	Преобразуем первое уравнение:
+	\[
+	x_2 + x_1x_2 = x_2(1 + x_1) = 0
+	\]
+	
+	Отсюда:
+	\[
+	x_2 = 0 \quad \text{или} \quad x_1 = -1
+	\]
+
+	Подставим $x_2 = 0$ во второе уравнение:
+	\[
+	x_1^3 = 0 \Rightarrow x_1 = 0
+	\]
+
+	Теперь перейдем к \(x_1 = -1\):
+	Подставляем во второе уравнение:
+	\[
+	-x_2 + x_2^2 - (-1)^3 = 0 \Rightarrow -x_2 + x_2^2 + 1 = 0
+	\]
+	\[
+	x_2^2 - x_2 + 1 = 0
+	\]
+	
+	У системы нет действительных корней, так что единственной изолированной точкой равновесия будет:
+	\[
+		x_1^* = (0, 0)
+	\]
+
+	Как прежде, сперва найдем линеаризацию:
+	\[
+		x = Ax + Bu
+	\]
+	
+	Матрицы системы задаются через частные производные:
+	\[
+		A = \left. \frac{\partial f}{\partial x} \right|_{x = x_1^*,\hspace{1mm} u = 0} = 
+		\begin{bmatrix}
+		0 & 1 \\
+		0 & -1
+		\end{bmatrix}
+	\]
+	\[
+	B = \left. \frac{\partial f}{\partial u} \right|_{x = x_1^*,\hspace{1mm} u = 0} = \begin{bmatrix}
+		0 \\
+		1
+	\end{bmatrix}
+	\]
+
+	Аналогично предыдущему пункту синтезируем матрицу обратной связи через LQR при матрицах $Q = I$ и $R = 1$:
+	\[
+		K_{x_1^*} = \begin{bmatrix}
+			1 & 1
+		\end{bmatrix} \Rightarrow u = - K_{x_1^*} x
+	\]
+
+	Замоделируем изначальную нелинейную систему при начальных условиях $x(0) = (0.1, 0.1)$ и $x(0) = (-0.1, -0.15)$ и регуляторе c матрицей $K_{x_1^*}$. Все графики приведены на рисунках \ref{part3_4_u1} - \ref{part3_4_phase}.
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_4_u_[0.1, 0.1].png}
+		\caption{График управления системы при $x(0) = [0.1, 0.1]$}
+		\label{part3_4_u1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_4_[0.1, 0.1].png}
+		\caption{График движения системы при $x(0) = [0.1, 0.1]$}
+		\label{part3_4_x1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_4_u_[-0.1, -0.15].png}
+		\caption{График управления системы при $x(0) = [-0.1, -0.15]$}
+		\label{part3_4_u2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_4_[-0.1, -0.15].png}
+		\caption{График движения системы при $x(0) = [-0.1, -0.15]$}
+		\label{part3_4_x2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/part3_4_phase.png}
+		\caption{Фазовый ортрет системы при обратной связе $-K_{x_1^*}$}
+		\label{part3_4_phase}
+	\end{figure}
+
+	Таким образом, в относительно малой окрестности начала координат (при различных начальных условиях) имеем притяжение к точке равновесия $x_1^*$ - синтезированный регулятор справляется с поставленной задачей локальной стабилизации!
+	
+	\section{Выводы}
+	В ходе лабораторной работы успешно исследованы нелинейные системы на наличие точек равновесия и их типы с помощью линеаризации через матрицу Якоби.
+
+	Также были синтезированы локально стабилизирующие регуляторы, позволяющие изменить природу системы, сделав, например, неустойчивые узлы устойчивыми.
+
+
+
+
+
+	
+
+	
+
 
     
 	
