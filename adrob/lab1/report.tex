@@ -1,0 +1,204 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{ЛР №1}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{Управление многомерным объектом}}
+\fancyfoot[L]{}
+\fancyfoot[C]{\thepage\space}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\color[gray]{0.7}\ttfamily\small,
+    stepnumber=1,
+    numbersep=8pt,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4,
+    breaklines=true
+}
+\usepackage{subcaption}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+                Научно-исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{45mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №1\\
+			\textbf{Адаптивное управление многомерным} \\
+			\textbf{объектом по состоянию} \\
+			Вариант 9
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{minipage}{.45\linewidth}
+			Выполнили студенты
+            \\
+			\\
+			Преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.52\linewidth}
+			\begin{flushright}
+				Мовчан Игорь Евгеньевич
+				\\
+				Копылов Андрей Михайлович
+                \\
+				Парамонов Алексей Владимирович
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2025
+		\end{center}
+		
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\section{Формирование эталонной модели}
+	Пусть дан объект
+	\[
+	\begin{cases}
+		\dot{x}(t) = A x(t) + B u(t), \\
+		y(t) = C x(t)
+	\end{cases}
+	\]
+
+	Согласно варианту задания, матрицы объекта имеют вид:
+	\[
+		A = \begin{bmatrix}
+			0 & 1 \\
+			0 & 0
+		\end{bmatrix}, \quad
+		B = \begin{bmatrix}
+			0 \\
+			b_0
+		\end{bmatrix} =
+		\begin{bmatrix}
+			0 \\
+			9
+		\end{bmatrix}, \quad
+		C = \begin{bmatrix}
+			1 & 0
+		\end{bmatrix}
+	\]
+
+	К тому же известны параметры времени переходного процесса $t_n$ по $5\%$-критерию и максимального перерегулирования $\overline{\sigma}$:
+	\[
+		t_n = 0.9, \quad \overline{\sigma} = 0
+	\]
+
+	Эталонная модель задается следующей системой:
+	\[
+	\begin{cases}
+		\dot{x}_M(t) = A_M x_M(t) + B_M g(t), \\
+		y_M(t) = C_M x_M(t)
+	\end{cases}
+	\]
+
+	Здесь $g(t)$ - вход модели, а матрицы $A_M$, $B_M$, $C_M$ имеют вид:
+	\[
+		A_M = \begin{bmatrix}
+			0 & 1 \\
+			-a_{M0} & -a_{M1}
+		\end{bmatrix}, \quad
+		B_M = \begin{bmatrix}
+			0 \\
+			a_{M0}
+		\end{bmatrix}, \quad
+		C_M = \begin{bmatrix}
+			1 & 0
+		\end{bmatrix}
+	\]
+
+	Запишем стандартный характеристический полином для двумерного случая $n = 2$ и нулевого перерегулирования:
+	\[
+		s^2 + a_{M1} s + a_{M0} = s^2 + 2 \omega_n s + \omega_n^2, \quad \omega_n = \frac{4.8}{t_n}
+	\]
+	
+	Откуда можно найти коэффициенты эталонной модели:
+	\[
+		a_{M0} = \omega_n^2 = 11 \frac{1}{9}, \quad
+		a_{M1} = 2 \omega_n = 6 \frac{2}{3}
+	\]
+	
+	Отлично! Теперь построим графики переходного процесса модели при единичном воздействии $g(t) = 1(t)$ и убедимся, что они соответствуют заданным параметрам времени переходного процесса $t_n$ и перерегулирования $\overline{\sigma}$. Результат изображен на рисунке \ref{fig:model_step_response}.
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/etalon_response.png}
+		\caption{Переходный процесс эталонной модели}
+		\label{fig:model_step_response}
+	\end{figure}
+
+	Можем видеть, что всё соответствует требованиям - можем использовать эталонную модель для синтеза необходимого управления.
+
+	\section{Формирование адаптивного управления}
+
+	Адаптивное управление представляет собой метод, позволяющий системе автоматически подстраиваться под изменения во внешней среде и внутреннем состоянии. В нашем случае мы будем использовать эталонную модель для реализации адаптивного управления многомерным объектом.
+
+	Для начала определим структуру адаптивного контроллера. Он будет состоять из следующих компонентов:
+	\begin{itemize}
+		\item \textbf{Модель объекта} - эталонная модель, полученная на предыдущем этапе.
+		\item \textbf{Детектор ошибок} - система, отслеживающая отклонения реального поведения объекта от эталонного.
+		\item \textbf{Адаптивный закон управления} - алгоритм, который на основе информации от детектора ошибок корректирует параметры управления.
+	\end{itemize}
+
+	В качестве первого шага реализуем детектор ошибок, который будет сравнивать выходные сигналы реального объекта и эталонной модели. Для этого нам потребуется определить функцию ошибки:
+	\[
+		e(t) = y(t) - y_M(t)
+	\]
+	где $y(t)$ - выход реального объекта, $y_M(t)$ - выход эталонной модели.
+
+	Далее, на основе функции ошибки, мы можем разработать адаптивный закон управления. Например, можно использовать пропорциональный контроллер с учетом ошибки:
+	\[
+		u(t) = K_p e(t)
+	\]
+	где $K_p$ - коэффициент пропорциональности, который может быть адаптирован в процессе работы системы.
+
+	Таким образом, мы получаем основу для реализации адаптивного управления многомерным объектом на основе эталонной модели. В следующем разделе мы рассмотрим конкретные примеры применения данного подхода.
+	
+\end{document}
