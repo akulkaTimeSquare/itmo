@@ -99,22 +99,98 @@
 	\tableofcontents
 	\clearpage
 	
-	\section{Формирование эталонной модели}
-	Пусть дан объект
+	\section{Цель работы}
+	Освоение принципов построения адаптивной системы управления многомерным объектом.
+
+	\section{Постановка задачи}
+	Пусть дан объект:
 	\[
 	\begin{cases}
-		\dot{x}(t) = A x(t) + B u(t), \\
+		\dot{x}(t) = A x(t) + b u(t) \\
 		y(t) = C x(t)
 	\end{cases}
 	\]
 
-	Согласно варианту задания, матрицы объекта имеют вид:
+	Матрицы объекта задаются как:
+	\[
+	A = 
+	\begin{bmatrix}
+	0 & 1 & 0 & \cdots & 0 \\
+	0 & 0 & 1 & \cdots & 0 \\
+	\vdots & \vdots & \vdots & \ddots & \vdots \\
+	0 & 0 & 0 & \cdots & 1 \\
+	-a_0 & -a_1 & -a_2 & \cdots & -a_{n-1}
+	\end{bmatrix}, 
+	\quad 
+	b = 
+	\begin{bmatrix}
+	0 \\
+	0 \\
+	\vdots \\
+	0 \\
+	b_0
+	\end{bmatrix}, 
+	\quad 
+	C^T = 
+	\begin{bmatrix}
+	1 \\ 0 \\ \vdots \\ 0 \\ 0
+	\end{bmatrix}
+	\]
+
+	Здесь $a_i$ - неизвестные параметры, $b_0$ - известный коээфициент.
+
+	Задача заключается в формировании управления для компенсации параметрической неопределенности объекта и обеспечения следующего целевого равенства:
+	\[
+		\lim_{t \to \infty} ||x_M(t) - x(t)|| = \lim_{t \to \infty} ||e(t)|| = 0
+	\]
+
+	Вектор состояния эталонной модели $x_M(t)$ задаётся системой с задающим воздействием $g(t)$:
+	\[
+	\begin{cases}
+		\dot{x}_M(t) = A_M x_M(t) + b_M g(t), \\
+		y_M(t) = C_M x_M(t)
+	\end{cases}
+	\]
+
+	Матрицы эталонной модели $A_M = A + b \theta^T$ для некоторого $n$-мерного вектора $\theta$, $b_M$ и $C_M$ выбираются так, чтобы обеспечить требуемые характеристики переходного процесса и желаемое качество воспроизведения задающего воздействия $g(t)$:
+	\[
+	A = 
+	\begin{bmatrix}
+	0 & 1 & 0 & \cdots & 0 \\
+	0 & 0 & 1 & \cdots & 0 \\
+	\vdots & \vdots & \vdots & \ddots & \vdots \\
+	0 & 0 & 0 & \cdots & 1 \\
+	-a_{M0} & -a_{M1} & -a_{M2} & \cdots & -a_{M(n-1)}
+	\end{bmatrix}, 
+	\quad 
+	b_M = 
+	\begin{bmatrix}
+	0 \\
+	0 \\
+	\vdots \\
+	0 \\
+	a_{M0}
+	\end{bmatrix}
+	\]
+	\[
+		C_M = 
+	\begin{bmatrix}
+	1 & 0 & \cdots & 0 & 0
+	\end{bmatrix}
+	\]
+
+	\section{Построение эталонной модели}
+	Согласно варианту задания, матрицы объекта задаются как:
 	\[
 		A = \begin{bmatrix}
 			0 & 1 \\
+			-a_0 & -a_1
+		\end{bmatrix}
+		= \begin{bmatrix}
+			0 & 1 \\
 			0 & 0
 		\end{bmatrix}, \quad
-		B = \begin{bmatrix}
+		b = \begin{bmatrix}
 			0 \\
 			b_0
 		\end{bmatrix} =
@@ -127,20 +203,12 @@
 		\end{bmatrix}
 	\]
 
-	К тому же известны параметры времени переходного процесса $t_n$ по $5\%$-критерию и максимального перерегулирования $\overline{\sigma}$:
+	К тому же известны параметры времени переходного процесса $t_n$ (допустим, по $5\%$-критерию) и максимального перерегулирования $\overline{\sigma}$:
 	\[
 		t_n = 0.9, \quad \overline{\sigma} = 0
 	\]
 
-	Эталонная модель задается следующей системой:
-	\[
-	\begin{cases}
-		\dot{x}_M(t) = A_M x_M(t) + B_M g(t), \\
-		y_M(t) = C_M x_M(t)
-	\end{cases}
-	\]
-
-	Здесь $g(t)$ - вход модели, а матрицы $A_M$, $B_M$, $C_M$ имеют вид:
+	Матрицы $A_M$, $b_M$ и $C_M$ эталонной модели же имеют вид:
 	\[
 		A_M = \begin{bmatrix}
 			0 & 1 \\
@@ -155,50 +223,352 @@
 		\end{bmatrix}
 	\]
 
-	Запишем стандартный характеристический полином для двумерного случая $n = 2$ и нулевого перерегулирования:
+	Для поиска необходимых коээфициентов запишем стандартный характеристический полином для двумерного случая $n = 2$ и нулевого перерегулирования:
 	\[
-		s^2 + a_{M1} s + a_{M0} = s^2 + 2 \omega_n s + \omega_n^2, \quad \omega_n = \frac{4.8}{t_n}
+		s^2 + a_{M1} s + a_{M0} = s^2 + 2 \omega_n s + \omega_n^2, \quad \omega_n = \frac{4.8}{t_n} = 5 \frac{1}{3}
 	\]
 	
 	Откуда можно найти коэффициенты эталонной модели:
 	\[
-		a_{M0} = \omega_n^2 = 11 \frac{1}{9}, \quad
-		a_{M1} = 2 \omega_n = 6 \frac{2}{3}
+		a_{M0} = \omega_n^2 = 28 \frac{4}{9}, \quad
+		a_{M1} = 2 \omega_n = 10 \frac{2}{3}
 	\]
 	
-	Отлично! Теперь построим графики переходного процесса модели при единичном воздействии $g(t) = 1(t)$ и убедимся, что они соответствуют заданным параметрам времени переходного процесса $t_n$ и перерегулирования $\overline{\sigma}$. Результат изображен на рисунке \ref{fig:model_step_response}.
+	Отлично! Теперь построим графики переходной функции модели, то есть при задающем воздействии $g(t) = 1(t)$, и убедимся, что они соответствуют заданным параметрам времени переходного процесса $t_n$ и перерегулирования $\overline{\sigma}$. Результат изображен на рисунке \ref{fig:model_step_response}.
 	\begin{figure}[h!]
 		\centering
-		\includegraphics[width=0.9\textwidth]{images/etalon_response.png}
+		\includegraphics[width=0.89\textwidth]{images/etalon_response.png}
 		\caption{Переходный процесс эталонной модели}
 		\label{fig:model_step_response}
 	\end{figure}
 
-	Можем видеть, что всё соответствует требованиям - можем использовать эталонную модель для синтеза необходимого управления.
+	Видим, что всё соответствует требованиям - можем использовать эталонную модель для дальнейшего синтеза управления.
 
-	\section{Формирование адаптивного управления}
-
-	Адаптивное управление представляет собой метод, позволяющий системе автоматически подстраиваться под изменения во внешней среде и внутреннем состоянии. В нашем случае мы будем использовать эталонную модель для реализации адаптивного управления многомерным объектом.
-
-	Для начала определим структуру адаптивного контроллера. Он будет состоять из следующих компонентов:
-	\begin{itemize}
-		\item \textbf{Модель объекта} - эталонная модель, полученная на предыдущем этапе.
-		\item \textbf{Детектор ошибок} - система, отслеживающая отклонения реального поведения объекта от эталонного.
-		\item \textbf{Адаптивный закон управления} - алгоритм, который на основе информации от детектора ошибок корректирует параметры управления.
-	\end{itemize}
-
-	В качестве первого шага реализуем детектор ошибок, который будет сравнивать выходные сигналы реального объекта и эталонной модели. Для этого нам потребуется определить функцию ошибки:
+	\section{Синтез управления для отслеживания}
+	Сначала предположим \textbf{известными параметры объекта}, тогда можно прямо вычислить вектор
+	$\theta^T = \begin{bmatrix}
+		\theta_1 & \theta_2
+	\end{bmatrix}$, определяемый рассогласованиями между матрицами $A$ и $A_M = A + b \theta^T$:
 	\[
-		e(t) = y(t) - y_M(t)
+		\theta_1 = \frac{-a_{M0} + a_0}{b_0} \approx -3.16, \quad
+		\theta_2 = \frac{-a_{M1} + a_1}{b_0} \approx -1.185, \quad
+		\kappa = \frac{b_0}{a_{M0}}
 	\]
-	где $y(t)$ - выход реального объекта, $y_M(t)$ - выход эталонной модели.
 
-	Далее, на основе функции ошибки, мы можем разработать адаптивный закон управления. Например, можно использовать пропорциональный контроллер с учетом ошибки:
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/known_params_response.png}
+		\caption{Графики $x_M(t)$ и $x(t)$ при расчетных значениях параметров}
+		\label{fig:known_params_response}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/known_params_error.png}
+		\caption{Ошибка $e(t) = x_M(t) - x(t)$ при расчетных значениях параметров}
+		\label{fig:known_params_error}
+	\end{figure}
+
+	Откуда управление может быть задано как:
 	\[
-		u(t) = K_p e(t)
+		u(t) = \theta^T x(t) + \frac{1}{\kappa} g(t), \quad g(t) = 9\sin(0.2 t) + 9\cos(0.1 t) + 15
 	\]
-	где $K_p$ - коэффициент пропорциональности, который может быть адаптирован в процессе работы системы.
 
-	Таким образом, мы получаем основу для реализации адаптивного управления многомерным объектом на основе эталонной модели. В следующем разделе мы рассмотрим конкретные примеры применения данного подхода.
+	Используем полученное выражение и построим траектории движения $x_M$ эталонной модели, а также $x$ объекта при этом управлении и задающем воздействии при начальных условиях $x_M(0) = \begin{bmatrix}
+		0 &
+		0
+	\end{bmatrix}^T$ и $x(0) = \begin{bmatrix}
+		1 &
+		1
+	\end{bmatrix}^T$. Дополнительно к этому найдем ошибку между состояниями $e = x_M - x$. Результаты приведены на рисунках \ref{fig:known_params_response} и \ref{fig:known_params_error}.
+	
+	Можем видеть, что с течением времени ошибка стремится к нулю, значит, регулятор построен верно.
+
+	\textbf{Попробуем немного отклонить} параметры объекта так, чтобы система осталась устойчивой, $\theta$ при этом оставим прежним:
+	\[
+		A' = \begin{bmatrix}
+			0 & 1 \\
+			- a_0 + 1 & - a_1 + 1
+			\end{bmatrix} =
+			\begin{bmatrix}
+			0 & 1 \\
+			1 & 1
+		\end{bmatrix}
+	\]
+
+	Построим для этих параметров траектории движения и ошибку между состояниями. Результаты приведены на рисунках \ref{fig:unknown_params_response_stable} и \ref{fig:unknown_params_error_stable}.
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/unknown_params_response_stable.png}
+		\caption{Графики $x_M(t)$ и $x(t)$ при незначительном отклонении параметров}
+		\label{fig:unknown_params_response_stable}
+	\end{figure}
+
+	Заметим, что объект по-прежнему остается устойчивым, но ошибки между состояниями уже не стремятся к нулю, а остаются в некоторой окрестности от него. Сам объект в целом имеет похожую на эталонную динамику.
+	
+	Всё вышесказанное связано с тем, что регулятор основывает свою работу в том числе на неверном векторе $\theta$, который при измененных параметрах матрицы $A$ объекта остался прежним. Появилось расхождение $\overline{\theta} = \theta - \theta'$ между реальной связью между объектом и эталоном $\theta'$ и используемой $\theta$ , а значит, управление уже не способно правильно компенсировать расхождения между ними.
+
+	Математически строго это выходит из того, что уравнение управления было получено из динамики ошибки системы с известными параметрами:
+	\[
+		\dot{e}(t) = \dot{x}_M(t) - \dot{x}(t) = A_M e(t) + b (\theta^T x(t) - u(t) + \dfrac{1}{k} g(t))
+	\]
+
+	Которое при верном управлении сводится к:
+	\[
+		\dot{e}(t) = A_M e(t) \quad \Rightarrow \quad \lim_{t \to \infty} e(t) = 0
+	\]
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/unknown_params_error_stable.png}
+		\caption{Ошибка $e(t) = x_M(t) - x(t)$ при незначительном отклонении параметров}
+		\label{fig:unknown_params_error_stable}
+	\end{figure}
+
+	Однако, при небольшом отклонении параметров:
+	\[
+		\dot{e}(t) = A_M e(t) + b (\theta^T x(t) - \theta'^T x(t)) = A_M e(t) + b \overline{\theta}^T x(t)
+	\]
+
+	В динамике ошибки остаётся остаточный член $b \overline{\theta}^T x(t)$, который в общем случае не позволяет ей устремиться к нулю.
+	
+	К тому же при \textbf{значительном отклонении параметров} система может стать неустойчивой, то есть управление не будет способно даже <<удержать>> её. Попробуем взять:
+	\[
+		A'' = \begin{bmatrix}
+			0 & 1 \\
+			- a_0 + 12 & - a_1 + 12
+			\end{bmatrix} =
+			\begin{bmatrix}
+			0 & 1 \\
+			12 & 12
+		\end{bmatrix}
+	\]
+
+	Построим для взятых параметров аналогичные графики состояний систем и ошибок, результаты приведены на рисунках \ref{fig:unknown_params_response_unstable} и \ref{fig:unknown_params_error_unstable}.
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/unknown_params_response_unstable.png}
+		\caption{Графики $x_M(t)$ и $x(t)$ при сильном отклонении параметров}
+		\label{fig:unknown_params_response_unstable}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/unknown_params_error_unstable.png}
+		\caption{Ошибка $e(t) = x_M(t) - x(t)$ при сильном отклонении параметров}
+		\label{fig:unknown_params_error_unstable}
+	\end{figure}
+
+	Видим, что объект стал неустойчивым. Выходит, управление с неверными параметрами  не способно породить корректную замкнутую систему, поэтому необходимо использовать адаптивное управление, которое при той же работе будет дополнительно оценивать вектор $\theta$, контролируя поведение объекта даже без знаний о его точных параметрах матрицы $A$.
+
+	\section{Создание адаптивного управления}
+	Итак, для формирования адаптивного управления дополнительно добавим оценку вектора $\theta$:
+	\[
+		u(t) = \hat{\theta}^T x(t) + \frac{1}{\kappa} g(t), \quad
+		\dot{\hat{\theta}} = \gamma x(t) b^T P e(t), \quad
+		\hat{\theta}(0) = 0
+	\]
+
+	В данном случае $P = P^T \succ 0$ - положительная определенная симметричная матрица, удовлетворяющая уравнению Ляпунова:
+	\[
+		A_M^T P + P A_M = - Q, \quad Q = I \succ 0
+	\]
+	
+	Примем $\gamma = 1$ - коэффициент адаптации, влияющий на скорость сходимости оценки параметров $\hat{\theta}(t)$ к истинным значениям $\theta$. Также зададим всё тот же сигнал и те же начальные условия для состояний объекта и эталонной модели:
+	\[
+		g(t) = 9\sin(0.2 t) + 9\cos(0.1 t) + 15, \quad
+		x(0) = \begin{bmatrix}
+			1 \\
+			1
+		\end{bmatrix}, \quad
+		x_M(0) = \begin{bmatrix}
+			0 \\
+			0
+		\end{bmatrix}
+	\]
+
+	Повторим все эксперименты, проделанные ранее, но уже с адаптивным управлением, то есть примем новые матрицы объекта $A$:
+	\[
+		A = \begin{bmatrix}
+			0 & 1 \\
+			0 & 0
+		\end{bmatrix}, \quad
+		A' = \begin{bmatrix}
+			0 & 1 \\
+			1 & 1
+		\end{bmatrix}, \quad
+		A'' = \begin{bmatrix}
+			0 & 1 \\
+			12 & 12
+		\end{bmatrix}
+	\]
+
+	И замоделируем поведение систем с вышеприведенным в пункте управлением при взятых  выше начальных условиях. Все графики приведены на рисунках \ref{fig:3_known_params_response} - \ref{fig:3_unknown_params_estimation_unstable}.
+
+	Можем видеть, что даже при значительном отклонении параметров объекта адаптивное управление способно обеспечить устойчивость системы и стремление ошибки к нулю. Это достигается за счёт оценки параметров $\hat{\theta}(t)$, которая корректируется в процессе работы системы, стремясь к истинным значениям $\theta$.
+
+	Таким образом, обеспечивается \textit{ограниченность} всех сигналов в замкнутой системе и \textit{асимптотическое стремление ошибок} к нулю - выполнены первые свойства алгоритма управления!
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_response.png}
+		\caption{Состояния при расчетных значениях параметров и оценке $\hat{\theta}(t)$}
+		\label{fig:3_known_params_response}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_error.png}
+		\caption{Ошибка при расчетных значениях параметров и оценке $\hat{\theta}(t)$}
+		\label{fig:3_known_params_error}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_estimation.png}
+		\caption{Ошибка $\tilde{\theta}(t) = \theta - \hat{\theta}(t)$ при расчетных значениях параметров}
+		\label{fig:3_known_params_estimation}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_unknown_params_response_stable.png}
+		\caption{Состояния при незначительном отклонении параметров и оценке $\hat{\theta}(t)$}
+		\label{fig:3_unknown_params_response_stable}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_unknown_params_error_stable.png}
+		\caption{Ошибка при незначительном отклонении параметров и оценке $\hat{\theta}(t)$}
+		\label{fig:3_unknown_params_error_stable}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_unknown_params_estimation_stable.png}
+		\caption{Ошибка $\tilde{\theta}(t) = \theta - \hat{\theta}(t)$ при незначительном отклонении параметров}
+		\label{fig:3_unknown_params_estimation_stable}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_unknown_params_response_unstable.png}
+		\caption{Состояния при сильном отклонении параметров и оценке $\hat{\theta}(t)$}
+		\label{fig:3_unknown_params_response_unstable}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_unknown_params_error_unstable.png}
+		\caption{Ошибка при сильном отклонении параметров и оценке $\hat{\theta}(t)$}
+		\label{fig:3_unknown_params_error_unstable}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_unknown_params_estimation_unstable.png}
+		\caption{Ошибка $\tilde{\theta}(t) = \theta - \hat{\theta}(t)$ при сильном отклонении параметров}
+		\label{fig:3_unknown_params_estimation_unstable}
+	\end{figure}
+
+	Отметим, что если вектор $x$ удовлетворяет условию неисчезающего возбуждения:
+	\[
+		\exists \alpha > 0, T > 0 : \int_{t}^{t+T} x(\tau) x^T(\tau) d\tau \geq \alpha I, \quad \forall t \geq 0
+	\]
+
+	То оценка параметров $\hat{\theta}(t)$ будет асимптотически сходиться к истинным значениям $\theta$. А так как в рамках пункта решается задача слежения, то условие неисчезающего возбуждения можно свести к таковому для задающего воздействия $g(t)$. Гармоники в составе $g(t)$ обеспечивают выполнение этого условия, поэтому оценка параметров $\hat{\theta}(t)$ в наших экспериментах и получились близкими к истине.
+	
+	Также при выполнении условия должно существовать оптимальное $\gamma$, при котором скорость сходимости параметрической ошибки $\tilde{\theta} = \theta - \hat{\theta}$ максимальна. Проверим это, изменяя коэффициент адаптации $\gamma \in \{5, 50, 200\}$. Результаты приведены на рисунках \ref{fig:3_known_params_response_5} - \ref{fig:3_known_params_estimation_200}.
+
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_response_5.png}
+		\caption{Оценка параметров $\hat{\theta}(t)$}
+		\label{fig:3_known_params_response_5}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_error_5.png}
+		\caption{Ошибка при расчетных значениях параметров и $\gamma = 5$}
+		\label{fig:3_known_params_error_5}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_estimation_5.png}
+		\caption{Ошибка $\tilde{\theta}(t) = \theta - \hat{\theta}(t)$ при расчетных значениях и $\gamma = 5$}
+		\label{fig:3_known_params_estimation_5}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_response_50.png}
+		\caption{Состояния при расчетных значениях параметров и $\gamma = 50$}
+		\label{fig:3_known_params_response_50}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_error_50.png}
+		\caption{Ошибка при расчетных значениях параметров и $\gamma = 50$}
+		\label{fig:3_known_params_error_50}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_estimation_50.png}
+		\caption{Ошибка $\tilde{\theta}(t) = \theta - \hat{\theta}(t)$ при расчетных значениях и $\gamma = 50$}
+		\label{fig:3_known_params_estimation_50}
+	\end{figure}
+
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_response_200.png}
+		\caption{Состояния при расчетных значениях параметров и $\gamma = 200$}
+		\label{fig:3_known_params_response_200}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_error_200.png}
+		\caption{Ошибка при расчетных значениях параметров и $\gamma = 200$}
+		\label{fig:3_known_params_error_200}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_estimation_200.png}
+		\caption{Ошибка $\tilde{\theta}(t) = \theta - \hat{\theta}(t)$ при расчетных значениях и $\gamma = 200$}
+		\label{fig:3_known_params_estimation_200}
+	\end{figure}
+
+	Можем видеть, что увеличение параметра $\gamma$ сначало привело к более высокой скорости сходимости оценки, однако при дальнейшем его увеличении быстродействие сильно упало, вплоть до более худших значений в сравнении с $\gamma = 5$. Таким образом, оптимальное значение $\gamma$ лежит где-то около $5$ и $50$ - выполняется свойство \textit{существования оптимального коэффициента адаптации} алгоритма.
+
+	Теперь посмотрим, что будет при постоянном задающем воздействии $g(t) = 1$. Для моделирования используем алгоритм адаптации с параметром $\gamma = 1$ и начальные условия $\hat{x} = \begin{bmatrix} 0 & 0 \end{bmatrix}^T$ и $x = \begin{bmatrix} 1 & 1 \end{bmatrix}^T$, а также расчётные значения параметров $\theta$. Результаты приведены на рисунках \ref{fig:3_known_params_response_g1} - \ref{fig:3_known_params_estimation_g1}.
+
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_response_g1.png}
+		\caption{Состояния при расчетных значениях параметров, $\gamma = 1$ и $g(t) = 1$}
+		\label{fig:3_known_params_response_g1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_error_g1.png}
+		\caption{Ошибка при расчетных значениях параметров, $\gamma = 1$ и $g(t) = 1$}
+		\label{fig:3_known_params_error_g1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\textwidth]{images/3_known_params_estimation_g1.png}
+		\caption{Ошибка $\tilde{\theta}(t) = \theta - \hat{\theta}(t)$ при расчетных значениях, $\gamma = 1$ и $g(t) = 1$}
+		\label{fig:3_known_params_estimation_g1}
+	\end{figure}
+
+	Все оценки состояний сошлись, ошибка стремится к нулю, однако оценки параметров $\hat{\theta}(t)$ не сходятся к истинным значениям $\theta$. Это связано с тем, что при постоянном задающем воздействии условие неисчезающего возбуждения не выполняется, так как состояния быстро выходят на стационарный режим и перестают изменяться. Следовательно, одно из собственных чисел матрицы интеграла:
+	\[
+		\int_{t}^{t+T} x(\tau) x^T(\tau) d\tau \geq \alpha I, \quad \forall t \geq 0
+	\]
+
+	Становится равным нулю, из-за чего условие неисчезающего возбуждения нарушается, и оценки параметров не могут сойтись к истинным значениям - не происходит достаточного возбуждения системы для корректной оценки всех её параметров. Следовательно, условие неисчезающих возбуждений действительно является ключевым в рассматриваемом алгоритме адаптации для схождения к нулю ошибки оценки параметров $\tilde{\theta}(t)$.
+
+	\section{Выводы}
+	В ходе выполнения лабораторной работы были исследованы методы построения адаптивного управления многомерным объектом с параметрической неопределённостью. Разработана и проверена эталонная модель с требуемыми характеристиками переходного процесса. Показано, что регулятор с неадаптивным управлением работает корректно только при известных точных параметрах объекта, а при их отклонениях теряет асимптотические свойства или становится неустойчивым.
+	
+	Синтезированный адаптивный регулятор с динамической оценкой параметров объекта демонстрирует устойчивость и обеспечивает асимптотическое стремление ошибки к нулю даже при значительных отклонениях параметров. Установлено, что выбор коэффициента адаптации критически влияет на скорость сходимости, и существует оптимальное его значение. Подтверждена важность условия неисчезающего возбуждения для сходимости оценок параметров к истинным значениям.
+	
+
+
+
+
+
+
 	
 \end{document}
