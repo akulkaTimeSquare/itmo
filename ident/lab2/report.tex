@@ -59,20 +59,21 @@
 			}
 		\end{center}
 		
-		\vspace{45mm}
+		\vspace{40mm}
 		
 		\begin{center}
 			Отчет по лабораторной работе №2\\
-			Динамические методы идентификации\\
-			Вариант 5
+			\textbf{Динамические методы идентификации}\\
+			Вариант 23
 		\end{center}
 		
-		\vspace{50mm}
+		\vspace{40mm}
 		
 		\begin{minipage}{.45\linewidth}
 			Выполнили студенты
             \\
 			\\
+			\\[5mm]
 			Преподаватель
 		\end{minipage}
 		\hfill
@@ -81,7 +82,9 @@
 				Мовчан Игорь Евгеньевич
 				\\
 				Соколов Дмитрий Алексеевич
-                \\
+				\\
+				Тенишев Алексей Николаевич
+				\\[5mm]
 				Ведяков Алексей Алексеевич
 			\end{flushright}
 		\end{minipage}
@@ -98,8 +101,301 @@
 	\tableofcontents
 	\clearpage
 	
-	\section{Постановка задачи}
+	\section{Дискретная система первого порядка}
+	\subsection{Задание системы}
+	Зададим дискретную систему с выходом $y(k)$ через передаточную функцию и вход $u(t) = \sin (\omega t)$, который по ходу дискретизируем:
+	\[
+		y(k) = W(z) u(k), \quad W(z) = \frac{b}{z + a}, \quad u(k) = \sin (\omega k T_d)
+	\]
+
+	Здесь переменная $T_d = 0.1$ отвечает за интервал дискретизации, $a$ и $b$ - параметры модели, $\omega$ - частота гармонического входа $u(t)$. Значения брались из варианта, в нашем случае это:
+	\[
+		a = 0.97, \quad b = 2.8, \quad \omega = 5.65
+	\]
+
+	Проведем моделирование входа $u(k)$ и выхода $y(k)$ при выбранных параметрах системы. Результат представлен на рисунке \ref{fig:model_response}.
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task1.png}
+		\caption{Дискретизированный вход и выход системы}
+		\label{fig:model_response}
+	\end{figure}
+
+	Для дальнейшей работы к тому же необходимо перевести систему в форму линейной регрессии, для нашего случая это:
+	\[
+		y(k) = \phi^T(k) \theta = \begin{bmatrix}
+			-y(k-1) & u(k)
+		\end{bmatrix} \begin{bmatrix}
+			a \\
+			b
+		\end{bmatrix} = -a y(k-1) + b u(k)
+	\]
+
+	\subsection{Идентификации с нормировкой шага}
+	Попробуем теперь, зная только $y(k)$ и $u(k)$, оценить \textit{постоянные} параметры системы $\theta = \begin{bmatrix}
+		a & b
+	\end{bmatrix}^T$, используя градиентный алгоритм:
+	\begin{equation}
+		\label{extended}
+		\hat{\theta}(k) = \hat{\theta}(k-1) - \gamma \nabla_{\hat{\theta}} J_{\text{SE}}(k) = \hat{\theta}(k-1) + \gamma \frac{\phi(k) e^0(k)}{1 + \gamma \phi^T(k)\phi(k)}	
+	\end{equation}
 	
+	В методе $e^0(k) := y(k) - \phi^T(k)\hat{\theta}(k-1)$ - ошибка оценивания $y(k)$ со <<знаниями>> о параметре на предыдущем шаге, а минимизируемый критерий качества основан на квадрате ошибки:
+	\[
+		J_{\text{SE}}(k) := \frac{e^2(k)}{2} = \frac{(y(k) - \phi^T \hat{\theta}(k))^2}{2}
+	\]
+
+	Знаменатель, присутствующий во втором слагаемом алгоритма \ref{extended}, служит некой нормировкой шага и позволяет стабильнее оценивать параметры дискретной системы.
+
+	Итак, проведем численное моделирование процесса идентификации при значениях $\gamma = 1$, $\gamma = 3$ и $\gamma = 10$. На рисунках \ref{fig:gamma1}-\ref{fig:all_gamma_error} приведены результаты работы алгоритма \ref{extended} с данными $\gamma$.
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task1_1.png}
+		\caption{Процесс идентификации параметров при значении $\gamma = 1$}
+		\label{fig:gamma1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task1_2.png}
+		\caption{Процесс идентификации параметров при значении $\gamma = 3$}
+		\label{fig:gamma3}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task1_3.png}
+		\caption{Процесс идентификации параметров при значении $\gamma = 10$}
+		\label{fig:gamma10}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task1_all_gammas.png}
+		\caption{Сравнение процессов идентификации при различных $\gamma$}
+		\label{fig:all_gamma}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task1_error_norms.png}
+		\caption{Сравнение норм параметрических ошибок при различных $\gamma$}
+		\label{fig:all_gamma_error}
+	\end{figure}
+
+	Можем видеть, что с увеличением $\gamma$ повышается скорость сходимости адаптации, но одновременно ухудшается и стабильность - появляются более резкие скачки, падает качество.
+
+	\subsection{Упрощенный алгоритм идентификации}
+	Воспользуемся также упрощенным градиентным алгоритмом:
+	\begin{equation}
+		\label{simpled}
+		\hat{\theta}(k) = \hat{\theta}(k-1) + \gamma \phi(k) e^0(k)
+	\end{equation}
+
+	Здесь исчезает нормировка по величине $\gamma$ и $\phi(k)$, поэтому при больших значениях $\gamma$ система идентификации может стать неустойчивой. Проверим это, проведя моделирование при $\gamma = 1$ и $\gamma = 10$. Результаты представлены на рисунках \ref{fig:gamma0.5_sim} и \ref{fig:gamma10_sim}.
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task1_4.png}
+		\caption{Идентификации при значении $\gamma = 0.5$ и упрощенном алгоритме}
+		\label{fig:gamma0.5_sim}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task1_5.png}
+		\caption{Идентификации при значении $\gamma = 10$ и упрощенном алгоритме}
+		\label{fig:gamma10_sim}
+	\end{figure}
+
+	Сильное увеличение $\gamma$ при использовании алгоритма идентификации \ref{simpled}, как и было сказано, приводит к неустойчивости оценок.
+	
+	Также в сравнении с предыдущими результатами для идентификации с нормировкой на $\gamma$ процесс сходимости менее стабилен - так, при оценке параметра $a$ присутствуют резкие скачки на величину выше самого $a$. 
+	
+	Таким образом, для получения качественных результатов при использовании упрощенного метода необходимо выбирать мелкие $\gamma$, что, в свою очередь, увеличивает ещё и время сходимости.
+	
+	Здесь важно, что за все вышесказанные проблемы мы получаем более легкое вычисление шагов градиента, что в большинстве случаев, пожалуй, не так уж и полезно :)
+
+	\section{Дискретная система второго порядка}
+	\subsection{Задание системы}
+	Зададимся теперь дискретной системой второго порядка с выходом $y(k)$ и передаточной функцией $W(z)$:
+	\[
+		y(k) = W(z) u(k), \quad W(z) = \frac{b}{z^2 + a_1 z + a_2}
+	\]
+
+	Также примем интервал дискретизации $T_d = 0.1$, а параметры системы $a_1$, $a_2$ и $b$ возьмем из варианта:
+	\[
+		a_1 = -1.89, \quad a_2 = 0.8928, \quad b = 2.5
+	\]
+
+	И переведем систему в форму линейной регрессии:
+	\[
+		y(k) = \phi^T(k) \theta = \begin{bmatrix}
+			-y(k-1) & y(k-2) & u(k)
+		\end{bmatrix} \begin{bmatrix}
+			a_1 \\
+			a_2 \\
+			b
+		\end{bmatrix} =
+	\]
+	\[
+		= -a_1 y(k-1) -a_2 y(k-2) + b u(k)
+	\]
+
+	\subsection{Простой гармонический вход}
+	Посмотрим, как пройдет идентификация параметров при различных гармонических входах $u(t)$. Для начала возьмем уже использовавшийся нами ранее синус с заданной из варианта частотой $\omega$:
+	\[
+		u(t) = \sin(\omega t), \quad u(k) = \sin(\omega k T_d), \quad \omega = 45.86
+	\]
+
+	Моделирование входа $u(k)$ и выхода $y(k)$ при выбранных параметрах системы приведено на рисунке \ref{fig:model_response2}.
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task2.png}
+		\caption{Вход и выход дискретной системы второго порядка при $u = \sin(\omega t)$}
+		\label{fig:model_response2}
+	\end{figure}
+
+	Для оценки параметров будем использовать градиентный алгоритм \ref{extended} при $\gamma = 1$, так как он показал себя в предыдущем случае лучшим образом. Результаты численного моделирования процесса идентификации представлены на рисунке \ref{fig:task2_1}.
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task2_1.png}
+		\caption{Идентификации параметров при входе $u = \sin(\omega t)$}
+		\label{fig:task2_1}
+	\end{figure}
+
+	Заметим, что увеличение частоты входа привело к более частым колебаниям и в оценках $\hat{\theta}$ набора параметров $\theta = \begin{bmatrix}
+		a_1 & a_2 & b
+	\end{bmatrix}^T$. При всем этом оценка сошлась достаточно точно, хоть и <<застряла>> на некотором уровне от истинных значений из-за малого $\gamma$.
+
+	\subsection{Двухсоставной гармонический вход}
+	Изменим вход, добавив синус меньшей амплитуды и частоты:
+	\[
+		u(t) = \sin(\omega t) + 0.2\sin(0.5 \omega t), \quad u(k) = \sin(\omega k T_d) + 0.2\sin(0.5 \omega k T_d)
+	\]
+
+	Аналогично проведем моделирование входа $u(k)$ и выхода $y(k)$, а также применим идентификацию параметров при $\gamma = 1$. На рисунках \ref{fig:task2_2}-\ref{fig:task2_4} изображены все соответствующие графики.
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task2_2.png}
+		\caption{Вход и выход системы второго порядка при $u = \sin(\omega t) + 0.2 \sin(0.5 \omega t)$}
+		\label{fig:task2_2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task2_3.png}
+		\caption{Идентификации параметров при входе $u = \sin(\omega t) + 0.2 \sin(0.5 \omega t)$}
+		\label{fig:task2_3}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task2_4.png}
+		\caption{Сравнение процессов при входах $u = \sin(\omega t)$ и $u = \sin(\omega t) + 0.2 \sin(0.5 \omega t)$}
+		\label{fig:task2_4}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task2_4_errors.png}
+		\caption{Сравнение норм параметрических ошибок при различных входах}
+		\label{fig:task2_4_errors}
+	\end{figure}
+
+	Для наглядности на рисунках \ref{fig:task2_4} и \ref{fig:task2_4_errors} также представлено сравнение процессов идентификации при входах, использующих только одну гармонику - $u(t) = \sin(\omega t)$, и две - $u(t) = \sin(\omega t) + 0.2 \sin(0.5 \omega t)$.
+
+	Видим, что добавление дополнительной гармоники в общем оставило динамику той же, однако \textit{немного} ускорило адаптацию за счёт обогащения входного сигнала слабым синусом, обладающим меньшей амплитудой и частотой.
+	
+	В общем случае добавление такого рода гармоники уменьшает вырожденность входа и улучшает способность алгоритмов различать вклад отдельных параметров $a_1$, $a_2$ и $b$.
+
+	\section{Непрерывная система}
+	\subsection{Задание системы}
+	Пусть дана непрерывная линейная система первого порядка с гармоническим входом $u(t)$ и выходом $y(t)$:
+	\[
+		y(t) = \frac{b}{p + a}u(t), \quad u(t) = \sin(\omega t)
+	\]
+
+	Перепишем модель в форме линейной регрессии, считая производную $\dot{y}(t)$ доступной к измерению:
+	\[
+		\dot{y}(t) = \begin{bmatrix}
+			-y(t) & u(t)
+		\end{bmatrix}
+		\begin{bmatrix}
+			a \\
+			b
+		\end{bmatrix} = -a y(t) + b u(t)
+	\]
+
+	Также примем параметры системы и входа $a$, $b$ и $\omega$ из варианта:
+	\[
+		a = 0.5, \quad b = 3.2, \quad \omega = 5.65
+	\]
+
+	Отлично, всё задано! На рисунке изображено моделирование входа $u(t)$ и выхода $y(t)$ данной непрерывной системы.
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task3.png}
+		\caption{Вход и выход непрерывной системы}
+		\label{fig:task3}
+	\end{figure}
+
+	\subsection{Непрерывный алгоритм идентификации}
+	Теперь проведем идентификацию параметров $a$ и $b$ на основе градиентного алгоритма для непрерывных систем:
+	\begin{equation}
+		\label{cont}
+		\hat{\theta} = -\gamma \nabla_{\hat{\theta}} J_{\text{SE}}(t) = \gamma \phi e(t)
+	\end{equation}
+
+	Здесь $e(t) := y(t) - \phi^T(t) \hat{\theta}(t)$ - ошибка на выход $y(t)$.
+
+	Численное моделирование процессов идентификации параметров $a$ и $b$ при значениях $\gamma = 1$, $\gamma = 3$ и $\gamma = 10$ и заданном алгоритме \ref{cont}, а также их сравнение представлено на рисунках \ref{fig:task3_1}-\ref{fig:task3_errors}.
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task3_1.png}
+		\caption{Идентификации параметров непрерывной системы при $\gamma = 1$}
+		\label{fig:task3_1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task3_2.png}
+		\caption{Идентификации параметров непрерывной системы при $\gamma = 3$}
+		\label{fig:task3_3}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task3_3.png}
+		\caption{Идентификации параметров непрерывной системы при $\gamma = 10$}
+		\label{fig:task3_10}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task3_4.png}
+		\caption{Сравнение процессов непрерывной системы при различных $\gamma$}
+		\label{fig:task3_4}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.825\textwidth]{images/task3_errors.png}
+		\caption{Сравнение норм ошибок в непрерывной системе при различных $\gamma$}
+		\label{fig:task3_errors}
+	\end{figure}
+
+	Можем видеть, что увеличение $\gamma$, как и для дискретной системы, ведет к ускорению процессов адаптации, однако снижает их качество и стабильность - например, на рисунке \ref{fig:task3_10} появляются некоторые колебания возле истинных значений параметров $a$ и $b$ системы.
+
+	\section{Выводы}
+	В ходе лабораторной работы исследованы градиентные алгоритмы идентификации для дискретных и непрерывных систем. Установлено, что для дискретных моделей использование алгоритма с нормировкой шага критически важно для обеспечения устойчивости, тогда как увеличение коэффициента адаптации $\gamma$ ускоряет сходимость ценой появления возможных нестабильностей.
+	
+	Эксперименты с системой второго порядка подтвердили, что обогащение спектра входного сигнала дополнительными гармониками немного повышает скорость адаптации.
+	
+	В конечном итоге, получено, что эффективность идентификации определяется величиной шага адаптации и насыщенностью входного сигнала.
+
+
+	
+
+
+
+
+
+	
+
+	
+
+
+
+	
+
 
 
 

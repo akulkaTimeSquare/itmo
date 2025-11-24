@@ -121,7 +121,7 @@ plt.plot(sol.t,  theta[0]*np.ones(np.size(theta_hat[0])) - theta_hat[0], label=r
 plt.plot(sol.t, theta[1]*np.ones(np.size(theta_hat[1])) - theta_hat[1], label=r'$\tilde{\theta}_2(t)$', linewidth=2)
 plt.xlabel('t')
 plt.ylabel(r'$\hat{\theta}(t)$')
-plt.title(r'Оценка параметров $\hat{\theta}$ при $g(t) = 1$')
+plt.title(r'Ошибка оценки параметров $\tilde{\theta}$ при $g(t) = 1$')
 plt.grid(True)
 plt.legend(loc="lower right")
 plt.tight_layout()

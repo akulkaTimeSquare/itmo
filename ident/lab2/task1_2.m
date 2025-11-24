@@ -1,56 +1,59 @@
-% ---- параметры системы ----
+load('ident_lab2_v05.mat');
+% исходные параметры
 a = zad1.a;
 b = zad1.b;
 w = zad1.w;
 
+% Параметры
 Td = 0.1;
-Tend = 20;
+t_end = 10;
+t = 0:Td:t_end;
+N = t_end/Td+1;
 
-k = 0:Td:Tend;
-N = length(k);
+% Входной сигнал
+u = sin(w*t);
 
-% вход
-u = sin(w * k);
+% Создание дискретной передаточной функции
+num = [b];
+den = [1, a];
+Wz = tf(num, den, Td);  % Ts - интервал дискретизации
 
-% выход системы
-y = zeros(1, N);
-for i = 1:N-1
-    y(i+1) = -a * y(i) + b * u(i);
-end
+% Расчет отклика
+y = lsim(Wz, u, t);
 
-% ---- алгоритмы для gamma ----
-gammas = [0.5, 10];
+gammas = [1, 3, 10];
 
 figure;
 
-for gi = 1:length(gammas)
+gi = 2
+gamma = gammas(gi);
 
-    gamma = gammas(gi);
-
-    % параметры оценки
-    theta = zeros(2, N);      % [a_hat; b_hat]
-    theta_hat = [0; 0];       % начальная оценка
-
-    for k_i = 2:N
-        phi = [y(k_i-1); u(k_i-1)];
-
-        % ошибка
-        e0 = y(k_i) - phi.'*theta_hat;
-
-        % градиентный алгоритм
-        theta_hat = theta_hat + gamma * phi * e0;
-
-        theta(:, k_i) = theta_hat;
-    end
-
-    % ---- графики ----
-    subplot(2,2,2*gi-1)
-    plot(k, theta(1,:), 'LineWidth', 1.6); hold on;
-    yline(a, '--'); grid on;
-    title(['\gamma = ', num2str(gamma), '  (a\_hat)']);
-
-    subplot(2,2,2*gi)
-    plot(k, theta(2,:), 'LineWidth', 1.6); hold on;
-    yline(b, '--'); grid on;
-    title(['\gamma = ', num2str(gamma), '  (b\_hat)']);
+theta = zeros(2, N);
+theta_hat = [0; 0];
+phi = zeros(2,1);
+for k_i = 2:N
+    phi = [-y(k_i-1); u(k_i-1)];
+    e0 = y(k_i) - phi.'*theta_hat;
+    theta_hat = theta_hat + gamma * (phi * e0)/(1 + gamma*(phi.'*phi));
+    theta(:, k_i) = theta_hat;
 end
+
+subplot(2,1,1);
+plot(t, theta(1,:), 'LineWidth', 1.5); hold on;
+yline(a, '--k', 'LineWidth', 1.5); grid on;
+yticks([-0.25, 0, 0.5, a]);
+ylim([-0.25 1.1])
+xlabel("t")
+ylabel("\theta(t)")
+title(['Оценка a при \gamma = ', num2str(gamma)]);
+
+subplot(2,1,2);
+plot(t, theta(2,:), 'LineWidth', 1.5); hold on;
+yline(b, '--k', 'LineWidth', 1.5); grid on;
+yticks([0 1 2 b])
+ylim([-0.1 3])
+title(['Оценка b при \gamma = ', num2str(gamma)]);
+set(gcf, 'PaperPositionMode','auto');
+xlabel("t")
+ylabel("\theta(t)")
+saveas(gcf, "images/task1_2.png")
