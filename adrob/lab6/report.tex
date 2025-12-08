@@ -1,0 +1,178 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{ЛР №6}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{Адаптивный наблюдатель состояния}}
+\fancyfoot[L]{}
+\fancyfoot[C]{\thepage\space}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\color[gray]{0.7}\ttfamily\small,
+    stepnumber=1,
+    numbersep=8pt,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4,
+    breaklines=true
+}
+\usepackage{subcaption}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+                Научно-исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{40mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №6\\
+			\textbf{Синтез адаптивного наблюдателя состояния}\\
+			\textbf{линейного объекта}\\
+			Вариант 9
+		\end{center}
+		
+		\vspace{40mm}
+		
+		\begin{minipage}{.45\linewidth}
+			Выполнили студенты
+            \\
+			\\[5mm]
+			Преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.52\linewidth}
+			\begin{flushright}
+				Мовчан Игорь Евгеньевич 
+				\\
+				Копылов Андрей Михайлович
+				\\[5mm]
+				Парамонов Алексей Владимирович
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2025
+		\end{center}
+		
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\section{Цель работы}
+	Освоение процедуры построения адаптивного наблюдателя для линейного объекта управления.
+	
+	\section{Постановка задачи}
+	Пусть дан асимптотически устойчивый объект при начальном состоянии $x(0)$ и недоступным к прямому измерению вектор $x$:
+	\[
+		\begin{cases*}
+			\dot{x} = Ax + bu\\
+			y = Cx
+		\end{cases*}
+	\]
+
+	Здесь $u$, $y$ - входной и выходной сигналы объекта, уже доступные к прямым измерениям.
+	
+	Также задаются матрица системы $A$, вектор управления $b$ и наблюдения $C$:
+	\[
+		A = 
+		\begin{bmatrix}
+		-a_{n-1} & 1       & 0& \ldots & 0 \\
+		-a_{n-2} & 0       & 1 & \ldots & 0 \\
+		\vdots   & \vdots  & \vdots & \ddots & \vdots \\
+		-a_1     & 0       & 0 &\ldots & 1 \\
+		-a_0     & 0       & 0 &\ldots & 0
+		\end{bmatrix}, \quad 
+		b = 
+		\begin{bmatrix}
+		0 \\
+		\vdots \\
+		0 \\
+		b_m \\
+		\vdots \\
+		b_0
+		\end{bmatrix}, \quad 
+		C = \begin{bmatrix}
+		1 & 0 & \ldots & 0
+		\end{bmatrix},
+	\]
+
+	Коэффициенты $a_i$ и $b_j$ являются неизвестными.
+	
+	Итак, рассматривается задача построения оценки вектора состояния $\hat{x}$ такой, что
+	\[
+		\lim_{t \to \infty} ||x(t) - \hat{x}(t)|| = 0
+	\]
+
+	Синтезируемый адаптивный наблюдатель должен одновременно оценивать неизвестные параметры объекта управления $\theta$ и генерировать оценку вектора состояния $\hat{x}$.
+
+	Отметим, что в задаче мы ограничены допущением, называемым \textit{условием согласования}:
+	\[
+		A_0 = A - \overline{\theta}C, \quad \overline{\theta}^T = \begin{bmatrix}
+			k_{n-1} - a_{n-1} & \ldots & k_0 - a_0
+		\end{bmatrix}
+	\]
+
+	\section{Одногармонический вход}
+
+	
+
+
+
+
+
+	
+
+	
+
+
+
+	
+
+
+
+
+
+
+	
+\end{document}
