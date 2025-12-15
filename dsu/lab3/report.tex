@@ -1,0 +1,109 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{ЛР №3}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{Система с дискретным ПИД-регулятором}}
+\fancyfoot[L]{}
+\fancyfoot[C]{\thepage\space}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\color[gray]{0.7}\ttfamily\small,
+    stepnumber=1,
+    numbersep=8pt,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4,
+    breaklines=true
+}
+\usepackage{subcaption}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+                Научно-исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{40mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №3\\
+			\textbf{Исследование системы автоматического}\\
+			\textbf{управления с дискретным ПИД-регулятором}\\
+			Вариант 11
+		\end{center}
+		
+		\vspace{40mm}
+		
+		\begin{minipage}{.45\linewidth}
+			Выполнили студенты
+            \\
+			\\
+			Преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.52\linewidth}
+			\begin{flushright}
+				Мовчан Игорь Евгеньевич 
+				\\
+				Боглачев Артём Сергеевич
+				\\
+				Краснов Александр Юрьевич
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2025
+		\end{center}
+		
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\section{Цель работы}
+	Изучение алгоритма цифрового управления, полученного путем аппроксимации непрерывного ПИД-регулятора.
+
+	\section{Составление модели}
+	
+
+
+\end{document}
