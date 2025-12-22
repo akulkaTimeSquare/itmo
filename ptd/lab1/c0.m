@@ -36,7 +36,7 @@ n = size(P,1);
 params.resolution = 0.01;
 
 % Предвычисления
-pts_c0 = interpolate_c0(P, params);
+pts_c0 = interpolate_c0(P, params.resolution);
 
 
 %% Визуализация
@@ -83,3 +83,33 @@ ylabel('Кривизна');
 grid on;
 xlim([0 1750]);
 print('-djpeg', '-r600', 'images/c0_k.jpg');
+
+
+%% Длина кривой
+
+% Вычисление расстояний между последовательными точками
+distances = sqrt(diff(pts_c0(:,1)).^2 + diff(pts_c0(:,2)).^2);
+
+% Суммируем все расстояния - это и есть длина кривой
+curve_length_c0 = sum(distances);
+
+% Выводим результат
+fprintf('Длина кривой C0: %.3f единиц\n', curve_length_c0);
+
+% Для лучшей визуализации можно также построить график накопленной длины
+cumulative_length = [0; cumsum(distances)];
+
+figure;
+plot(cumulative_length, 'LineWidth', 2);
+title('Накопленная длина кривой C0');
+xlabel('Номер точки');
+ylabel('Длина от начала');
+xlim([0 1750]);
+grid on;
+
+% Показать финальную длину на графике
+annotation('textbox', [0.6, 0.12, 0.1, 0.1], 'String', ...
+    sprintf('Общая длина: %.3f', curve_length_c0), ...
+    'BackgroundColor', 'white', 'FontSize', 10, 'EdgeColor', 'blue');
+
+print('-djpeg', '-r600', 'images/c0_length.jpg');
