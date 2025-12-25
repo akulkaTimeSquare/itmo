@@ -53,7 +53,6 @@ plt.title("Состояния системы")
 plt.yticks([-16, -14, -12, -10, -8, -6, -4, -2, 0, 2, 3, 4])
 plt.xlabel('t')
 plt.ylabel('x(t)')
-plt.yticks([-6, -4, -2, 0, 1, 2, 4, 6, 8])
 plt.savefig(
     "images/x_2.png",
     dpi=400,

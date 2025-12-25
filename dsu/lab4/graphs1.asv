@@ -1,0 +1,54 @@
+t = out.y2.Time;
+t_u = 0:0.1:10;
+
+y2 = out.y2.Data;
+u2 = out.u2.Data;
+
+y3 = out.y3.Data;
+u3 = out.u3.Data;
+
+%% 2
+figure;
+stairs(t, y2, 'LineWidth', 1.5); hold on;
+stairs(t, double(t >= 1), 'LineWidth', 2, 'LineStyle', '--');
+hold on;
+grid on;
+xlabel('t');
+ylabel('y(t)');
+title('Выход системы при регуляторе с заданными полюсами');
+xlim([0 10]);
+saveas(gcf, 'images/y2.png');
+
+figure;
+stairs(t_u, u2, 'LineWidth', 1.5);
+grid on;
+xlabel('t');
+ylabel('u(t)');
+xlim([0 5]);
+ylim([-220 175]);
+title('Выход дискретного регулятора с заданными полюсами');
+saveas(gcf, 'images/u2.png');
+
+%% 3
+figure;
+stairs(t, y3, 'LineWidth', 1.5); hold on;
+stairs(t, t);
+hold off;
+grid on;
+xlabel('t');
+ylabel('y(t)');
+title('Выход системы при нарастающем задающем воздействии');
+xlim([0 10]);
+yticks([-5 0 5 9 10]);
+saveas(gcf, 'images/y3.png');
+
+figure;
+stairs(t_u, u2, 'LineWidth', 1.5);
+grid on;
+xlabel('t');
+ylabel('u(t)');
+xlim([0 5]);
+title('Управление при нарастающем задающем воздействии');
+ylim([-220 175]);
+xticks([1 2 3 4 5 6 7 8 9 10])
+saveas(gcf, 'images/images'u3.png');

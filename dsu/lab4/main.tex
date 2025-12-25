@@ -1,0 +1,478 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage[left=15mm, top=25mm, right=15mm, bottom=25mm]{geometry}
+\usepackage{cmap}
+\usepackage{indentfirst}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{etoolbox}
+\usepackage{titlesec}
+\pagestyle{plain}
+
+% Выравнивание формул по центру
+\patchcmd{\tableofcontents}{\contentsname}{\centering\contentsname}{}{}
+\titleformat{\section}[block]{\normalfont\large\bfseries\centering}{}{0pt}{}
+\titleformat{\subsection}[block]{\normalfont\normalsize\bfseries\centering}{}{0pt}{}
+\allowdisplaybreaks
+\graphicspath{{images/}}
+\usetikzlibrary{patterns}
+\definecolor{LightGray}{gray}{0.95}
+\definecolor{LightGray2}{gray}{0.7}
+\lstdefinestyle{code}{
+    language=MATLAB,
+    basicstyle=\footnotesize\ttfamily,
+    backgroundcolor=\color{LightGray},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=4,
+    captionpos=b,
+    breaklines=true,
+    breakatwhitespace=false,
+    frame=single,
+    rulecolor=\color{LightGray2},
+    linewidth=\linewidth,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!40!black},
+    stringstyle=\color{purple},
+    escapeinside={\%*}{*},
+    inputencoding=utf8x,
+    xleftmargin=0pt,
+    framexleftmargin=0pt,
+    framexrightmargin=0pt
+}
+\lstset{style=code}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    pdftitle={Лабораторная работа №4},
+    pdfpagemode=FullScreen,
+}
+
+% Для подписей рисунков
+\captionsetup[figure]{
+  justification=centering,
+  labelsep=period,
+  name={Рисунок},
+  font={small,bf}
+}
+
+
+\begin{document}
+    \begin{titlepage}
+        \begin{center}
+        Федеральное государственное автономное образовательное учреждение высшего образования \\
+        «Национальный Исследовательский Университет ИТМО» \\
+        \vfill
+        {\large\bf ЛАБОРАТОРНАЯ РАБОТА №4} \\
+        {\large\bf «Дискретные регуляторы с заданными характеристиками}\\
+        {\large\bf переходных процессов»} \\
+        Вариант №11 \\
+        \vfill
+        
+        \begin{minipage}{.45\linewidth}
+			Выполнили студенты
+            \\
+			\\[5mm]
+			Преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.52\linewidth}
+			\begin{flushright}                
+                Боглачев Артём Сергеевич \\
+				Мовчан Игорь Евгеньевич
+				\\[5mm]
+				Краснов Александр Юрьевич
+			\end{flushright}
+		\end{minipage}
+        \vfill
+        Санкт-Петербург, 2025
+        \end{center}
+    \end{titlepage}
+    
+    \tableofcontents
+    \newpage
+
+\section{Введение}
+
+Целью данной работы является изучение методов синтеза дискретных регуляторов, обеспечивающих заданные характеристики переходных процессов в цифровых системах управления. В работе рассматриваются три типа регуляторов:
+
+\begin{enumerate}
+    \item Апериодический регулятор
+    \item Регулятор Далина
+    \item Регулятор с заданным расположением полюсов
+\end{enumerate}
+
+Для варианта 11 определены следующие исходные данные:
+\begin{itemize}
+    \item Параметры объекта управления: $a = 1.9$, $b = 6.5$
+    \item Требования к переходным процессам: $\zeta = 0.45$, $\omega_d = 4$ рад/с
+    \item Точность: $K_v = 0.25$
+    \item Период дискретизации: $T = 1$ с (для регуляторов 1-2), $T = 0.1$ с (для регулятора 3)
+\end{itemize}
+
+\section{Синтез апериодического регулятора}
+
+\subsection{Исходные данные}
+
+\begin{itemize}
+    \item Передаточная функция объекта: $G(s) = \dfrac{e^{-as}}{1 + bs}$
+    \item Параметры: $a = 1.9$, $b = 6.5$
+    \item Период дискретизации: $T = 1$ с
+\end{itemize}
+
+\subsection{Приведение параметров}
+
+Так как запаздывание $a = 1.9$ не кратно периоду дискретизации $T = 1$ с, округляем до ближайшего целого значения:
+\[
+a = 2, \quad b = 6.5, \quad T = 1
+\]
+
+\subsection{Дискретизация объекта с ЭНП}
+
+Передаточная функция непрерывной части:
+\[
+G(s) = \frac{e^{-2s}}{1 + 6.5s}
+\]
+
+Дискретная передаточная функция с экстраполятором нулевого порядка (ЭНП):
+\[
+HG(z) = \mathcal{Z}\left\{ \frac{1 - e^{-sT}}{s} \cdot G(s) \right\} = (1 - z^{-1}) z^{-2} \mathcal{Z}\left\{ \frac{1}{s(1 + 6.5s)} \right\}
+\]
+
+Вычислим Z-преобразование:
+\begin{align*}
+\mathcal{Z}\left\{ \frac{1}{s(1 + 6.5s)} \right\} &= \mathcal{Z}\left\{ \frac{1}{s} - \frac{1}{s + 1/6.5} \right\} = \\
+&= \frac{z}{z - 1} - \frac{z}{z - e^{-1/6.5}} \\
+&= \frac{z}{z - 1} - \frac{z}{z - 0.857} \\
+&= \frac{0.143z}{(z - 1)(z - 0.857)}
+\end{align*}
+
+где $e^{-1/6.5} \approx 0.857$.
+
+Тогда:
+\[
+HG(z) = (1 - z^{-1}) z^{-2} \cdot \frac{0.143z}{(z - 1)(z - 0.857)} = \frac{0.143 z^{-2}}{1 - 0.857 z^{-1}}
+\]
+
+\subsection{Синтез регулятора}
+
+Желаемая передаточная функция замкнутой системы для апериодического регулятора:
+\[
+T(z) = z^{-k}, \quad k \geq 2 \text{ (для физической реализуемости)}
+\]
+
+Выбираем $k = 2$.
+
+Формула для расчёта передаточной функции регулятора:
+\[
+D(z) = \frac{1}{HG(z)} \cdot \frac{T(z)}{1 - T(z)}
+\]
+
+Подставляем:
+\[
+\frac{1}{HG(z)} = \frac{1 - 0.857 z^{-1}}{0.143 z^{-2}}, \quad \frac{T(z)}{1 - T(z)} = \frac{z^{-2}}{1 - z^{-2}}
+\]
+
+\begin{align*}
+D(z) &= \frac{1 - 0.857 z^{-1}}{0.143 z^{-2}} \cdot \frac{z^{-2}}{1 - z^{-2}} \\
+&= \frac{1 - 0.857 z^{-1}}{0.143 (1 - z^{-2})}
+\end{align*}
+
+Приводим к положительным степеням $z$:
+\[
+D(z) = \frac{z^2 - 0.857z}{0.143 (z^2 - 1)}
+\]
+
+\subsection{Итоговый результат}
+
+\[
+D_{\text{апер}}(z) = \frac{z^2 - 0.857z}{0.143 (z^2 - 1)}
+\]
+
+\subsection{Моделирование и результаты}
+
+Моделирование выхода регулятора и системы приведено на рисунках \ref{1} и \ref{2}.
+
+Апериодический регулятор обеспечивает минимальное время переходного процесса (в нашем случае 2 периода дискретизации). Однако он требует больших управляющих воздействий и чувствителен к точности модели объекта.
+
+\section{Синтез регулятора Далина}
+
+\subsection{Исходные данные}
+
+\begin{itemize}
+    \item Те же параметры объекта: $a = 2$, $b = 6.5$
+    \item Период дискретизации: $T = 1$ с
+    \item Параметр $q = b = 6.5$ (постоянная времени объекта)
+\end{itemize}
+
+\subsection{Желаемая передаточная функция}
+
+Формула желаемой передаточной функции для регулятора Далина:
+\[
+T(z) = \frac{z^{-k-1} (1 - e^{-T/q})}{1 - e^{-T/q} z^{-1}}, \quad k = a/T = 2
+\]
+
+Вычисляем коэффициенты:
+\begin{align*}
+e^{-T/q} &= e^{-1/6.5} \approx 0.857 \\
+1 - e^{-T/q} &= 0.143
+\end{align*}
+
+Тогда:
+\[
+T(z) = \frac{0.143 z^{-3}}{1 - 0.857 z^{-1}}
+\]
+
+\subsection{Синтез регулятора}
+
+Используем ту же дискретную передаточную функцию объекта $HG(z)$:
+\[
+HG(z) = \frac{0.143 z^{-2}}{1 - 0.857 z^{-1}}
+\]
+
+Формула для расчёта передаточной функции регулятора:
+\[
+D(z) = \frac{1}{HG(z)} \cdot \frac{T(z)}{1 - T(z)}
+\]
+
+Вычисляем:
+\begin{align*}
+\frac{T(z)}{1 - T(z)} &= \frac{0.143 z^{-3}}{1 - 0.857 z^{-1} - 0.143 z^{-3}} \\
+D(z) &= \frac{1 - 0.857 z^{-1}}{0.143 z^{-2}} \cdot \frac{0.143 z^{-3}}{1 - 0.857 z^{-1} - 0.143 z^{-3}} \\
+&= \frac{z^{-1} - 0.857 z^{-2}}{1 - 0.857 z^{-1} - 0.143 z^{-3}}
+\end{align*}
+
+Приводим к положительным степеням $z$:
+\[
+D(z) = \frac{z^2 - 0.857 z}{z^3 - 0.857 z^2 - 0.143}
+\]
+
+\subsection{Итоговый результат}
+
+\[
+D_{\text{Далин}}(z) = \frac{z^2 - 0.857 z}{z^3 - 0.857 z^2 - 0.143}
+\]
+
+\subsection{Моделирование и результаты}
+
+Моделирование выхода регулятора и системы приведено на рисунках \ref{3} и \ref{4}.
+
+Регулятор Далина обеспечивает более плавный переходный процесс с экспоненциальным характером. Управляющие воздействия имеют приемлемую величину по сравнению с апериодическим регулятором.
+
+\section{Синтез регулятора с заданным расположением полюсов}
+
+\subsection{Исходные данные}
+
+\begin{itemize}
+    \item Дискретная передаточная функция объекта с ЭНП:
+    \[
+    HG(z) = \frac{0.03(z + 0.75)}{z^2 - 1.5z + 0.5}
+    \]
+    \item Требования к переходным процессам: $\zeta = 0.45$, $\omega_d = 4$ рад/с
+    \item Точность: $K_v = 0.25$
+    \item Период дискретизации: $T = 0.1$ с
+\end{itemize}
+
+\subsection{Расчёт желаемых полюсов}
+
+Собственная частота колебаний:
+\[
+\omega_n = \frac{\omega_d}{\sqrt{1 - \zeta^2}} = \frac{4}{\sqrt{1 - 0.2025}} \approx 4.48 \text{ рад/с}
+\]
+
+Коэффициент затухания:
+\[
+\sigma = \zeta \omega_n = 0.45 \cdot 4.48 \approx 2.016
+\]
+
+Полюса в $z$-плоскости:
+\begin{align*}
+z_{1,2} &= e^{-\sigma T} e^{\pm j \omega_d T} \\
+&= e^{-0.2016} e^{\pm j 0.4} \\
+&= 0.8175 \cdot (\cos(0.4) \pm j \sin(0.4)) \\
+&= 0.8175 \cdot (0.9211 \pm j 0.3894) \\
+&\approx 0.753 \pm j 0.318
+\end{align*}
+
+Знаменатель желаемой передаточной функции:
+\[
+D_{\text{ж}}(z) = (z - z_1)(z - z_2) = z^2 - 1.506z + 0.668
+\]
+
+\subsection{Определение коэффициентов передаточной функции}
+
+Задаём форму желаемой передаточной функции:
+\[
+T(z) = \frac{b_1 z + b_2}{z^2 - 1.506z + 0.668}
+\]
+
+\textbf{Условие 1:} Нулевая установившаяся ошибка для ступенчатого воздействия:
+\[
+T(1) = 1 \Rightarrow \frac{b_1 + b_2}{1 - 1.506 + 0.668} = 1 \Rightarrow b_1 + b_2 = 0.162
+\]
+
+\textbf{Условие 2:} Установившаяся ошибка для линейного воздействия:
+\[
+e_{ss} = \frac{1}{K_v} = \frac{1}{0.25} = 4
+\]
+
+Используя теорему о конечном значении для линейного воздействия:
+\[
+e_{ss} = \lim_{z \to 1} \frac{T}{z-1} [1 - T(z)] = 4
+\]
+где $T = 0.1$ с.
+
+Вычисляем производную $T(z)$ в точке $z=1$:
+\[
+T'(1) = \lim_{z \to 1} \frac{1 - T(z)}{z-1}
+\]
+
+Производная $T(z)$:
+\[
+T'(z) = \frac{b_1 D(z) - (b_1 z + b_2) D'(z)}{D^2(z)}, \quad D(z) = z^2 - 1.506z + 0.668
+\]
+
+Вычисляем:
+\begin{align*}
+D(1) &= 0.162 \\
+D'(1) &= 2 \cdot 1 - 1.506 = 0.494 \\
+T'(1) &= \frac{b_1 \cdot 0.162 - 0.162 \cdot 0.494}{0.162^2} = \frac{0.162b_1 - 0.080028}{0.026244} = -40
+\end{align*}
+
+Решая уравнение:
+\[
+0.162b_1 - 0.080028 = -1.04976 \Rightarrow b_1 \approx -5.987
+\]
+
+Тогда:
+\[
+b_2 = 0.162 - (-5.987) = 6.149
+\]
+
+Итоговая желаемая передаточная функция:
+\[
+T(z) = \frac{-5.987z + 6.149}{z^2 - 1.506z + 0.668}
+\]
+
+\subsection{Синтез регулятора}
+
+Формула для расчёта передаточной функции регулятора:
+\[
+D(z) = \frac{1}{HG(z)} \cdot \frac{T(z)}{1 - T(z)}
+\]
+
+Вычисляем:
+\[
+1 - T(z) = \frac{z^2 + 4.481z - 5.481}{z^2 - 1.506z + 0.668}
+\]
+
+\[
+\frac{T(z)}{1 - T(z)} = \frac{-5.987z + 6.149}{z^2 + 4.481z - 5.481}
+\]
+
+Подставляем $HG(z)$:
+\[
+D(z) = \frac{z^2 - 1.5z + 0.5}{0.03(z + 0.75)} \cdot \frac{-5.987z + 6.149}{z^2 + 4.481z - 5.481}
+\]
+
+Раскрываем скобки:
+\[
+D(z) = \frac{(z^2 - 1.5z + 0.5)(-5.987z + 6.149)}{0.03(z + 0.75)(z^2 + 4.481z - 5.481)}
+\]
+
+Числитель:
+\[
+-5.987z^3 + 15.072z^2 - 12.424z + 3.0745
+\]
+
+Знаменатель:
+\[
+0.03z^3 + 0.1569z^2 - 0.1088z - 0.1233
+\]
+
+\subsection{Итоговый результат}
+
+\[
+D_{\text{пол}}(z) \approx \frac{-199.57z^3 + 502.4z^2 - 414.13z + 102.48}{z^3 + 5.23z^2 - 3.627z - 4.11}
+\]
+
+\subsection{Моделирование}
+
+Моделирование выхода регулятора и системы при ступенчатом воздействии приведено на рисунках \ref{5} и \ref{6}, а при линейно-нарастающем - на рисунках \ref{7} и \ref{8}.
+
+\section{Выводы}
+
+В ходе выполнения лабораторной работы были синтезированы три типа дискретных регуляторов для заданного объекта управления:
+
+\begin{enumerate}
+    \item \textbf{Апериодический регулятор} обеспечивает минимальное время переходного процесса (2 периода дискретизации), но требует больших управляющих воздействий и чувствителен к точности модели объекта.
+    
+    \item \textbf{Регулятор Далина} обеспечивает более плавный переходный процесс с экспоненциальным характером, управляющие воздействия имеют приемлемую величину.
+    
+    \item \textbf{Регулятор с заданными полюсами} позволяет точно задать динамические характеристики системы и дать требуемую точность слежения за линейно-нарастающим сигналом.
+\end{enumerate}
+
+Все синтезированные регуляторы обеспечивают нулевую установившуюся ошибку для ступенчатого входного воздействия. 
+
+\section{Графики}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/u.png}
+    \caption{Управление апериодического регулятора}
+    \label{1}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/y.png}
+    \caption{Переходный процесс при ступенчатом воздействии (апериодический регулятор)}
+    \label{2}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/u1.png}
+    \caption{Управление регулятора Далина}
+    \label{3}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/y1.png}
+    \caption{Переходный процесс при ступенчатом воздействии (регулятор Далина)}
+    \label{4}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/u2.png}
+    \caption{Управление регулятора с заданным расположением полюсов}
+    \label{5}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/y2.png}
+    \caption{Переходный процесс при ступенчатом воздействии (регулятор с заданным расположением полюсов)}
+    \label{6}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/u3.png}
+    \caption{Управление регулятора с заданным расположением полюсов и линейно-нарастающем воздействии}
+    \label{7}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/y3.png}
+    \caption{Переходный процесс при линейно-нарастающем воздействии (регулятор с заданным расположением полюсов)}
+    \label{8}
+\end{figure}
+
+\end{document}
