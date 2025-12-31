@@ -29,7 +29,7 @@ x = flip(x);
 y = flip(y);
 P = [x', y'];
 
-step = 0.01;
+step = 0.0001;
 r = 0.8;
 k = 20;
 

@@ -1,0 +1,340 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{Лабораторная работа №1}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{Задачи}}
+\fancyfoot[L]{}
+\fancyfoot[C]{\thepage\space}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\color[gray]{0.7}\ttfamily\small,
+    stepnumber=1,
+    numbersep=8pt,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4,
+    breaklines=true
+}
+\usepackage{subcaption}
+
+\begin{document}
+	\section{Вычисление длины $C^0$-гладкой кривой}
+	Вычисленные через $A^*$ точки:
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.8\textwidth]{points_plot.jpg}
+		\caption{Карта и опорные точки}
+		\label{12}
+	\end{figure}
+
+	Получающаяся траектория задаётся аналитически:
+	\[
+	S: \bigcup_{i=1}^{n-1}
+	\left\{
+	\begin{aligned}
+	&-\sin\psi_i (x - x_i) + \cos\psi_i (y - y_i) = 0, \\
+	&\psi_i = \arctan\left( \frac{y_{i+1} - y_i}{x_{i+1} - x_i} \right), \\
+	&r_i = \sqrt{ (x_{i+1} - x_i)^2 + (y_{i+1} - y_i)^2 }, \\
+	&Q_i(x, y) = \cos\psi_i (x - x_i) + \sin\psi_i (y - y_i) - r_i, \\
+	&\text{Если } Q_i(x, y) > 0, \text{ то } i = i + 1.
+	\end{aligned}
+	\right.
+	\]
+
+	Физически - соединяем опорные точки $(x_i, y_i)$ прямыми, поэтому длину можно вычислить через обычную теорему Пифагора как
+	\[
+		L = \sum_{i=0}^{n-1} r_i = \sum_{i=0}^{n-1} \sqrt{ (x_{i+1} - x_i)^2 + (y_{i+1} - y_i)^2 } \approx 17.899
+	\]
+
+	\section{Вычисление длины $C^1$-гладкой кривой}
+	Получающаяся траектория задаётся аналитически:
+	\[
+	S: \bigcup_{i=1}^{n-1}
+	\left\{
+	\begin{aligned}
+	&-\sin\psi_i (x - x_i) + \cos\psi_i (y - y_i) = 0, \text{ если } Q_{1i} \le 0\\
+	&(x - x_{ci})^2 + (y - y_{ci})^2 - R^2 = 0, \text{ если } Q_{2i} \le 0\\
+	&\begin{bmatrix}
+		x_{ci} \\
+		y_{ci}
+		\end{bmatrix}
+		=
+		\begin{bmatrix}
+		x_{i+1} \\
+		y_{i+1}
+		\end{bmatrix}
+		+ R_I^P(\psi_i) R_I^P(\delta_i)
+		\begin{bmatrix}
+		d_{ci} \\
+		0
+		\end{bmatrix}, \\
+	&\psi_i = \arctan\!2\left( \frac{y_{i+1} - y_i}{x_{i+1} - x_i} \right), \\
+	&\sigma_i = 
+	\begin{cases}
+	\pi - (\psi_{i+1} - \psi_i), & \text{если } (\psi_{i+1} - \psi_i) > 0 \\
+	-\pi - (\psi_{i+1} - \psi_i), & \text{если } (\psi_{i+1} - \psi_i) \leq 0
+	\end{cases}, \\
+	&\delta_i = \pi - \frac{\sigma_i}{2}, \quad 
+	d_{ci} = \left| \frac{R}{\sin\frac{\sigma_i}{2}} \right|, \quad
+	 d_{i} = \left| \frac{R}{\tan\frac{\sigma_i}{2}} \right|, \\
+	&r_i = \sqrt{ (x_{i+1} - x_i)^2 + (y_{i+1} - y_i)^2 }, \\
+	&Q_{1i} = \cos\psi_i (x - x_i) + \sin\psi_i (y - y_i) - r_i + d_i, \\
+	&Q_{2i} = \cos\psi_{i+1} (x - x_i) + \sin\psi_{i+1} (y - y_i) - d_i, \\
+	&\text{Если } Q_{2i} > 0, \text{ то } i = i + 1.
+	\end{aligned}
+	\right.
+	\]
+
+	Длина построенной траектории считается суммой прямых и круговых участков, которые переходят друг в друга.
+	
+	Эту же величину можно получить и эквивалентным способом: сначала суммируем длины всех прямолинейных сегментов $r_i$ между точками $(x_i, y_i)$ и $(x_{i+1}, y_{i+1})$, а после для каждой внутренней точки $(x_i, y_i)$, где происходит изменение направления, вычисляется корректировка на значение $A_i - 2 d_i$ при $A_i = R \theta_i = R (\pi - |\sigma_i|)$ - длина окружности. В итоге для взятого в работе радиуса скругления $R = 0.8$ имеем:
+	\[
+		L = \sum_{i = 1}^{n-1} r_i + \sum_{j = 2}^{n-1} (A_j - 2 d_j) \approx 17.00623
+	\]
+
+	Это чуть меньше, чем у $C^0$-гладкого метода соединения точек, так как длина вписанных окружностей ниже длины прямых.
+
+	\section{Вычисление длины $C^2$-гладкой кривой}
+	Траектория задаётся аналитически через различные участки. 
+	
+	Движение по прямой:
+	\begin{align*}
+	S_1: 
+	\begin{cases}
+	\, -\sin\psi_i (x - x_i) + \cos\psi_i (y - y_i) = 0, \\[0.5em]
+	\, \psi_i = \arctan\!2 \left( \dfrac{y_{i+1} - y_i}{x_{i+1} - x_i} \right).
+	\end{cases}
+	\end{align*}
+
+	Движение по окружности:
+	\begin{align*}
+	S_3:
+	\begin{cases}
+	\, (x - x_{ci})^2 + (y - y_{ci})^2 - R^2 = 0, \\[0.5em]
+	\, \begin{bmatrix} x_{ci} \\ y_{ci} \end{bmatrix} = \begin{bmatrix} x_{i+1} \\ y_{i+1} \end{bmatrix} + R^I_P (\psi_i) R^P_I (\delta_i) \begin{bmatrix} d_{ci} \\ 0 \end{bmatrix}, \\[1em]
+	\, d_{ci} = d_{1i} + d_{2i}, \\[0.5em]
+	\, d_{1i} = \sqrt{R^2 - (h_i/2)^2}, \\[0.5em]
+	\, d_{2i} = \sqrt{h_{i2}^2 - (h_i/2)^2} \\[0.5em]
+	\, h_i = \sqrt{(x_{S_{2}e} - x_{S_{1e}})^2 + (y_{S_{2}e} - y_{S_{1e}})^2}, \\[0.5em]
+	\, h_{i2} = \sqrt{(x_{S_{2}e} - x_{i+1})^2 + (y_{S_{2}e} - y_{i+1})^2}, \\[0.5em]
+	\, \delta_i = \pi - \dfrac{\sigma_i}{2}, \\[1em]
+	\, \sigma_i =
+	\begin{cases}
+	\pi - (\psi_{i+1} - \psi_i), & \text{если } (\psi_{i+1} - \psi_i) > 0, \\[0.5em]
+	-\pi - (\psi_{i+1} - \psi_i), & \text{если } (\psi_{i+1} - \psi_i) \leq 0,
+	\end{cases} \\[1em]
+	\, \psi_i = \arctan\!2 \left( \dfrac{y_{i+1} - y_i}{x_{i+1} - x_i} \right).
+	\end{cases}
+	\end{align*}
+
+	Движение по <<открывающей>> параболе:
+	\begin{align*}
+	S_2:
+	\begin{cases}
+	\, \begin{bmatrix} x_L \\ y_L \end{bmatrix} = \begin{bmatrix} x_{i+1} \\ y_{i+1} \end{bmatrix} + R^P_I(\psi_i) \begin{bmatrix} x - d_i \\ y \end{bmatrix}, \\[1em]
+	\, k(x_L)^3 - y_L = 0, \\[0.5em]
+	\, d_i = \left| \dfrac{R}{\tan\frac{\theta}{2}} \right|, \\[1em]
+	\, \psi_i = \arctan\!2 \left( \dfrac{y_{i+1} - y_i}{x_{i+1} - x_i} \right).
+	\end{cases}
+	\end{align*}
+
+	Движение по <<закрывающей>> параболе:
+	\begin{align*}
+	S_4:
+	\begin{cases}
+	\, \begin{bmatrix} x_L \\ y_L \end{bmatrix} = \begin{bmatrix} x_{i+1} \\ y_{i+1} \end{bmatrix} + R_I^P(\psi_{i+1}) \begin{bmatrix} x + d_i \\ y \end{bmatrix}, \\[1em]
+	\, -k(x_L)^3 - y_L = 0, \\[0.5em]
+	\, d_i = \left| \dfrac{R}{\tan\frac{\sigma_i}{2}} \right|, \\[1em]
+	\, \psi_i = \arctan\!2 \left( \dfrac{y_{i+1} - y_i}{x_{i+1} - x_i} \right).
+	\end{cases}
+	\end{align*}
+
+	Переключение всё также будет происходить с помощью прямых $Q_i$. Итоговая кривая $S$ определяется как объединение:
+	\[
+	S = \bigcup_{i=1}^{n-1} 
+	\begin{cases}
+	S_{1}, \text{ если } Q_{1i} \leq 0, \\
+	S_{2}, \text{ если } Q_{2i} \leq 0, \\
+	S_{3}, \text{ если } Q_{3i} \leq 0, \\
+	S_{4}, \text{ если } Q_{4i} \leq 0, \\
+	Q_{1i} = \cos \psi_i (x - x_i) + \sin \psi_i (y - y_i) - r_i + d_i, \\
+	Q_{2i} = \cos \psi_{i+1} (x - x_{i+1}) + \sin \psi_{i+1} (y - y_{i+1}) - d_i, \\
+	Q_{3i} = \cos \alpha_1 (x - x_i) + \sin \alpha_1 (y - y_i) + t_1, \\
+	Q_{4i} = \cos \alpha_2 (x - x_i) + \sin \alpha_2 (y - y_i) - t_2, \\
+	\text{Если } Q_{2i} > 0, \text{ то } i = i + 1.
+	\end{cases}
+	\]
+
+	Введенные вспомогательные параметры:
+	\[
+		\begin{cases}
+		t_1 &= \left[ x_{S_1e} \quad y_{S_1e} \right]^T, \\
+		t_2 &= \left[ x_{S_2e} \quad y_{S_2e} \right]^T, \\
+		\alpha_1 &= \frac{\psi_{i+1} - \beta_i}{2}, \\
+		\alpha_2 &= \psi_{i+1} - \frac{\psi_{i+1} - \beta_i}{2}, \\
+		\beta_i &= \arccos \left( 1 - \frac{h_i^2}{2R^2} \right) = 2 \arcsin (\frac{h_i}{2R}).
+		\end{cases}
+	\]
+	
+	Геометрические характеристики:
+	\[
+		\begin{cases}
+		h_i &= \sqrt{(x_{S_2e} - x_{S_1e})^2 + (y_{S_2e} - y_{S_1e})^2}, \\
+		\psi_i &= \arctan 2 \left( \frac{y_{i+1} - y_i}{x_{i+1} - x_i} \right), \\
+		r_i &= \sqrt{(x_{i+1} - x_i)^2 + (y_{i+1} - y_i)^2}, \\
+		d_i &= \left| \frac{R}{\tan \frac{\pi}{2}}\right|.
+		\end{cases}
+	\]
+
+	где $x_{S_1e}$, $x_{S_2e}$, $y_{S_1e}$ и $y_{S_2e}$ — конечные точки парабол $S_2$ и $S_4$.
+
+	Длина построенной траектории считается суммой прямолинейных участков $S_1$, переходных кубических парабол $S_2, S_4$ и круговых сегментов $S_3$, которые последовательно переходят друг в друга.
+
+	Эту же величину можно получить эквивалентным способом через процедуру корректировки. Сначала суммируются длины всех прямолинейных сегментов $r_i$ между узловыми точками $(x_i, y_i)$ и $(x_{i+1}, y_{i+1})$. Затем для каждой внутренней точки, где происходит изменение направления, вычисляется корректирующее значение $\Delta L_j$, учитывающее замену острого угла на систему сопряженных кривых.
+
+	Для принятого в работе радиуса скругления $R = 0.8$ имеем:
+	\[
+		L = \sum_{i = 1}^{n-1} r_i + \sum_{j = 1}^{n-2} \Delta L_j \approx 17.00662
+	\]
+
+	Здесь корректировка $\Delta L_j$ для каждого поворота определяется следующим образом:
+	\[
+		\Delta L_j = 2 \cdot L^p_{j} + L^a_{j} - 2 d_j
+	\]
+
+	Компоненты формулы вычисляются на основе геометрических параметров сопряжения:
+	\begin{enumerate}
+		\item Криволинейный интеграл $y = kx^3$ на участке $[0, x_L]$:
+		\[ L_{j}^p = \int_{0}^{x_L} \sqrt{1 + (3kx^2)^2} \, dx \]
+		
+		При $x_L = \frac{1}{6kR}$ - проекция параболы, обеспечивающая непрерывность кривизны.
+		
+		\item Остаточный круговой сегмент между переходными кривыми:
+		\[ L_{j}^a = R \cdot \beta_j, \quad \beta_j = 2 \arcsin\left( \frac{h_j}{2R} \right) \]
+		здесь $h_j$ - хорда между точками выхода первой параболы и входа во вторую.
+		
+		\item Расстояние от вершины до точки касания:
+		\[ d_j = \left| \frac{R}{\tan\left(\frac{\sigma_j}{2}\right)} \right| \]
+	\end{enumerate}
+
+	Итоговое значение длины получается больше, чем у $C^1$-гладкой кривой, из-за более сложной траектории параболического входа и выхода с окружностей.
+	
+	\section{Длина B-сплайновой кривой}
+	Пусть задан неубывающий вектор равеномерно распределенных от 1 до $n-k$ узлов $u_i$
+	\[
+	U = \{u_0, u_1, \dots, u_m\}
+	\]
+
+	А также заданы базисные функции B-сплайна степени $k$, определённые рекурсией:
+	\[
+	N_{i,0}(t) =
+	\begin{cases}
+	1, & u_i \le t < u_{i+1}\\
+	0, & \text{иначе}
+	\end{cases}
+	\]
+	\[
+	N_{i,k}(t) =
+	\frac{t-u_i}{u_{i+k}-u_i} N_{i,k-1}(t)
+	+
+	\frac{u_{i+k+1}-t}{u_{i+k+1}-u_{i+1}} N_{i+1,k-1}(t).
+	\]
+
+	Кривая задаётся контрольными точками $P_i = (x_i, y_i)$:
+	\[
+	C(t) = \sum_i N_{i,k}(t) P_i, \qquad t \in [u_0, u_m]
+	\]
+
+	Производная базисной функции B-сплайна имеет вид:
+	\[
+	N'_{i,k}(t)
+	=
+	\frac{k}{u_{i+k}-u_i} N_{i,k-1}(t)
+	-
+	\frac{k}{u_{i+k+1}-u_{i+1}} N_{i+1,k-1}(t).
+	\]
+
+	Дифференцируя кривую $C(t)$, получаем:
+	\[
+		C'(t)
+		= \sum_i N'_{i,k}(t) P_i
+		= \sum_i N_{i,k-1}(t)
+		\frac{k}{u_{i+k}-u_i} (P_i - P_{i-1})
+	\]
+
+	Введём контрольные точки производной:
+	\[
+	D_i = \frac{k}{u_{i+k}-u_i} (P_i - P_{i-1}),
+	\]
+
+	Тогда производная кривой представляется в виде
+	\[
+	C'(t) = \sum_i N_{i,k-1}(t) D_i.
+	\]
+
+	Таким образом, производная B-сплайна степени $k$ является B-сплайном степени $k-1$.
+
+	Длина гладкой параметрической кривой определяется как
+	\[
+	L = \int_{u_0}^{u_m} \left\| C'(t) \right\| \, dt.
+	\]
+
+	Поскольку $D_i = (D_i^x, D_i^y)$, имеем:
+	\begin{align}
+	x'(t) &= \sum_i N_{i,k-1}(t) D_i^x, \\
+	y'(t) &= \sum_i N_{i,k-1}(t) D_i^y.
+	\end{align}
+
+	Следовательно, длина B-сплайновой кривой равна
+	\[
+	L
+	=
+	\int_{u_0}^{u_m}
+	\sqrt{
+	\left( \sum_i N_{i,k-1}(t) D_i^x \right)^2
+	+
+	\left( \sum_i N_{i,k-1}(t) D_i^y \right)^2
+	}
+	\, dt.
+	\]
+
+	Для взятого в работе $k = 3$ имеем длину:
+	\[
+		L \approx 16.6272
+	\]
+
+	Несколько меньше, чем у всех ранее вычисленных.
+
+	
+	
+
+
+\end{document}
