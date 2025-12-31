@@ -29,7 +29,7 @@ x = flip(x);
 y = flip(y);
 P = [x', y'];
 
-step = 0.01;
+step = 0.0001;
 r = 0.8;
 
 pts_c1 = interpolate_c1(P, r, step);
@@ -84,3 +84,32 @@ xlim([0 1750]);
 ylim([-0.05 1.4]);
 grid on;
 print('-djpeg', '-r600', 'images/c1_k.jpg');
+
+%% Длина
+
+% Вычисление расстояний между последовательными точками
+distances_c1 = sqrt(diff(pts_c1(:,1)).^2 + diff(pts_c1(:,2)).^2);
+
+% Суммируем все расстояния - это и есть длина кривой
+curve_length_c1 = sum(distances_c1);
+
+% Выводим результат
+fprintf('Длина C1-гладкой кривой: %.3f единиц\n', curve_length_c1);
+
+% Для наглядности можно построить график накопленной длины
+cumulative_length_c1 = [0; cumsum(distances_c1)];
+
+figure;
+plot(cumulative_length_c1, 'LineWidth', 2, 'Color', 'r');
+title('Накопленная длина C1-гладкой кривой');
+xlabel('Номер точки (дискретизация)');
+ylabel('Длина от начала');
+xlim([0 1750]);
+grid on;
+
+% Показать финальную длину на графике
+annotation('textbox', [0.6, 0.12, 0.1, 0.1], 'String', ...
+    sprintf('Общая длина: %.3f', curve_length_c1), ...
+    'BackgroundColor', 'white', 'FontSize', 10, 'EdgeColor', 'red');
+
+print('-djpeg', '-r600', 'images/c1_length.jpg');

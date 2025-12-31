@@ -36,7 +36,7 @@ n = size(P,1);
 params.resolution = 0.01;
 
 % Предвычисления
-pts_c0 = interpolate_c0(P, params);
+pts_c0 = interpolate_c0(P, params.resolution);
 
 
 %% Визуализация
@@ -83,3 +83,12 @@ ylabel('Кривизна');
 grid on;
 xlim([0 1750]);
 print('-djpeg', '-r600', 'images/c0_k.jpg');
+
+
+%% Длина кривой
+
+% Вычисление расстояний между последовательными точками
+distances = sqrt(diff(P(:,1)).^2 + diff(P(:,2)).^2);
+
+% Выводим результат
+fprintf('Длина кривой C0: %.3f единиц\n', curve_length_c0);

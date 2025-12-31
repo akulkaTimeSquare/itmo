@@ -1,0 +1,153 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{ЛР №11}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{Адаптивная компенсация возмущения}}
+\fancyfoot[L]{}
+\fancyfoot[C]{\thepage\space}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\color[gray]{0.7}\ttfamily\small,
+    stepnumber=1,
+    numbersep=8pt,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4,
+    breaklines=true
+}
+\usepackage{subcaption}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+                Научно-исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{40mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №11\\
+			\textbf{Адаптивная компенсация внешнего возмущения}\\
+			Вариант 9
+		\end{center}
+		
+		\vspace{45mm}
+		
+		\begin{minipage}{.45\linewidth}
+			Выполнили студенты
+            \\
+			\\[5mm]
+			Преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.52\linewidth}
+			\begin{flushright}
+				Мовчан Игорь Евгеньевич 
+				\\
+				Копылов Андрей Михайлович
+				\\[5mm]
+				Парамонов Алексей Владимирович
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2025
+		\end{center}
+		
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\section{Цель работы}
+	Освоение принципа адаптивной компенсации возмущения на примере задачи стабилизации многомерного линейного объекта.
+	
+	\section{Постановка задачи}
+	Рассмотрим задачу компенсации внешнего возмущения, действующего на объект с начальными условиями $x(0)$
+	\begin{equation}
+		\begin{cases}
+			\dot{x} = Ax + bu + df \\ \tag{1}
+			y = Cx
+		\end{cases}	
+	\end{equation}
+
+	Здесь $x \in \mathbb{R}^n$ - измеряемый вектор состояния, $u$, $y$ - измеряемые вход и выход объекта (скаляры), $A$, $b$, $C$ и $d$ - известные матрицы соответствующих размерностей, $f$ - \textit{неизмеряемое} мультисинусоидальное возмущение с \textit{априори неизвестными} амплитудами, частотами и фазами гармоник. 
+	
+	Предполагается, что возмущение $f$ может быть промоделировано как выход автономного генератора:
+	\[
+		f^{(r)} + l_{r-1}f^{(r-1)} + l_{r-2}f^{(r-2)} + \ldots + l_0 f = 0 \tag{2}
+	\]
+
+	При этом параметры модели $l_i$ неизвестны, как и начальные условия сигнала и его производных $f^{(i)}(0)$, а корни характеристического полинома модели являются чисто мнимыми и некратными.
+
+	Примем и допущение, что сигналы $u$, $f$ согласованы и $b = d^4$.
+
+	Цель задачи заключается в построении управления, компенсирующего неизвестное возмущение так, чтобы
+	\begin{equation}
+		\lim_{t \to \infty} \|x(t)\| = 0. \tag{3}
+	\end{equation}
+
+	\section{Построение модели}
+	Для начала зададим матрицу $A$ систему и вектор управляемости $b$, а также желаемое время переходного процесса $t_n$ и максимальное перерегулирование $\bar{\sigma}$ согласно выбранному варианту:
+	\[
+		A = \begin{bmatrix}
+			1 & 0 \\
+			0 & 0
+		\end{bmatrix}, \quad b = \begin{bmatrix}
+			2 \\ 4
+		\end{bmatrix}, \quad t_n = 0.9, \quad \bar{\sigma} = 0
+	\]
+
+	Прежде чем приступить к построению управления необходимо проверить пару $(A, b)$ на управляемость (можем ли мы воздействовать на все моды системы) с помощью матрицы управляемости $U$:
+	\[
+		U = \begin{bmatrix}
+			b & Ab
+		\end{bmatrix} = \begin{bmatrix}
+			2 & 2\\
+			4 & 0
+		\end{bmatrix}
+	\]
+
+	Так как её ранг полон, то система полностью управляема.
+
+	
+\end{document}

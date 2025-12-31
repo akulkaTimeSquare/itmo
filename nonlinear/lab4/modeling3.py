@@ -3,7 +3,7 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 import sympy as sp
 
-# --- 1. Символьное определение переменных и параметров ---
+# Символьное определение
 x1, x2, x3, x4, t = sp.symbols('x1 x2 x3 x4 t')
 k1, k2, k3, k4 = sp.symbols('k1 k2 k3 k4', positive=True, real=True)
 
@@ -11,16 +11,14 @@ k1, k2, k3, k4 = sp.symbols('k1 k2 k3 k4', positive=True, real=True)
 a1 = sp.cos(x1) + k1 * x1
 z2 = x2 - a1
 
-# x1_dot = cos(x1) - x2 = -k1*x1 - z2 (по построению)
 x1_dot = -k1 * x1 - z2
-# Но для символьного дифференцирования используем исходную динамику:
 x1_dot_orig = sp.cos(x1) - x2
 x2_dot_orig = x1 + x3
 x3_dot_orig = x1 * x3 + (2 - sp.sin(x3)) * x4
-x4_dot_orig = x2 * x3 + 2 * sp.Symbol('u')  # u пока не нужно
+x4_dot_orig = x2 * x3 + 2 * sp.Symbol('u')
 
-# --- 2. Точные производные ---
-da1 = sp.diff(a1, x1) * x1_dot_orig  # da1/dt = ∂a1/∂x1 * x1_dot
+# Производные
+da1 = sp.diff(a1, x1) * x1_dot_orig
 da1_simpl = sp.simplify(da1)
 print("da1 =", da1_simpl)
 
@@ -29,27 +27,24 @@ da2 = sp.diff(a2, x1) * x1_dot_orig + sp.diff(a2, x2) * x2_dot_orig
 da2_simpl = sp.simplify(da2)
 print("da2 =", da2_simpl)
 
-# a3 = (-x1*x3 + da2 - z2 - k3*z3) / (2 - sin(x3)), где z3 = x3 - a2
 z3 = x3 - a2
 a3_expr = (-x1 * x3 + da2_simpl - z2 - k3 * z3) / (2 - sp.sin(x3))
 a3_simpl = sp.simplify(a3_expr)
 print("a3 =", a3_simpl)
 
-# da3 = ∂a3/∂x1 * x1_dot + ∂a3/∂x2 * x2_dot + ∂a3/∂x3 * x3_dot
 da3 = (sp.diff(a3_simpl, x1) * x1_dot_orig +
        sp.diff(a3_simpl, x2) * x2_dot_orig +
        sp.diff(a3_simpl, x3) * x3_dot_orig)
 da3_simpl = sp.simplify(da3)
 print("da3 (упрощённая) = ... (длинная, но точная)")
 
-# --- 3. Финальное управление u ---
+# Управление
 z4 = x4 - a3_simpl
 u_expr = (-x2 * x3 + da3_simpl - z3 - k4 * z4) / 2
 u_simpl = sp.simplify(u_expr)
 print("u = ... (точное выражение)")
 
-# --- 4. Компиляция в численные функции ---
-# Подставим численные k_i
+# Параметры и функции
 subs_dict = {k1: 2.0, k2: 3.0, k3: 4.0, k4: 5.0}
 
 a1_func   = sp.lambdify((x1,), a1.subs(subs_dict), 'numpy')
@@ -60,7 +55,7 @@ a3_func   = sp.lambdify((x1, x2, x3), a3_simpl.subs(subs_dict), 'numpy')
 da3_func  = sp.lambdify((x1, x2, x3, x4), da3_simpl.subs(subs_dict), 'numpy')
 u_func    = sp.lambdify((x1, x2, x3, x4), u_simpl.subs(subs_dict), 'numpy')
 
-# --- 5. Динамика исходной системы с backstepping-управлением ---
+# Динамика
 def system_dynamics(t, X):
     x1v, x2v, x3v, x4v = X
 
@@ -77,7 +72,6 @@ def system_dynamics(t, X):
 
     return [dx1, dx2, dx3, dx4]
 
-
 x0 = [2, -1, 1, -2]
 
 t_span = (0, 4)
@@ -89,7 +83,7 @@ sol = solve_ivp(
     method='RK45',
     rtol=1e-8,
     atol=1e-10,
-    max_step=0.01  # ← важно для нелинейных систем!
+    max_step=0.01
 )
 
 if not sol.success:
@@ -97,7 +91,6 @@ if not sol.success:
 else:
     x1, x2, x3, x4 = sol.y
 
-    # Вычислим z2, z3, z4 и u для графиков
     a1_vals = a1_func(x1)
     z2_vals = x2 - a1_vals
 
@@ -111,11 +104,8 @@ else:
     u_vals = u_func(x1, x2, x3, x4)
     u_vals = np.clip(u_vals, -50, 50)
 
-    # Функция Ляпунова
-    V = 0.5 * (x1**2 + z2_vals**2 + z3_vals**2 + z4_vals**2)
 
-    # --- Графики ---
-
+    # Графики
     plt.figure()
     plt.plot(sol.t, x1, label=r'$x_1$')
     plt.plot(sol.t, x2, label=r'$x_2$')
@@ -152,7 +142,7 @@ else:
 
 
     plt.figure()
-    plt.plot(sol.t, u_vals, 'r', label=r'$u$')
+    plt.plot(sol.t, u_vals)
     plt.grid(True)
     plt.legend()
     plt.title('Управление u')

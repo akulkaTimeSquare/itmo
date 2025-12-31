@@ -33,7 +33,7 @@ y = flip(y);
 P = [x', y'];
 
 % ===== Параметры =====
-step = 0.01;
+step = 0.0001;
 degree = 3;
 
 % ===== Построение B-spline =====
@@ -90,3 +90,32 @@ grid on;
 xlim([0 1300]);
 ylim([-0.05 2.05])
 print('-djpeg', '-r600', 'images/bsplines_k.jpg');
+
+%% Длина
+
+% Вычисление расстояний между последовательными точками
+distances_bspline = sqrt(diff(pts_bspline(:,1)).^2 + diff(pts_bspline(:,2)).^2);
+
+% Суммируем все расстояния - это и есть длина кривой
+curve_length_bspline = sum(distances_bspline);
+
+% Выводим результат
+fprintf('Длина B-сплайновой кривой (степень %d): %.3f единиц\n', degree, curve_length_bspline);
+
+% Для наглядности можно построить график накопленной длины
+cumulative_length_bspline = [0; cumsum(distances_bspline)];
+
+figure;
+plot(cumulative_length_bspline, 'LineWidth', 2, 'Color', [0.8, 0.2, 0.8]); % пурпурный цвет
+title(sprintf('Накопленная длина B-сплайновой кривой (степень %d)', degree));
+xlabel('Номер точки (дискретизация)');
+ylabel('Длина от начала');
+xlim([0 1300]);
+grid on;
+
+% Показать финальную длину на графике
+annotation('textbox', [0.6, 0.12, 0.1, 0.1], 'String', ...
+    sprintf('Общая длина: %.3f', curve_length_bspline), ...
+    'BackgroundColor', 'white', 'FontSize', 10, 'EdgeColor', [0.8, 0.2, 0.8]);
+
+print('-djpeg', '-r600', 'images/bspline_length.jpg');

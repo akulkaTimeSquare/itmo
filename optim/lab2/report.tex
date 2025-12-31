@@ -1,0 +1,360 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{Лабораторная работа №2}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{Оптимальное управление}}
+\fancyfoot[L]{}
+\fancyfoot[C]{\thepage\space}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\color[gray]{0.7}\ttfamily\small,
+    stepnumber=1,
+    numbersep=8pt,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4,
+    breaklines=true
+}
+\usepackage{subcaption}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+                Научно-исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{45mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №2\\
+			\textbf{Синтез оптимального управления \\
+			Принцип максимума} \\
+			Вариант 21
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{minipage}{.45\linewidth}
+			Выполнил студент
+            \\
+			Проверил преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.52\linewidth}
+			\begin{flushright}
+				Мовчан Игорь Евгеньевич, R3480
+                \\
+				Парамонов Алексей Владимирович
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2025
+		\end{center}
+		
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\section{Поиск глобального минимума}
+	Рассмотрим функцию двух переменных:
+	\[
+		J(x, u) = 8x^2 + 3u^2 + 6xu + x + 4u - 13
+	\]
+
+	Целью работы ставится поиск глобального минимума $J(x, u)$ различными методами. Сперва взглянем на теоретические подходы на основе необходимого и достаточного условий и ограничениях.
+	\subsection{Поиск минимума без ограничений}
+	Для начала примем, что все ограничения отсутствуют. Найдем градиент функции:
+	\[
+	\nabla J(x, u) = 
+	\begin{bmatrix}
+	\dfrac{\partial J}{\partial x} \\[2ex]
+	\dfrac{\partial J}{\partial u}
+	\end{bmatrix}
+	=
+	\begin{bmatrix}
+	16x + 6u + 1 \\
+	6x + 6u + 4
+	\end{bmatrix}
+	= 0
+	\]
+
+	По необходимому условию градиент должен быть равен нулю, так что в итоге получаем систему на $x$ и $u$:
+	\[
+	\begin{cases}
+	16x + 6u + 1 = 0 \\
+	6x + 6u + 4 = 0
+	\end{cases} \quad
+	\Rightarrow \quad
+	\begin{cases}
+	10x = 3 \\
+	3x + 3u + 2 = 0
+	\end{cases}
+	\]
+
+	Откуда имеем
+	\[
+	\begin{cases}
+	x = 0.3 \\
+	0.9 + 3u = -2
+	\end{cases}
+	\quad
+	\Rightarrow
+	\quad
+	\begin{cases}
+	x^* = \dfrac{3}{10} \\[2ex]
+	u^*  = -\dfrac{29}{30}
+	\end{cases}
+	\]
+
+	Для определения типа полученной точки найдем матрицу Гессе:
+	\[
+		H(x) = \begin{bmatrix}
+			16 & 6 \\
+			6 & 6
+		\end{bmatrix} \succcurlyeq 0
+	\]
+
+	Она положительно определена, а значит, найденная $(x^*, u^*)$ - точка глобального минимума \textbf{выпуклой} функции $J(x, u)$.
+
+	\subsection{С ограничением в виде равенства}
+	Пусть теперь задано ограничение $c(x, u) = 0$:
+	\[
+		c(x, u) = x^2 - 8u - 4 = 0 \quad \Rightarrow \quad u = (x^2 - 4)/8
+	\]
+
+	Минимум тогда можно найти с помощью функции Лагранжа
+	\[
+	\mathcal{L}(x, u, \lambda) = J(x, u) + \lambda c(x, u) =
+	\]
+	\[
+	= 8x^2 + 3u^2 + 6xu + x + 4u - 13 + \lambda (x^2 - 8u - 4)
+	\]
+
+	Здесь $\lambda$ — множитель Лагранжа.
+	
+	Поиск минимума с ограничениями в виде равенства тогда сводится к решению системы:
+	\[
+	\begin{cases}
+		\dfrac{\partial \mathcal{L}}{\partial \lambda} = c(x, u) = 0 \\[2ex]
+		\dfrac{\partial \mathcal{L}}{\partial x} = 0 \\[2ex]
+		\dfrac{\partial \mathcal{L}}{\partial u} = 0	
+	\end{cases} \Rightarrow \quad
+	\begin{cases}
+		x^2 - 8u - 4 = 0 \\
+		16x + 6u + 1 + 2\lambda x = 0 \\
+		6x + 6u + 4 - 8\lambda = 0	
+	\end{cases}
+	\]
+
+	Система имеет единственное вещественное решение
+	\[
+		\begin{cases}
+			x^* \approx 0.121 \\
+			u^* \approx -0.498 \\
+			\lambda^* \approx 0.217
+		\end{cases}
+	\]
+
+	Для проверки того, что найденная точка действительно является точкой глобального минимума подставим полученное из ограничения $c(x, u) = 0$ выражение на $u$ в функцию $J(x, u)$:
+	\[
+		J(x) = 8 x^2 + \frac{3}{64}x^4 - \frac{3}{8}x^2 + \frac{3}{4} + \frac{3}{4} x^3 - 3 x + \frac{1}{2} x^2 - 2 - 13 =
+	\]
+	\[
+		= \frac{3}{64}x^4 + \frac{3}{4}x^3 + \frac{65}{8}x^2 -2x -\frac{57}{4}
+	\]
+
+	Теперь это функция одной переменной с положительным коэффициентом при старшей чётной степени (а это значит, что функция ограничена снизу). Найдём её вторую производную:
+	\[
+		J'(x) = \frac{3}{16} x^3 + \frac{9}{4} x^2 + \frac{65}{4}x - 2
+	\]
+	\[
+		J''(x) = \frac{9}{16}x^2 + \frac{9}{2} x + \frac{65}{4}
+	\]
+
+	Проверим дискриминант:
+	\[
+		D = \frac{81}{4} - \frac{9 \cdot 65}{16} = -\frac{261}{16} < 0
+	\]
+
+	При этом $J''(x)$ - парабола с ветвями вверх, а значит, вторая производная положительна для всех $x$. Выходит, найденная $(x^*, u^*)$ действительно является точкой минимума.
+
+	\subsection{C ограничением в виде неравенства}
+	Пусть задано ограничение $c(x, u) \leq 0$:
+	\[
+		c(x, u) = x^2 - 8u - 4 \leq 0
+	\]
+
+	Для решение задачи введем в рассмотрение функцию Лагранжа
+	\[
+	\mathcal{L}(x, u, \lambda) = J(x, u) + \lambda c(x, u) =
+	\]
+	\[
+	= 8x^2 + 3u^2 + 6xu + x + 4u - 13 + \lambda (x^2 - 8u - 4)
+	\]
+
+	Найдем экстремальные точки через необходимые условия
+	\[
+		\begin{cases}
+			\dfrac{\partial \mathcal{L}}{\partial \lambda} = c(x, u) \le 0 \\[2ex]
+			\dfrac{\partial \mathcal{L}}{\partial x} = 0 \\[2ex]
+			\dfrac{\partial \mathcal{L}}{\partial u} = 0 \\
+			\lambda \ge 0 \\
+			\lambda c(x, u) = 0
+		\end{cases} \Rightarrow \quad
+		\begin{cases}
+			x^2 - 8u - 4 \le 0 \\
+			16x + 6u + 1 + 2\lambda x = 0 \\
+			6x + 6u + 4 - 8\lambda = 0	\\
+			\lambda \ge 0 \\
+			\lambda c(x, u) = 0
+		\end{cases}
+	\]
+
+	Сперва рассмотрим случай $\lambda = 0$. Задача тогда сводится к безусловной минимизации $J(x, u)$, которая была уже проведена и для которой получены следующие значения:
+	\[
+		\begin{cases}
+			x^* = \dfrac{3}{10} \\[2ex]
+			u^*  = -\dfrac{29}{30}
+		\end{cases} \Rightarrow \quad c(x^*, u^*) = \frac{9}{100} + \frac{116}{15} - 4 > 0
+	\]
+
+	Найденная точка нарушает ограничение, значит, $\lambda > 0$. Тогда по условию дополнительной нежесткости получаем систему с ограничением в виде равенства, для которой уже была получена точка
+	\[
+		\begin{cases}
+			x^* \approx 0.121 \\
+			u^* \approx -0.498 \\
+			\lambda^* \approx 0.217
+		\end{cases}
+	\]
+
+	Она удовлетворяет неравенству, а значит, является стационарной. Здесь важно, что неравенство $c(x, u) \le 0$ порождает выпуклое множество, сама $J(x, u)$ тоже является выпуклой, поэтому найденная $(x^*, u^*)$ является точкой минимума.
+
+	\section{Градиентный поиск минимума}
+	Пусть мы исследуем всё тот же критерий качества
+	\[
+		J(x, u) = 8x^2 + 3u^2 + 6xu + x + 4u - 13
+	\]
+
+	Необходимо динамическими методами найти точки глобального минимума. Далее исследуем два различных подхода.
+
+	\subsection{Метод Ньютона-Рафсона}
+	Поставленная задача оптимизации с помощью данного метода решается последовательным нахождением точек
+	\[
+		\bar{x}^{(n+1)} = \bar{x}^{(n)} - H^{-1}(\bar{x}^{(n)}) \nabla J(\bar{x}^{(n)})
+	\]
+
+	Здесь были введены вектор переменных и градиент в точке
+	\[
+		\bar{x}^{(n)} = \begin{bmatrix} x(n) \\ u(n) \end{bmatrix},
+		\quad
+		\nabla J(\bar{x}^{(n)}) = \begin{bmatrix} \dfrac{\partial J(\bar{x}^{(n)})}{\partial x} \\[2ex] \dfrac{\partial J(\bar{x}^{(n)})}{\partial u} \end{bmatrix} = 
+		\begin{bmatrix}
+			16x + 6u + 1 = 0 \\
+			6x + 6u + 4 = 0
+		\end{bmatrix}
+	\]
+
+	А также матрица Гессе вторых частных производных:
+	\[
+		H(\bar{x}^{(n)}) = \begin{bmatrix} 
+		\dfrac{\partial}{\partial x}\left( \dfrac{\partial J(\bar{x}^{(n)})}{\partial x} \right) & \dfrac{\partial}{\partial x}\left( \dfrac{\partial J(\bar{x}^{(n)})}{\partial u} \right) \\[3ex]
+		\dfrac{\partial}{\partial u}\left( \dfrac{\partial J(\bar{x}^{(n)})}{\partial x} \right) & \dfrac{\partial}{\partial u}\left( \dfrac{\partial J(\bar{x}^{(n)})}{\partial u} \right)
+		\end{bmatrix} = \begin{bmatrix}
+			16 & 6 \\
+			6 & 6
+		\end{bmatrix}
+	\]
+
+	Суть подхода заключается в движении в направлении наискорейшего убывания - по антиградиенту - с учётом кривизны функции с помощью матрицы Гессе.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/nr.png}
+		\caption{Применение метода Ньютона-Рафсона для поиска минимума}
+		\label{fig:nr}
+	\end{figure}
+
+	Применение метода при точке старта $\bar{x}^{(0)} = \begin{bmatrix}
+		3 & -4
+	\end{bmatrix}^T$ продемонстрировано на рисунке \ref{fig:nr}. Критерием останова было выбрано увеличение значения $J(\bar{x}^{(n)})$. Видим, что траектория приходит в уже найденную в первом пункте точку минимума за один шаг. Успех!
+
+	\subsection{Метод наискорейшего спуска}
+	В методе Ньютона-Рафсона на каждом шаге необходимо считать матрицу вторых производных, а после её обращать, это \textit{очень} тяжеловесно. В связи с этим возникает идея упрощения множителя перед антиградиентом до константы $\gamma$, получаем:
+	\[
+		\bar{x}^{(n+1)} = \bar{x}^{(n)} - \gamma \nabla J(\bar{x}^{(n)})
+	\]
+
+	Это и назовём методом наискорейшего спуска или же градиентным спуском. Суть его также заключается в движении в направлении наискорейшего убывания функции, но более просто - без учёта локальной кривизны. Поэтому на практике, если взять слишком большое значение $\gamma$, то состояние $\bar{x}^{(n)}$ начнёт <<раскачивать>>.
+
+	Итак, применение метода при параметрах $\gamma = 0.05$ и $\gamma = 0.125$, начальном условии $\bar{x}^{(0)} = \begin{bmatrix} 3 & -4 \end{bmatrix}^T$ и критерии останова в виде увеличения значения $J(\bar{x}^{(n)})$ приведено на рисунках \ref{fig:grad}-\ref{fig:grad_xu1}.
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/grad.png}
+		\caption{Применение градиентного спуска: траектория, $\gamma = 0.05$}
+		\label{fig:grad}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/grad_xu.png}
+		\caption{Применение градиентного спуска: состояния, $\gamma = 0.05$}
+		\label{fig:grad_xu}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/grad1.png}
+		\caption{Применение градиентного спуска: траектория, $\gamma = 0.1$}
+		\label{fig:grad1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/grad_xu1.png}
+		\caption{Применение градиентного спуска: состояния, $\gamma = 0.1$}
+		\label{fig:grad_xu1}
+	\end{figure}
+
+	Можем видеть, что параметр $\gamma = 0.05$ соответствует апериодической сходимости, а его повышение до $\gamma = 0.1$ уже приводит к колебаниям и требует большего числа шагов для попадания в окрестность точки глобального минимума. В целом обе вариации отработали хорошо и дошли до вычисленных стационарных точек.
+
+	\section{Общие выводы}
+	В ходе лабораторной работы были исследованы аналитические и численные методы поиска глобального минимума квадратичной функции двух переменных. Показано, что для выпуклой функции без ограничений минимум находится точно через систему уравнений, задаваемую градиентом, и подтверждается положительной определённостью матрицы Гессе. При наличии ограничений — как равенства, так и неравенства — использован метод множителей Лагранжа с учётом условий Куна–Таккера, и найдены соответствующие стационарные точки, удовлетворяющие критериям оптимальности. Численные методы — Ньютона–Рафсона и градиентного спуска — подтвердили аналитические результаты: первый обеспечил сходимость за один шаг благодаря точной учёту кривизны, второй — продемонстрировал чувствительность к выбору шага, также сошёлся, причем с меньшей вычислительной нагрузкой на каждый шаг.
+	
+\end{document}
