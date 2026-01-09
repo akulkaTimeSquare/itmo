@@ -1,0 +1,71 @@
+t = out.x.Time;
+x0 = out.x1.Data;
+x1 = out.x1.Data;
+x2 = out.x2.Data;
+x3 = out.x3.Data;
+
+% График x(t) для всех систем на одном рисунке
+figure;
+plot(t, x0(:, 1), 'LineWidth', 2); hold on;
+plot(t, x1(:, 1), 'LineWidth', 2, '');
+plot(t, x1(:, 1), 'LineWidth', 2);
+plot(t, x1(:, 1), 'LineWidth', 2);
+hold off;
+grid on;
+xlabel('t', 'Interpreter', 'tex');
+ylabel('x(t)', 'Interpreter', 'tex');
+title('Состояния объекта при (r_1, k_1)', 'Interpreter', 'tex');
+legend('x_1', 'x_2', 'Location', 'best', 'Interpreter', 'tex');
+saveas(gcf, 'images/x1_m.png');
+
+% График всех управлений u(t) на одном рисунке
+figure;
+plot(out.u, 'LineWidth', 2, 'DisplayName', 'u');
+grid on;
+xlabel('t', 'Interpreter', 'tex');
+ylabel('u(t)', 'Interpreter', 'tex');
+title('Оптимальное управление при (r_1, k_1)', 'Interpreter', 'tex');
+legend('Location', 'best', 'Interpreter', 'tex');
+saveas(gcf, 'images/u_m.png');
+
+
+% График x(t) для всех систем на одном рисунке
+figure;
+plot(out.x1, 'LineWidth', 2);
+grid on;
+xlabel('t', 'Interpreter', 'tex');
+ylabel('x(t)', 'Interpreter', 'tex');
+title('Состояния объекта при (r_2, k_2)', 'Interpreter', 'tex');
+legend('x_1', 'x_2', 'Location', 'best', 'Interpreter', 'tex');
+saveas(gcf, 'images/x1_m.png');
+
+% График всех управлений u(t) на одном рисунке
+figure;
+plot(out.u1, 'LineWidth', 2, 'DisplayName', 'u');
+grid on;
+xlabel('t', 'Interpreter', 'tex');
+ylabel('u(t)', 'Interpreter', 'tex');
+title('Оптимальное управлени при (r_2, k_2)', 'Interpreter', 'tex');
+legend('Location', 'best', 'Interpreter', 'tex');
+saveas(gcf, 'images/u1_m.png');
+
+
+% График x(t) для всех систем на одном рисунке
+figure;
+plot(out.x2, 'LineWidth', 2);
+grid on;
+xlabel('t', 'Interpreter', 'tex');
+ylabel('x(t)', 'Interpreter', 'tex');
+title('Состояния объекта при (r_3, k_3)', 'Interpreter', 'tex');
+legend('x_1', 'x_2', 'Location', 'best', 'Interpreter', 'tex');
+saveas(gcf, 'images/x2_m.png');
+
+% График всех управлений u(t) на одном рисунке
+figure;
+plot(out.u2, 'LineWidth', 2, 'DisplayName', 'u');
+grid on;
+xlabel('t', 'Interpreter', 'tex');
+ylabel('u(t)', 'Interpreter', 'tex');
+title('Оптимальное управление при (r_3, k_3)', 'Interpreter', 'tex');
+legend('Location', 'best', 'Interpreter', 'tex');
+saveas(gcf, 'images/u2_m.png');

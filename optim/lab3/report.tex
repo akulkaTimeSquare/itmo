@@ -1,0 +1,347 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{Лабораторная работа №3}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{LQR-регулятор}}
+\fancyfoot[L]{}
+\fancyfoot[C]{\thepage\space}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\color[gray]{0.7}\ttfamily\small,
+    stepnumber=1,
+    numbersep=8pt,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4,
+    breaklines=true
+}
+\usepackage{subcaption}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+                Научно-исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{45mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №3\\
+			\textbf{Синтез оптимального регулятора \\
+			для линейного стационарного объекта} \\
+			Вариант 21
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{minipage}{.45\linewidth}
+			Выполнил студент
+            \\
+			Проверил преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.52\linewidth}
+			\begin{flushright}
+				Мовчан Игорь Евгеньевич, R3480
+                \\
+				Парамонов Алексей Владимирович
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2025
+		\end{center}
+		
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\section{Построение оптимального регулятора}
+	Рассмотрим линейный объект с начальными условиями $x(0)$
+	\[
+		\dot{x} = Ax + bu, \quad x(0) = \begin{bmatrix}
+			1 & 0
+		\end{bmatrix}^T
+	\]
+
+	Матрицы возьмём согласно варианту:
+	\[
+		A = \begin{bmatrix}
+			0 & 1 \\
+			5 & -4
+		\end{bmatrix}, \quad
+		b = \begin{bmatrix}
+			1 \\
+			1
+		\end{bmatrix}
+	\]
+
+	Будем строить регулятор с отрицательной обратной связью вида
+	\[
+		u = -Kx
+	\]
+
+	Расчет будем производить на основе уравнения Риккати относительно положительно определенной матрицы $P \succ 0$:
+	\[
+		A^T P + PA + Q - P b r^{-1} b^T P = 0
+	\]
+
+	Матрицу $Q \succcurlyeq 0$ и параметр $r > 0$ примем из варианта
+	\[
+		Q = \begin{bmatrix}
+			2 & 0 \\
+			0 & 1
+		\end{bmatrix}, \quad
+		r = 5
+	\]
+
+	А матрицу $K$ обратной связи будем расчитывать через
+	\[
+		K = r^{-1} b^T P
+	\]
+
+	При такой постановке задачи минимизируется критерий качества
+	\[
+		J = \int_0^\infty x^T(\tau) Q x(\tau) + r u^2(\tau) d\tau
+	\]
+
+	Из его вида можем предположить, что чем больше $Q$ относительно $r$, тем более важно скорее <<заглушить>> $x(\tau)$ (достигается большее быстродействие системы), а чем больше $r$ относительно $Q$, тем это быстродействие меньше, как и максимальные значения управления.
+
+	Итак, произведём расчёт регулятора при принятых матрицах и параметрах. Решение уравнения Риккати даёт матрицу
+	\[
+		P = \begin{bmatrix}
+			7.806 & 1.551  \\
+			1.551 & 0.416 
+		\end{bmatrix} \succ 0
+	\]
+
+	Из этого находим обратную связь оптимального регулятора
+	\[
+		K = r^{-1} b^T P = 
+		\begin{bmatrix}
+			1.8715 & 0.3934 
+		\end{bmatrix}
+	\]
+
+	Проведем моделирование с найденным управлением и начальными условиями $x(0) = \begin{bmatrix}
+		1 & 0
+	\end{bmatrix}^T$. Результаты приведены на рисунках \ref{fig:u}-\ref{fig:j}. Установившееся значения критерия качества $J_{min} \approx 7.8062$.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/u.png}
+		\caption{График управляющего воздействия при оптимальном регуляторе}
+		\label{fig:u}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/x.png}
+		\caption{Графики переменных состояния объекта при оптимальном регуляторе}
+		\label{fig:x}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/j.png}
+		\caption{График изменения минимизируемого критерия качества}
+		\label{fig:j}
+	\end{figure}
+
+	Можем видеть, что регулятор успешно стабилизирует систему с ненулевыми начальными условиями, а критерий качества со временем достигает минимально возможной оценки $J_{min} = x(0)^T P x(0)$.
+
+	Чтобы доказать минимальность установившегося значения критерия качества, стоит незначительно отклонить расчётную матрицу обратной связи $K$ регулятора и убедиться, что в этом случае предельное значение функционала $J$ больше $J_{min}$. Сделаем это.
+
+	\section{Оптимальность найденного регулятора}
+
+	Итак, немного отклоним матрицу обратной связи регулятора так, чтобы система сохранила устойчивость, до
+	\[
+		K' = \begin{bmatrix}
+			2 & 0.525
+		\end{bmatrix} = K + \begin{bmatrix}
+			0.1285 & 0.1316
+		\end{bmatrix}
+	\]
+
+	Повторим моделирование с условиями $x(0) = \begin{bmatrix}
+		1 & 0
+	\end{bmatrix}^T$. Результаты приведены на рисунках \ref{fig:u1}-\ref{fig:j1}. Установившееся значение функционала качества $J_{stab} \approx 7.8604 > J_{min} \approx 7.8062$.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/u1.png}
+		\caption{График управляющего воздействия при измененном $K$}
+		\label{fig:u1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/x1.png}
+		\caption{Графики переменных состояния при измененном $K$}
+		\label{fig:x1}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/j1.png}
+		\caption{График критерия качества при измененном $K$}
+		\label{fig:j1}
+	\end{figure}
+
+	Из графиков видим, что система всё ещё является устойчивой, но установившееся значение функционала качества выше, чем у замкнутой оптимальным регулятором. Для убедительности повторим эксперименты ещё раз, но уже с матрицей
+	\[
+		K'' = \begin{bmatrix}
+			1.7 & 0.35
+		\end{bmatrix} = K + \begin{bmatrix}
+			-0.1715 & -0.0434
+		\end{bmatrix}
+	\]
+
+	Результаты продемонстрированы на рисунках \ref{fig:u2}-\ref{fig:j2}. Установившееся значение $J_{stab} \approx 7.8803 > J_{min} \approx 7.8062$.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/u2.png}
+		\caption{График управляющего воздействия при связи $K''$}
+		\label{fig:u2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/x2.png}
+		\caption{Графики переменных состояния при связи $K''$}
+		\label{fig:x2}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/j2.png}
+		\caption{График критерия качества при связи $K'$}
+		\label{fig:j2}
+	\end{figure}
+
+	Таким образом, продемонстрировано, что оптимальный регулятор с матрицей обратной связи $K$ действительно достигает минимального значения $J_{min}$ критерия качества
+	\[
+		J = \int_0^\infty x^T(\tau) Q x(\tau) + r u^2(\tau) d\tau
+	\]
+
+	При положительно (полу-)определенных матрицах
+	\[
+		Q = \begin{bmatrix}
+			2 & 0 \\
+			0 & 1
+		\end{bmatrix} \succcurlyeq 0, \quad
+		r = 5 > 0
+	\]
+
+	Посмотрим теперь, как матрица $Q$ и параметр $r$ влияют на качество переходных процессов в замкнутой системе.
+
+	\section{Влияние параметров на стабилизацию}
+	Итак, зададимся тремя различными значениями параметра $r$ и трёмя разными матрицами $Q$ при условии, что $r > 0$, $Q = k Q^*$ при положительном коэффициенте $k$ и матрице $Q^*\succcurlyeq 0$, взятой в соответствии с вариантом задания
+	\[
+		Q^* = \begin{bmatrix}
+			2 & 0 \\
+			0 & 1
+		\end{bmatrix} \succcurlyeq 0
+	\]
+
+	В итоге получаем пары:
+	\[
+		r_1 = 15,\, k_1 = 3 \qquad
+		r_2 = 2,\, k_2 = 10 \qquad
+		r_3 = 10,\, k_3 = 2
+	\]
+
+	При этом для сравнения с уже вычисленным оптимальным регулятором добавим в рассмотрение пару
+	\[
+		r_0 = 5,\quad k_0 = 1
+	\]
+
+	Найденные обратные связи для введенных пар $(r_i, k_i)$ тогда:
+	\[
+		K_0 = \begin{bmatrix}
+			1.8715 & 0.3934 
+		\end{bmatrix}, \quad
+		K_1 = \begin{bmatrix}
+			1.8715 & 0.3934
+		\end{bmatrix}
+	\]
+	\[
+		K_2 = \begin{bmatrix}
+			2.1130 & 0.4682
+		\end{bmatrix}, \quad
+		K_3 = \begin{bmatrix}
+			2.9073 & 0.7384
+		\end{bmatrix}
+	\]
+
+	Моделирование фомируемого управления регуляторов приведено на рисунке \ref{fig:um}, переменных состояния - на рисунках \ref{fig:x1m} и \ref{fig:x2m}, а графиков критериев качества с установившемися значениями
+	\[
+		J_{min0} \approx 7.8062, \quad J_{min1} = \dfrac{J_{min0}}{3} \approx 23.4185
+	\]
+	\[
+		J_{min2} \approx 7.0661, \quad J_{min3} \approx 4.9242
+	\]
+
+	На рисунках \ref{fig:j_diff}. Из всего выведенного можем сделать вывод, что на характер переходных процессов влияет именно соотношение между $Q$ и $r$. Соответственно, чем <<больше>> $Q$, тем управление более агрессивное, затрачивает большие управления и быстрее стабилизирует систему. И наоборот, чем больше $r$, тем управляющее воздействие более мягкое, но переходные процессы длятся дольше.
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/u_m.png}
+		\caption{График управляющего воздействия при различных парах $(r_i, k_i)$}
+		\label{fig:um}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/x1_m.png}
+		\caption{График переменных состояния $x_1$ при различных парах $(r_i, k_i)$}
+		\label{fig:x1m}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/x2_m.png}
+		\caption{График переменных состояния $x_2$ при различных парах $(r_i, k_i)$}
+		\label{fig:x2m}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/j_diff.png}
+		\caption{Графики критериев качества при различных парах $(r_i, k_i)$}
+		\label{fig:j_diff}
+	\end{figure}
+
+	\section{Выводы}
+	В ходе лабораторной работы был синтезирован оптимальный линейный квадратичный регулятор для линейной системы на основе уравнения Риккати и отрицательной обратной связи по состоянию. Показано, что полученный регулятор обеспечивает устойчивость замкнутой системы и минимизирует квадратичный функционал качества, причём минимальное значение критерия совпадает с теоретической оценкой \( J_{\min} = x(0)^T P x(0) \). Численные эксперименты с отклонёнными матрицами обратной связи подтвердили оптимальность решения, так как значение функционала при этом возрастает. Также исследовано влияние параметров \(Q\) и \(r\), показавшее, что их соотношение определяет компромисс между быстродействием системы и величиной управляющего воздействия.
+
+	
+\end{document}
