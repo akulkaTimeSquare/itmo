@@ -1,0 +1,239 @@
+\documentclass[a4paper,hidelinks,14pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[english, russian]{babel}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{datetime}
+\usepackage[pdftex]{graphicx}
+\usepackage{indentfirst}
+\usepackage{asymptote}
+\usepackage{systeme}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{lastpage}
+\usepackage{fancybox,fancyhdr}
+\usepackage{hyperref}
+\usepackage[font={small,it}]{caption}
+\fancyhead[L]{Лабораторная работа №6}
+\fancyhead[C]{}
+\fancyhead[R]{\textit{$H_\infty$-оптимизация}}
+\fancyfoot[L]{}
+\fancyfoot[C]{\thepage\space}
+\fancyfoot[R]{}
+\pagestyle{fancy}
+\newcommand{\gt}{\textgreater}
+\newcommand{\lt}{\textless}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\color[gray]{0.7}\ttfamily\small,
+    stepnumber=1,
+    numbersep=8pt,
+    frame=single,
+    showstringspaces=false,
+    tabsize=4,
+    breaklines=true
+}
+\usepackage{subcaption}
+
+\begin{document}
+	\begin{titlepage}
+		\setlength{\parindent}{0ex}
+		
+		\begin{center}
+			\textsc{
+				\vspace{1ex}
+                Научно-исследовательский университет ИТМО \\
+				\vspace{0.5ex}
+				Факультет систем управления и робототехники \\
+				\vspace{0.5ex}
+			}
+		\end{center}
+		
+		\vspace{45mm}
+		
+		\begin{center}
+			Отчет по лабораторной работе №6\\
+			\textbf{Синтез оптимального управления \\
+			$H_\infty$-оптимизация} \\[0.5ex]
+			Вариант 21
+		\end{center}
+		
+		\vspace{50mm}
+		
+		\begin{minipage}{.45\linewidth}
+			Выполнил студент
+            \\
+			Проверил преподаватель
+		\end{minipage}
+		\hfill
+		\begin{minipage}{.52\linewidth}
+			\begin{flushright}
+				Мовчан Игорь Евгеньевич, R3480
+                \\
+				Парамонов Алексей Владимирович
+			\end{flushright}
+		\end{minipage}
+		
+		\vfill
+		\begin{center}
+			Санкт-Петербург
+			\\
+			2026
+		\end{center}
+		
+	\end{titlepage}
+
+	\tableofcontents
+	\clearpage
+	
+	\section{Синтез $H_\infty$-оптимального регулятора}
+	Рассмотрим возмущённый линейный объект управления, описываемый уравнением состояния с начальными условиями $x(0)$:
+	\[
+		\dot{x} = Ax + Bu + B_f f, \quad x(0) = \begin{bmatrix}
+			1 & 0
+		\end{bmatrix}^T
+	\]
+
+	Задача заключается в построении H$_\infty$-оптимального регулятора по состоянию вида $u = Kx$. Расчет матрицы коэффициентов $K$ производится на основе решения алгебраического уравнения Риккати:
+	\[
+	\begin{cases}
+		A^T P + PA + Q - PBB^T P + \gamma^{-2}PB_f B_f^T P = 0 \\
+		K = -B^T P
+	\end{cases}
+	\]
+
+	Необходимо экспериментально определить минимальное значение коэффициента подавления помех $\gamma = \gamma_{min}$, при котором существует положительно полуопределённое решение $P \succcurlyeq 0$.
+
+	Матрицы системы и коэффициенты возьмём согласно варианту:
+	\[
+		A = \begin{bmatrix}
+			3 & 1 \\
+			1 & 1
+		\end{bmatrix}, \quad
+		B = \begin{bmatrix}
+			1 \\
+			2
+		\end{bmatrix}, \quad
+		B_f = \begin{bmatrix}
+			3 \\
+			4
+		\end{bmatrix}, \quad
+		Q = \begin{bmatrix}
+			3 & 0 \\
+			0 & 5
+		\end{bmatrix}
+	\]
+
+	\section{Определение $\gamma_{min}$ и расчет регулятора}
+
+	Минимальное значение $\gamma_{min}$, при котором существует стабилизирующее положительно полуопределенное решение $P$ уравнения Риккати, является ключевым параметром, определяющим максимально достижимый уровень подавления возмущений.
+
+	С помощью нескольких попыток поиска было найдено искомое минимальное значение:
+	\[
+		\gamma_{min} \approx 3.5
+	\]
+
+	Для найденного $\gamma_{min}$ было решено уравнение Риккати, что дало следующую симметричную матрицу $P$:
+	\[
+		P = \begin{bmatrix}
+			115.195 & -14.584 \\
+			-14.584 &  3.696
+		\end{bmatrix}
+	\]
+
+	На основе этой матрицы была вычислена матрица коэффициентов обратной связи $K$ для H$_\infty$-оптимального регулятора:
+	\[
+		K = -B^T P = \begin{bmatrix}
+			-86.027 & 7.192
+		\end{bmatrix}
+	\]
+
+	Полученный регулятор $u=Kx$ обеспечивает робастную стабилизацию системы при заданном уровне внешних возмущений.
+
+	Моделирование при внешнем возмущении
+	\[
+		f(t) = 10 \sin 6t + 5 \cos 2t + 4 \cos 3t + 3 \cos 8t
+	\]
+
+	приведено на рисунках \ref{fig:u} и \ref{fig:x}. Можем видеть, что управление успешно стабилизирует состояния $x(t)$ системы - внешнее возмущение $f(t)$ не разносит систему. Регулятор робастен, успех!
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/u.png}
+		\caption{График управляющего воздействия при оптимальном регуляторе}
+		\label{fig:u}
+	\end{figure}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.8\textwidth]{images/x.png}
+		\caption{Графики переменных состояния объекта при оптимальном регуляторе}
+		\label{fig:x}
+	\end{figure}
+
+	\section{Расчёт норм передаточных функций}
+	Для анализа качества подавления возмущений, действующих на систему, необходимо рассчитать $H_\infty$-нормы передаточных функций от входа возмущения $f$ до различных выходов системы. В данном случае, в качестве выходов рассматриваются компоненты вектора состояния $x_1$ и $x_2$, а также сам вектор состояния $x$.
+
+	Замкнутая регулятором система описывается уравнением:
+	\[
+		\dot{x} = (A + BK)x + B_f f
+	\]
+	
+	Пусть далее $A_{M} = A + BK$ — матрица замкнутой системы.
+
+	Передаточные функции от возмущения $f$ до компонент состояния $x_1$ и $x_2$ (обозначим их $G_1(s)$ и $G_2(s)$) имеют вид:
+	\begin{align*}
+		G_1(s) &= C_1 (sI - A_{M})^{-1} B_f \\
+		G_2(s) &= C_2 (sI - A_{M})^{-1} B_f
+	\end{align*}
+	где $C_1 = \begin{bmatrix} 1 & 0 \end{bmatrix}$ и $C_2 = \begin{bmatrix} 0 & 1 \end{bmatrix}$.
+
+	Передаточная функция от возмущения $f$ до всего вектора состояния $x$ (обозначим ее $G_x(s)$) тогда:
+	\[
+		G_x(s) = I(sI - A_{M})^{-1} B_f = (sI - A_{M})^{-1} B_f
+	\]
+
+	$H_\infty$-норма передаточной функции определяется как пиковое значение её АЧХ по всем частотам:
+	\[
+		\| G(s) \|_{\infty} = \sup_{\omega \in \mathbb{R}} \sigma_{\max}(G(j\omega))
+	\]
+	где $\sigma_{\max}(\cdot)$ обозначает максимальное сингулярное число. Для скалярных передаточных функций $G_1(s)$ и $G_2(s)$ это эквивалентно максимуму модуля $|G(j\omega)|$.
+
+	В итоге были получены следующие значения норм:
+	\begin{itemize}
+		\item $H_\infty$-норма передаточной функции от $f$ до $x_1$:
+		\[
+			\| G_1(s) \|_{\infty} = \| C_1(sI - A_M)^{-1}B_f \|_{\infty} \approx 0.1079
+		\]
+		\item $H_\infty$-норма передаточной функции от $f$ до $x_2$:
+		\[
+			\| G_2(s) \|_{\infty} = \| C_2(sI - A_M)^{-1}B_f \|_{\infty} \approx 1.4602
+		\]
+		\item $H_\infty$-норма передаточной функции от $f$ до $x$:
+		\[
+			\| G_x(s) \|_{\infty} = \| (sI - A_M)^{-1}B_f \|_{\infty} \approx 1.4642
+		\]
+	\end{itemize}
+
+	Отметим, что значение $H_\infty$-нормы представляет собой коэффициент усиления <<в худшем случае>> от входного возмущения $f(t)$ к выходному сигналу.
+	\begin{itemize}
+		\item Норма $\| G_1(s) \|_{\infty}$ показывает, во сколько раз в худшем случае амплитуда гармонического возмущения на некоторой частоте будет усилена в установившемся режиме для состояния $x_1$.
+		\item Аналогично, $\| G_2(s) \|_{\infty}$ характеризует максимальное усиление для состояния $x_2$.
+		\item Норма $\| G_x(s) \|_{\infty}$ даёт обобщенную оценку усиления для всего вектора состояния $x$.
+	\end{itemize}
+
+	Сравнивая значения $\| G_1(s) \|_{\infty}$ и $\| G_2(s) \|_{\infty}$, можно сделать вывод о том, что состояние $x_2$ является более чувствительной к влиянию возмущения $f(t)$. Это можно было видеть и на графиках.
+
+	\section{Выводы}
+	В ходе лабораторной работы был успешно выполнен синтез $H_\infty$-оптимального регулятора для линейной динамической системы. Было численно определено минимальное значение коэффициента подавления возмущений $\gamma_{min}$, после чего, решив соответствующее уравнение Риккати, была найдена матрица коэффициентов регулятора. Таким образом, была решена задача робастной стабилизации объекта управления по полному вектору состояния.
+
+	
+\end{document}

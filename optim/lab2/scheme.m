@@ -10,7 +10,7 @@ odes = [ode1; ode2; ode3; ode4];
 
 % Граничные условия
 cond1 = x1(0) == 0;
-cond2 = x2(0) == 0;
+cond2 = f2(0) == 0;
 cond3 = x1(1) == 10;
 cond4 = x2(1) == 0;
 conds = [cond1; cond2; cond3; cond4];
@@ -63,7 +63,7 @@ xlabel('t');
 ylabel('x(t)');
 grid on;
 legend("x_1(t)", "x_2(t)");
-saveas(gcf, "images/x.png");
+saveas(gcf, "images/xf.png");
 
 %% График управления
 figure;
@@ -72,7 +72,7 @@ title('Оптимальное управление');
 xlabel('t');
 ylabel('u(t)');
 grid on;
-saveas(gcf, "images/u.png");
+saveas(gcf, "images/uf.png");
 
 %% Графики накопления
 tau = sym('tau');
@@ -101,4 +101,4 @@ xlabel('t');
 ylabel('J(t)');
 grid on;
 yticks([0 1000 2000 3000 4000 5000 6000 6829])
-saveas(gcf, "images/J_cum.png");
+saveas(gcf, "images/J_cumf.png");

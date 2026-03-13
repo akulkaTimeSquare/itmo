@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="caster">
+    <xacro:macro name="caster" params="n x y z radius">
+        <collision name='caster_collision_${n}'>
+            <origin xyz="${x} ${y} ${z}" rpy="0.0 0.0 0.0" />
+            <geometry>
+                <sphere radius="${radius}" />
+            </geometry>
+            <surface>
+                <friction>
+                    <ode>
+                        <mu>0</mu>
+                        <mu2>0</mu2>
+                        <slip1>1.0</slip1>
+                        <slip2>1.0</slip2>
+                    </ode>
+                </friction>
+            </surface>
+        </collision>
+        <visual name='caster_visual_${n}'>
+            <origin xyz="${x} ${y} ${z}" rpy="0.0 0.0 0.0" />
+            <geometry>
+                <sphere radius="${radius}" />
+            </geometry>
+            <material name="gray" />
+        </visual>
+    </xacro:macro>
+</robot>
